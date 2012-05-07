@@ -11,7 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.killerud.skydrive.util.UploadFileDialog;
+import com.killerud.skydrive.dialogs.UploadFileDialog;
 import com.microsoft.live.*;
 
 import java.util.Arrays;

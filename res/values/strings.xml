@@ -62,4 +62,9 @@
     <string name="stop">Stop</string>
     <string name="stopped">Stopped</string>
 
+    <!-- Error messages -->
+    <string name="errorFolderCouldNotBeCreated">Something went wrong in creating the folder. Please try again.</string>
+    <string name="errorNoApplicationCouldOpenTheFile">No application could open the file</string>
+    <string name="errorOpeningAudioFile">Could not open audio file</string>
+
 </resources>

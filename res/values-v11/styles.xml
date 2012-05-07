@@ -1,3 +1,4 @@
 <resources>
     <style name="LightTheme" parent="android:Theme.Holo.Light" />
+    <style name="LightThemeDialog" parent="android:Theme.Holo.Light.Dialog" />
 </resources>

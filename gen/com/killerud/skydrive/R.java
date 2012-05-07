@@ -31,31 +31,32 @@ public final class R {
         public static final int video_x_generic=0x7f020011;
     }
     public static final class id {
+        public static final int browser_header_layout=0x7f07000b;
         public static final int buttonLayout=0x7f070004;
         public static final int cancelButton=0x7f070006;
-        public static final int copy=0x7f070013;
-        public static final int copyItems=0x7f070016;
-        public static final int cut=0x7f070014;
-        public static final int cutItems=0x7f070017;
-        public static final int delete=0x7f070015;
-        public static final int deleteItems=0x7f070018;
+        public static final int copy=0x7f070014;
+        public static final int copyItems=0x7f070017;
+        public static final int cut=0x7f070015;
+        public static final int cutItems=0x7f070018;
+        public static final int delete=0x7f070016;
+        public static final int deleteItems=0x7f070019;
         public static final int descriptionEditText=0x7f070003;
         public static final int descriptionLabel=0x7f070002;
         public static final int introTextView=0x7f070009;
-        public static final int linearLayout1=0x7f07000c;
+        public static final int linearLayout1=0x7f07000d;
         public static final int nameEditText=0x7f070001;
         public static final int nameLabel=0x7f070000;
         public static final int nameTextView=0x7f070007;
-        public static final int newFolder=0x7f07000e;
-        public static final int reload=0x7f070010;
-        public static final int rename=0x7f070012;
+        public static final int newFolder=0x7f07000f;
+        public static final int reload=0x7f070011;
+        public static final int rename=0x7f070013;
         public static final int saveButton=0x7f070005;
-        public static final int share=0x7f070011;
+        public static final int share=0x7f070012;
         public static final int signInButton=0x7f07000a;
-        public static final int skyDriveItemIcon=0x7f07000b;
+        public static final int skyDriveItemIcon=0x7f07000c;
         public static final int typeTextView=0x7f070008;
-        public static final int uploadFile=0x7f07000f;
-        public static final int uploadToThisFolder=0x7f07000d;
+        public static final int uploadFile=0x7f070010;
+        public static final int uploadToThisFolder=0x7f07000e;
     }
     public static final class layout {
         public static final int create_folder=0x7f030000;
@@ -94,6 +95,11 @@ public final class R {
         public static final int download=0x7f04000e;
         public static final int downloadError=0x7f040013;
         public static final int downloading=0x7f040011;
+        /**  Error messages 
+         */
+        public static final int errorFolderCouldNotBeCreated=0x7f04002d;
+        public static final int errorNoApplicationCouldOpenTheFile=0x7f04002e;
+        public static final int errorOpeningAudioFile=0x7f04002f;
         public static final int fileAlreadySaved=0x7f040014;
         public static final int fileAlreadySavedMessage=0x7f040015;
         public static final int fileSaved=0x7f040012;
@@ -135,5 +141,6 @@ public final class R {
     }
     public static final class style {
         public static final int LightTheme=0x7f050000;
+        public static final int LightThemeDialog=0x7f050001;
     }
 }

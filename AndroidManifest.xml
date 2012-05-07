@@ -30,7 +30,7 @@
         </activity>
 
         <activity android:name=".SharingReceiverActivity"
-        android:label="@string/mySkyDrive">
+            android:label="@string/mySkyDrive">
 
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
@@ -39,9 +39,22 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".util.UploadFileDialog"
+        <activity android:name=".dialogs.UploadFileDialog"
                   android:label="@string/uploadFile"
-                android:theme ="@android:style/Theme.Holo.Light.Dialog"
+                android:theme ="@style/LightThemeDialog"
                 />
+
+        <activity android:name=".dialogs.NewFolderDialog"
+                  android:label="@string/createFolder"
+                  android:theme="@style/LightThemeDialog"
+                  />
+
+        <activity android:name=".dialogs.PlayAudioDialog"
+                  android:theme="@style/LightThemeDialog" />
+
+        <activity android:name=".dialogs.ViewPhotoDialog"
+                  android:theme="@style/LightThemeDialog" />
+
+
     </application>
 </manifest> 

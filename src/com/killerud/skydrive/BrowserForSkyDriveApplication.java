@@ -14,6 +14,7 @@ public class BrowserForSkyDriveApplication extends Application {
     private LiveAuthClient mAuthClient;
     private LiveConnectClient mConnectClient;
     private LiveConnectSession mSession;
+    private final String LOGCAT_TAG = "ASE";
 
     private String mFirstName;
 
@@ -47,6 +48,10 @@ public class BrowserForSkyDriveApplication extends Application {
 
     public String getUserFirstName(){
         return mFirstName;
+    }
+
+    public String getDebugTag(){
+        return LOGCAT_TAG;
     }
 
 }

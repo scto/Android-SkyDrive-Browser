@@ -8,10 +8,7 @@ import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.media.MediaPlayer.OnCompletionListener;
-import android.media.MediaPlayer.OnPreparedListener;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils;
@@ -19,18 +16,19 @@ import android.view.*;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.*;
 import android.widget.AdapterView.OnItemClickListener;
+import com.killerud.skydrive.dialogs.NewFolderDialog;
+import com.killerud.skydrive.dialogs.PlayAudioDialog;
+import com.killerud.skydrive.dialogs.ViewPhotoDialog;
 import com.killerud.skydrive.objects.*;
+import com.killerud.skydrive.util.IOUtil;
 import com.killerud.skydrive.util.JsonKeys;
-import com.killerud.skydrive.util.UploadFileDialog;
+import com.killerud.skydrive.dialogs.UploadFileDialog;
 import com.microsoft.live.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Stack;
 
 
@@ -51,6 +49,8 @@ public class BrowserActivity extends ListActivity {
     private static final String HOME_FOLDER = "me/skydrive";
     private String mCurrentFolderId;
     private Stack<String> mPreviousFolderIds;
+
+    private IOUtil mIOUtil;
 
     /*
      * Holder for the ActionMode, part of the contectual action bar
@@ -108,460 +108,12 @@ public class BrowserActivity extends ListActivity {
     };
     */
 
-    /**
-     *  The Create a new folder dialog. Always creates in the current directory.
-     */
-    private class NewFolderDialog extends Dialog {
-        public NewFolderDialog(Context context) {
-            super(context);
-        }
 
-        @Override
-        protected void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            setContentView(R.layout.create_folder);
-            setTitle(getString(R.string.newFolderTitle));
 
-            final EditText name = (EditText) findViewById(R.id.nameEditText);
-            final EditText description = (EditText) findViewById(R.id.descriptionEditText);
 
-            findViewById(R.id.saveButton).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    /* Uses a hashmap for creating a JSON object later on.
-                     * Communication with the SkyDrive API is in JSON.
-                     */
-                    Map<String, String> folder = new HashMap<String, String>();
-                    folder.put(JsonKeys.NAME, name.getText().toString());
-                    folder.put(JsonKeys.DESCRIPTION, description.getText().toString());
 
-                    final ProgressDialog progressDialog =
-                            showProgressDialog("", getString(R.string.navigateWait), true);
-                    progressDialog.show();
 
-                    /* Attempts to create the folder */
-                    mClient.postAsync(mCurrentFolderId,
-                            new JSONObject(folder),
-                            new LiveOperationListener() {
-                                @Override
-                                public void onError(LiveOperationException exception, LiveOperation operation) {
-                                    progressDialog.dismiss();
-                                    showToast(exception.getMessage());
-                                }
 
-                                /* Gets the result of the operation and shows the user in a toast
-                                 * on error, reloads on success
-                                 */
-                                @Override
-                                public void onComplete(LiveOperation operation) {
-                                    progressDialog.dismiss();
-
-                                    JSONObject result = operation.getResult();
-                                    if (result.has(JsonKeys.ERROR)) {
-                                        JSONObject error = result.optJSONObject(JsonKeys.ERROR);
-                                        String message = error.optString(JsonKeys.MESSAGE);
-                                        String code = error.optString(JsonKeys.CODE);
-                                        showToast(code + ":" + message);
-                                    } else {
-                                        dismiss();
-                                        loadFolder(mCurrentFolderId);
-                                    }
-                                }
-                            });
-                }
-            });
-
-            findViewById(R.id.cancelButton).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    dismiss();
-                }
-            });
-        }
-    }
-
-    /** The Audio dialog. Automatically starts buffering and playing a song,
-     * and allows the user to pause, play, stop, and save the song, or
-     * dismiss the dialog
-     */
-    private class PlayAudioDialog extends Dialog {
-        private final SkyDriveAudio mAudio;
-        private MediaPlayer mPlayer;
-        private TextView mPlayerStatus;
-        private LinearLayout mLayout;
-        private LinearLayout mButtonLayout;
-        private ImageButton mPlayPauseButton;
-        private ImageButton mStopButton;
-        private File mFile;
-
-        private boolean isPlaying;
-
-        public PlayAudioDialog(Context context, SkyDriveAudio audio) {
-            super(context);
-            assert audio != null;
-            mAudio = audio;
-            mPlayer = new MediaPlayer();
-        }
-
-        @Override
-        protected void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            setTitle(mAudio.getName());
-
-            /* Creates the layout.
-             * A vertical linearlayout contains a textview used for status updates
-             * and a horizontal linearlayout for holding the buttons.
-             */
-            mLayout = new LinearLayout(getContext());
-            mLayout.setOrientation(LinearLayout.VERTICAL);
-            mButtonLayout = new LinearLayout(mLayout.getContext());
-            mButtonLayout.setOrientation(LinearLayout.HORIZONTAL);
-
-            mPlayerStatus = new TextView(mLayout.getContext());
-            mPlayerStatus.setText(getString(R.string.buffering) + " " + mAudio.getName());
-
-            mPlayPauseButton = new ImageButton(mButtonLayout.getContext());
-            mPlayPauseButton.setBackgroundResource(R.drawable.ic_media_play);
-            mPlayPauseButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if(isPlaying){
-                        mPlayer.pause();
-                        mPlayPauseButton.setBackgroundResource(R.drawable.ic_media_play);
-                        mPlayerStatus.setText(getString(R.string.paused) + " " + mAudio.getName());
-                        isPlaying = false;
-                    }else if(!isPlaying){
-                        mPlayer.start();
-                        mPlayPauseButton.setBackgroundResource(R.drawable.ic_media_pause);
-                        mPlayerStatus.setText(getString(R.string.playing) + " " + mAudio.getName());
-                        isPlaying = true;
-                    }
-                }
-            });
-
-            mStopButton = new ImageButton(mButtonLayout.getContext());
-            mStopButton.setBackgroundResource(R.drawable.ic_media_stop);
-            mStopButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    mPlayer.stop();
-                    mPlayerStatus.setText(getString(R.string.stopped) + " " + mAudio.getName());
-                }
-            });
-
-            mFile = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/", mAudio.getName());
-
-            ImageButton saveButton = new ImageButton(mButtonLayout.getContext());
-            saveButton.setBackgroundResource(android.R.drawable.ic_menu_save);
-            saveButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    final ProgressDialog progressDialog =
-                            new ProgressDialog(BrowserActivity.this);
-                    progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                    progressDialog.setMessage(getString(R.string.downloading));
-                    progressDialog.setCancelable(true);
-
-
-
-
-                    if(mFile.exists()) {
-                        AlertDialog existsAlert = new AlertDialog.Builder(getApplicationContext()).create();
-                        existsAlert.setTitle(R.string.fileAlreadySaved);
-                        existsAlert.setMessage(getString(R.string.fileAlreadySavedMessage));
-                        existsAlert.setButton("Download", new OnClickListener(){
-                            public void onClick(DialogInterface dialog, int which){
-                                  downloadFile(progressDialog);
-                            }
-                        });
-                        existsAlert.setButton2("Cancel", new OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                dismiss();
-                            }
-                        });
-                        existsAlert.show();
-
-                    }else{
-                        downloadFile(progressDialog);
-                    }
-                }
-            });
-
-            ImageButton cancel = new ImageButton(mButtonLayout.getContext());
-            cancel.setBackgroundResource(android.R.drawable.ic_menu_close_clear_cancel);
-            cancel.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    mPlayer.stop();
-                    dismiss();
-                }
-            });
-
-
-            mLayout.addView(mPlayerStatus, new AbsListView.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.FILL_PARENT));
-
-            mButtonLayout.addView(mPlayPauseButton, new AbsListView.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.FILL_PARENT));
-            mButtonLayout.addView(mStopButton,new AbsListView.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.FILL_PARENT));
-            mButtonLayout.addView(saveButton,new AbsListView.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.FILL_PARENT));
-            mButtonLayout.addView(cancel,new AbsListView.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.FILL_PARENT));
-
-            mLayout.addView(mButtonLayout, new AbsListView.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.FILL_PARENT));
-
-
-
-            addContentView(mLayout,
-                    new LayoutParams(LayoutParams.WRAP_CONTENT,
-                            LayoutParams.WRAP_CONTENT));
-
-            mPlayer.setOnPreparedListener(new OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    mPlayerStatus.setText(getString(R.string.playing) + " " + mAudio.getName());
-                    mPlayPauseButton.setBackgroundResource(R.drawable.ic_media_pause);
-                    mPlayer.start();
-                    isPlaying = true;
-                }
-            });
-
-            mPlayer.setOnCompletionListener(new OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mp) {
-                    mPlayerStatus.setText(getString(R.string.stopped) + " " + mAudio.getName());
-                }
-            });
-
-
-
-            try {
-                if(mFile.exists()){
-                    mPlayer.setDataSource(mFile.getPath());
-                }else{
-                    mPlayer.setDataSource(mAudio.getSource());
-                }
-                mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                mPlayer.prepareAsync();
-            } catch (IllegalArgumentException e) {
-                showToast(e.getMessage());
-                return;
-            } catch (IllegalStateException e) {
-                showToast(e.getMessage());
-                return;
-            } catch (IOException e) {
-                showToast(e.getMessage());
-                return;
-            }
-
-
-        }
-
-        private void downloadFile(final ProgressDialog progressDialog) {
-            progressDialog.show();
-
-            final LiveDownloadOperation operation =
-                    mClient.downloadAsync(mAudio.getId() + "/content",
-                            mFile,
-                            new LiveDownloadOperationListener() {
-                                @Override
-                                public void onDownloadProgress(int totalBytes,
-                                                               int bytesRemaining,
-                                                               LiveDownloadOperation operation) {
-                                    int percentCompleted =
-                                            computePercentCompleted(totalBytes, bytesRemaining);
-
-                                    progressDialog.setProgress(percentCompleted);
-                                }
-
-                                @Override
-                                public void onDownloadFailed(LiveOperationException exception,
-                                                             LiveDownloadOperation operation) {
-                                    progressDialog.dismiss();
-                                    showToast(getString(R.string.downloadError));
-                                }
-
-                                @Override
-                                public void onDownloadCompleted(LiveDownloadOperation operation) {
-                                    progressDialog.dismiss();
-                                    showFileXloadedNotification(mFile.getName(), true);
-                                }
-                            });
-
-            progressDialog.setOnCancelListener(new OnCancelListener() {
-                @Override
-                public void onCancel(DialogInterface dialog) {
-                    operation.cancel();
-                }
-            });
-        }
-
-        /* Known "feature": pressing the Home-button (or rather, not pressing
-         * Cancel or the Back-button, triggering Dismiss) causes the music to
-         * keep playing. There is no way to turn off that mediaplayer other
-         * than force-quitting. Background music playback, yay! :D Fortunately
-         * there's no playlist!
-         */
-        @Override
-        protected void onStop() {
-            super.onStop();
-            mPlayer.stop();
-            mPlayer.release();
-            mPlayer = null;
-        }
-    }
-
-
-    /** The photo dialog. Downloads and displays an image, but does not save the
-     * image unless the user presses the save button (i.e. acts as a cache)
-     */
-    private class ViewPhotoDialog extends Dialog {
-        private final SkyDrivePhoto mPhoto;
-        private boolean mSavePhoto;
-        private String mFileName;
-        private File mFile;
-
-        public ViewPhotoDialog(Context context, SkyDrivePhoto photo) {
-            super(context);
-            assert photo != null;
-            mPhoto = photo;
-            mSavePhoto = false;
-        }
-
-        @Override
-        protected void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            setTitle(mPhoto.getName());
-
-            /* Creates the layout.
-             * The layout consists of a textview to let the user know we're loading,
-             * an imageview to display the image and a linearlayout containing the
-             * buttons. This is wrapped in a linearlayout, then a scrollview and displayed.
-             */
-            final ScrollView wrapper = new ScrollView(getContext());
-
-            final LinearLayout layout = new LinearLayout(wrapper.getContext());
-            layout.setOrientation(LinearLayout.VERTICAL);
-
-            final ImageView imageView = new ImageView(layout.getContext());
-            final TextView loadingText = new TextView(layout.getContext());
-            loadingText.setText(R.string.navigateWait);
-
-            final LinearLayout buttonLayout = new LinearLayout(layout.getContext());
-            buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
-
-            final ImageButton saveButton = new ImageButton(buttonLayout.getContext());
-            saveButton.setBackgroundResource(android.R.drawable.ic_menu_save);
-            saveButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    mSavePhoto = true;
-                    showFileXloadedNotification(mFile.getName(), true);
-                    dismiss();
-                }
-            });
-
-            final ImageButton cancel = new ImageButton(buttonLayout.getContext());
-            cancel.setBackgroundResource(android.R.drawable.ic_menu_close_clear_cancel);
-            cancel.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    mSavePhoto = false;
-                    dismiss();
-                }
-            });
-
-            layout.addView(loadingText,new LayoutParams(LayoutParams.WRAP_CONTENT,
-                    LayoutParams.WRAP_CONTENT));
-            layout.addView(imageView, new LayoutParams(LayoutParams.WRAP_CONTENT,
-                    LayoutParams.WRAP_CONTENT));
-            buttonLayout.addView(saveButton,new LayoutParams(LayoutParams.WRAP_CONTENT,
-                    LayoutParams.WRAP_CONTENT));
-            buttonLayout.addView(cancel,new LayoutParams(LayoutParams.WRAP_CONTENT,
-                    LayoutParams.WRAP_CONTENT));
-            layout.addView(buttonLayout,new LayoutParams(LayoutParams.WRAP_CONTENT,
-                    LayoutParams.FILL_PARENT));
-            wrapper.addView(layout,new LayoutParams(LayoutParams.WRAP_CONTENT,
-                    LayoutParams.WRAP_CONTENT));
-
-            addContentView(wrapper,
-                    new LayoutParams(LayoutParams.WRAP_CONTENT,
-                            LayoutParams.WRAP_CONTENT));
-
-
-
-
-
-
-
-            mFile = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/", mPhoto.getName());
-            mFileName = mFile.getName();
-
-            if(mFile.exists()){
-                imageView.setImageBitmap(BitmapFactory.decodeFile(mFile.getPath()));
-                layout.removeView(loadingText);
-            }else{
-                final ProgressDialog progressDialog =
-                        new ProgressDialog(BrowserActivity.this);
-                progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                progressDialog.setMessage(getString(R.string.downloading));
-                progressDialog.setCancelable(true);
-                progressDialog.show();
-
-                final LiveDownloadOperation operation =
-                        mClient.downloadAsync(mPhoto.getId() + "/content",
-                                mFile,
-                                new LiveDownloadOperationListener() {
-                                    @Override
-                                    public void onDownloadProgress(int totalBytes,
-                                                                   int bytesRemaining,
-                                                                   LiveDownloadOperation operation) {
-                                        int percentCompleted =
-                                                computePercentCompleted(totalBytes, bytesRemaining);
-
-                                        progressDialog.setProgress(percentCompleted);
-                                    }
-
-                                    @Override
-                                    public void onDownloadFailed(LiveOperationException exception,
-                                                                 LiveDownloadOperation operation) {
-                                        progressDialog.dismiss();
-                                        showToast(getString(R.string.downloadError));
-                                    }
-
-                                    @Override
-                                    public void onDownloadCompleted(LiveDownloadOperation operation) {
-                                        progressDialog.dismiss();
-                                        imageView.setImageBitmap(BitmapFactory.decodeFile(mFile.getPath()));
-                                        layout.removeView(loadingText);
-                                    }
-                                });
-
-                progressDialog.setOnCancelListener(new OnCancelListener() {
-                    @Override
-                    public void onCancel(DialogInterface dialog) {
-                        operation.cancel();
-                        if(mFile != null) mFile.delete();
-                    }
-                });
-            }
-        }
-
-
-        /* Known "feature": pressing the Home-button (or rather, not pressing
-         * Cancel or the Back-button, triggering Dismiss) causes the file to
-         * stay saved even if the user didn't explicitly ask for it. The user
-         * is not informed of this save/failure to delete, and so may be
-         * surprised to see the file saved later on.
-         */
-        @Override
-        protected void onStop(){
-            if(mSavePhoto){
-                showFileXloadedNotification(mFileName, true);
-            }else{
-                if(mFile != null) mFile.delete();
-            }
-        }
-
-    }
 
     /* Creates a download progress dialog while downloading the given file (fetched from the bundle) */
     @Override
@@ -635,7 +187,7 @@ public class BrowserActivity extends ListActivity {
                                                     public void onDownloadCompleted(LiveDownloadOperation operation) {
                                                         progressDialog.dismiss();
 
-                                                        showFileXloadedNotification(file.getName(), true);
+                                                        showFileXloadedNotification(file, true);
                                                     }
                                                 });
 
@@ -673,25 +225,36 @@ public class BrowserActivity extends ListActivity {
     /** Pings the user with a notification that a file was either downloaded or
      * uploaded, depending on the given boolean. True = download, false = up.
      *
-     * @param fileName The file name to be displayed
+     * @param file The file to be displayed
      * @param download Whether or not this is a download notification
      */
-    private void showFileXloadedNotification(String fileName, boolean download) {
+    private void showFileXloadedNotification(File file, boolean download) {
         int icon = R.drawable.notification_icon;
-        CharSequence tickerText = fileName + " saved " + (download ? "from" : "to") + "SkyDrive!";
+        CharSequence tickerText = file.getName() + " saved " + (download ? "from" : "to") + "SkyDrive!";
         long when = System.currentTimeMillis();
 
         Notification notification = new Notification(icon, tickerText, when);
 
         Context context = getApplicationContext();
         CharSequence contentTitle = getString(R.string.appName);
-        CharSequence contentText = fileName + " was saved to your " + (download ? "phone" : "SkyDrive") + "!";
-        Intent notificationIntent = new Intent(context, BrowserActivity.class);
+        CharSequence contentText = file.getName() + " was saved to your " + (download ? "phone" : "SkyDrive") + "!";
+
+        Intent notificationIntent;
+
+        if(download){
+            Uri path = Uri.fromFile(file);
+            notificationIntent = new Intent(Intent.ACTION_VIEW);
+            notificationIntent.setDataAndType(path, mIOUtil.findMimeTypeOfFile(file));
+            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        }else{
+            notificationIntent = new Intent(context, BrowserActivity.class);
+        }
+
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
 
         notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
 
-        mNotificationManager.notify(1, notification);
+        ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).notify(1, notification);
     }
 
     /**
@@ -757,7 +320,7 @@ public class BrowserActivity extends ListActivity {
                                     showToast(getString(R.string.uploadError));
                                     return;
                                 }
-                                showFileXloadedNotification(file.getName(), false);
+                                showFileXloadedNotification(file, false);
                                 if(mUploadDialog){
                                     finish();
                                 }else{
@@ -780,7 +343,10 @@ public class BrowserActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         Intent startIntent = getIntent();
         BrowserForSkyDriveApplication app = (BrowserForSkyDriveApplication) getApplication();
+
+        mIOUtil = new IOUtil();
         mClient = app.getConnectClient();
+
 
         determineBrowserStateAndLayout(startIntent);
 
@@ -932,10 +498,10 @@ public class BrowserActivity extends ListActivity {
             @Override
             public void visit(SkyDrivePhoto photo) {
                 if (mUploadDialog) return;
-                ViewPhotoDialog dialog =
-                        new ViewPhotoDialog(BrowserActivity.this, photo);
-                dialog.setOwnerActivity(BrowserActivity.this);
-                dialog.show();
+                Intent startPhotoDialog = new Intent(getApplicationContext(), ViewPhotoDialog.class);
+                startPhotoDialog.putExtra("killerud.skydrive.PHOTO_ID", photo.getId());
+                startPhotoDialog.putExtra("killerud.skydrive.PHOTO_NAME", photo.getName());
+                startActivity(startPhotoDialog);
             }
 
             @Override
@@ -968,9 +534,11 @@ public class BrowserActivity extends ListActivity {
             @Override
             public void visit(SkyDriveAudio audio) {
                 if (mUploadDialog) return;
-                PlayAudioDialog audioDialog =
-                        new PlayAudioDialog(BrowserActivity.this, audio);
-                audioDialog.show();
+                Intent startAudioDialog = new Intent(getApplicationContext(), PlayAudioDialog.class);
+                startAudioDialog.putExtra("killerud.skydrive.AUDIO_ID", audio.getId());
+                startAudioDialog.putExtra("killerud.skydrive.AUDIO_NAME", audio.getName());
+                startAudioDialog.putExtra("killerud.skydrive.AUDIO_SOURCE", audio.getSource());
+                startActivity(startAudioDialog);
             }
         });
     }
@@ -1052,9 +620,9 @@ public class BrowserActivity extends ListActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.newFolder:
-                NewFolderDialog dialog = new NewFolderDialog(BrowserActivity.this);
-                dialog.setOwnerActivity(BrowserActivity.this);
-                dialog.show();
+                Intent startNewFolderDialog = new Intent(getApplicationContext(), NewFolderDialog.class);
+                startNewFolderDialog.putExtra("killerud.skydrive.CURRENT_FOLDER", mCurrentFolderId);
+                startActivity(startNewFolderDialog);
                 return true;
             case R.id.uploadFile:
                 Intent intent = new Intent(getApplicationContext(), UploadFileDialog.class);

@@ -3,16 +3,12 @@ package com.killerud.skydrive;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.killerud.skydrive.util.UploadFileDialog;
 import com.microsoft.live.*;
 
 import java.util.Arrays;
