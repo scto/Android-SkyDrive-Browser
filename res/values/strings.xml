@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Sign in -->
+    <string name="appName">Android SkyDrive Explorer</string>
+    <string name="initializing">Connecting the app to your Windows Live account...</string>
+    <string name="firstWelcome">Welcome to Android SkyDrive Browser!\n\nAndroid SkyDrive Browser lets you sign in with your
+        Windows Live account to access files in your Microsoft SkyDrive. It also lets you easily upload files to your
+        SkyDrive, making it that much easier to share your files between computers and friends!\n\nSign in with your Windows Live account to get started!</string>
+    <string name="signIn">Sign in to Windows Live</string>
+    <string name="mySkyDrive">My SkyDrive</string>
+    <string name="automaticSignInError">Could not connect automatically to Windows Live. Please try logging in manually.</string>
+    <string name="manualSignInError">Could not connect Windows Live. Please make sure you are connected to the internet and try again.</string>
+
+    <!-- Browser -->
+    <string name="iconDescription">Icon</string>
+    <string name="noItems">No files in this folder</string>
+    <string name="newFolderTitle">Create a new folder here</string>
+    <string name="newFolder">New folder</string>
+    <string name="uploadFile">Save to SkyDrive</string>
+    <string name="navigateWait">Talking to SkyDrive...</string>
+    <string name="imageDisplayError">Could not show the image</string>
+
+    <!-- Download file dialog -->
+    <string name="download">Download</string>
+    <string name="fileWillBeDownloaded">The file will be downloaded to your phone</string>
+    <string name="ok">OK</string>
+    <string name="downloading">Downloading from SkyDrive...</string>
+    <string name="fileSaved">File saved</string>
+    <string name="downloadError">Something went wrong while downloading. The file was not saved on your phone.</string>
+    <string name="fileAlreadySaved">File already saved</string>
+    <string name="fileAlreadySavedMessage">That file has already been saved, but it might have changed since last time. Download again?</string>
+
+
+    <!-- New folder dialog -->
+    <string name="name">Folder name</string>
+    <string name="description">Folder description</string>
+    <string name="createFolder">Create folder</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Upload file dialog -->
+    <string name="uploading">Saving to your SkyDrive...</string>
+    <string name="uploadError">Something happened while uploading. The file was not saved in your SkyDrive.</string>
+    <string name="uploadToThisFolder">Save file here</string>
+
+    <!-- Context menus -->
+    <string name="delete">Delete</string>
+    <string name="share">Share</string>
+    <string name="cut">Cut</string>
+    <string name="copy">Copy</string>
+    <string name="rename">Rename</string>
+    <string name="reload">Refresh</string>
+    <string name="save">Save</string>
+    <string name="close">Close</string>
+
+    <!-- Play audio dialog -->
+    <string name="buffering">Buffering</string>
+    <string name="playing">Playing</string>
+    <string name="play">Play</string>
+    <string name="pause">Pause</string>
+    <string name="paused">Paused</string>
+    <string name="saved">Saved</string>
+    <string name="stop">Stop</string>
+    <string name="stopped">Stopped</string>
+
+</resources>

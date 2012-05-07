@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+            android:id="@+id/newFolder"
+            android:showAsAction="always"
+            android:title="@string/newFolder"
+            android:visible="true"
+            android:icon="@drawable/ic_menu_add_folder"
+            />
+    <item
+            android:id="@+id/uploadFile"
+            android:showAsAction="always"
+            android:icon="@android:drawable/ic_menu_upload"
+            android:title="@string/uploadFile"
+            android:visible="true"
+            />
+    <item
+            android:id="@+id/reload"
+            android:showAsAction="always"
+            android:icon="@drawable/ic_menu_refresh"
+            android:title="@string/reload"
+            android:visible="true"
+            />
+</menu>
