@@ -209,7 +209,7 @@ public class ViewPhotoDialog extends Activity {
             Uri path = Uri.fromFile(file);
             notificationIntent = new Intent(Intent.ACTION_VIEW);
             notificationIntent.setDataAndType(path, mIOUtil.findMimeTypeOfFile(file));
-            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Notification.FLAG_AUTO_CANCEL);
         }else{
             notificationIntent = new Intent(context, BrowserActivity.class);
         }

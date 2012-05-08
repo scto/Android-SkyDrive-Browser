@@ -11,11 +11,6 @@
         android:layout_gravity="center_vertical"
         android:contentDescription="@string/iconDescription" />
 
-    <CheckBox android:id="@+id/selectedSkyDrive"
-              android:layout_height="wrap_content"
-              android:layout_width="wrap_content"
-              android:onClick="onCheckboxClicked"
-            />
     <LinearLayout
         android:id="@+id/linearLayout1"
         android:layout_width="match_parent"
@@ -28,5 +23,4 @@
             android:padding="10dp"
             android:textSize="16sp"/>
     </LinearLayout>
-
 </LinearLayout>

@@ -38,8 +38,7 @@ public class SignInActivity extends Activity {
 
         mSignInButton = (Button) findViewById(R.id.signInButton);
         mIntroText = (TextView) findViewById(R.id.introTextView);
-        mIntroText.setVisibility(View.INVISIBLE);
-        mSignInButton.setVisibility(View.INVISIBLE);
+
 
         mSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -51,8 +50,6 @@ public class SignInActivity extends Activity {
                             startBrowserActivity(session);
                         } else {
                             Toast.makeText(getApplicationContext(), R.string.manualSignInError, Toast.LENGTH_SHORT);
-                            mIntroText.setVisibility(View.VISIBLE);
-                            mSignInButton.setVisibility(View.VISIBLE);
                             Log.e(Constants.LOGTAG, "Login did not connect. Status is " + status + ".");
                         }
                     }
@@ -78,8 +75,6 @@ public class SignInActivity extends Activity {
                     startBrowserActivity(session);
                 } else {
                     Toast.makeText(getApplicationContext(), R.string.automaticSignInError, Toast.LENGTH_SHORT);
-                    mIntroText.setVisibility(View.VISIBLE);
-                    mSignInButton.setVisibility(View.VISIBLE);
                     Log.e(Constants.LOGTAG, "Initialize did not connect. Status is " + status + ".");
                 }
             }

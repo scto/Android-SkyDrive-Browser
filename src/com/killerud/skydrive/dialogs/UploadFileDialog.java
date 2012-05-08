@@ -25,6 +25,8 @@ import java.util.Arrays;
 import java.util.Stack;
 
 public class UploadFileDialog extends ListActivity {
+    private ArrayList<View> mSelectedView;
+
     private class UploadFileListAdapter extends BaseAdapter {
         private final LayoutInflater mInflater;
         private final ArrayList<File> mFiles;
@@ -121,7 +123,7 @@ public class UploadFileDialog extends ListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.file_picker);
-
+        mSelectedView = new ArrayList<View>();
         mPrevFolders = new Stack<File>();
 
         ListView lv = getListView();
@@ -155,6 +157,15 @@ public class UploadFileDialog extends ListActivity {
             return true;
         } else {
             return super.onKeyDown(keyCode, event);
+        }
+    }
+
+    public void onCheckboxClicked(View v) {
+        // Perform action on clicks, depending on whether it's now checked
+        if (((CheckBox) v).isChecked()) {
+            mSelectedView.add(v);
+        } else {
+            mSelectedView.remove(v);
         }
     }
 
