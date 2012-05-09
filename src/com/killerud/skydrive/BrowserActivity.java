@@ -1,18 +1,13 @@
 package com.killerud.skydrive;
 
 import android.app.*;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
-import android.content.DialogInterface.OnDismissListener;
-import android.content.Intent;
+import android.content.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.text.TextUtils;
+import android.os.IBinder;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.*;
@@ -40,7 +35,9 @@ import java.util.Stack;
  * Time: 15:07
  */
 public class BrowserActivity extends ListActivity {
+    /* Live Client and download/upload class */
     private LiveConnectClient mClient;
+    private XLoader mXloader;
 
     /* Dialogs and notification */
     private NotificationManager mNotificationManager;
@@ -53,11 +50,11 @@ public class BrowserActivity extends ListActivity {
     private Stack<String> mPreviousFolderIds;
 
     /* File manipulation */
-    private ArrayList<View> mSelectedView;
     private boolean mCutNotPaste;
     private IOUtil mIOUtil;
+    private ArrayList<SkyDriveObject> mCopyCutFiles;
+    private ArrayList<SkyDriveObject> mCurrentlySelectedFiles;
 
-    private ArrayList<View> mViewsToBeCopiedOrMoved;
     /*
      * Holder for the ActionMode, part of the contectual action bar
      * for selecting and manipulating items
@@ -72,151 +69,6 @@ public class BrowserActivity extends ListActivity {
      */
     private boolean mUploadDialog = false;
 
-
-
-
-    /* Creates a download progress dialog while downloading the given file (fetched from the bundle) */
-    @Override
-    protected Dialog onCreateDialog(final int id, final Bundle bundle) {
-        Dialog dialog = null;
-        switch (id) {
-            case DIALOG_DOWNLOAD_ID: {
-                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle(getString(R.string.download))
-                        .setMessage(getString(R.string.fileWillBeDownloaded))
-                        .setPositiveButton(getString(R.string.ok), new Dialog.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-
-
-                                final String fileId = bundle.getString(JsonKeys.ID);
-                                final String name = bundle.getString(JsonKeys.NAME);
-                                final ProgressDialog progressDialog =
-                                        new ProgressDialog(BrowserActivity.this);
-                                progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                                progressDialog.setMessage(getString(R.string.downloading));
-                                progressDialog.setCancelable(true);
-
-
-                                final File file = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/", name);
-                                if (file.exists()) {
-                                builder.setTitle(R.string.fileAlreadySaved)
-                                        .setMessage(getString(R.string.fileAlreadySavedMessage))
-                                        .setPositiveButton("Download", new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int which) {
-
-                                            downloadFile(progressDialog, fileId, file);
-
-                                        }
-                                    }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i) {
-                                            finish();
-                                        }
-                                    }).show();
-                                }else{
-                                     downloadFile(progressDialog, fileId, file);
-                                }
-                            }
-
-                            private void downloadFile(final ProgressDialog progressDialog, String fileId, final File file) {
-                                progressDialog.show();
-
-                                final LiveDownloadOperation operation =
-                                        mClient.downloadAsync(fileId + "/content",
-                                                file,
-                                                new LiveDownloadOperationListener() {
-                                                    @Override
-                                                    public void onDownloadProgress(int totalBytes,
-                                                                                   int bytesRemaining,
-                                                                                   LiveDownloadOperation operation) {
-                                                        int percentCompleted =
-                                                                computePercentCompleted(totalBytes, bytesRemaining);
-
-                                                        progressDialog.setProgress(percentCompleted);
-                                                    }
-
-                                                    @Override
-                                                    public void onDownloadFailed(LiveOperationException exception,
-                                                                                 LiveDownloadOperation operation) {
-                                                        progressDialog.dismiss();
-                                                        showToast(getString(R.string.downloadError));
-                                                    }
-
-                                                    @Override
-                                                    public void onDownloadCompleted(LiveDownloadOperation operation) {
-                                                        progressDialog.dismiss();
-
-                                                        showFileXloadedNotification(file, true);
-                                                    }
-                                                });
-
-                                progressDialog.setOnCancelListener(new OnCancelListener() {
-                                    @Override
-                                    public void onCancel(DialogInterface dialog) {
-                                        operation.cancel();
-                                    }
-                                });
-                            }
-                        }).setNegativeButton(getString(R.string.cancel), new Dialog.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
-
-                dialog = builder.create();
-                break;
-            }
-        }
-
-        if (dialog != null) {
-            dialog.setOnDismissListener(new OnDismissListener() {
-                @Override
-                public void onDismiss(DialogInterface dialog) {
-                    removeDialog(id);
-                }
-            });
-        }
-
-        return dialog;
-    }
-
-    /** Pings the user with a notification that a file was either downloaded or
-     * uploaded, depending on the given boolean. True = download, false = up.
-     *
-     * @param file The file to be displayed
-     * @param download Whether or not this is a download notification
-     */
-    private void showFileXloadedNotification(File file, boolean download) {
-        int icon = R.drawable.notification_icon;
-        CharSequence tickerText = file.getName() + " saved " + (download ? "from" : "to") + "SkyDrive!";
-        long when = System.currentTimeMillis();
-
-        Notification notification = new Notification(icon, tickerText, when);
-
-        Context context = getApplicationContext();
-        CharSequence contentTitle = getString(R.string.appName);
-        CharSequence contentText = file.getName() + " was saved to your " + (download ? "phone" : "SkyDrive") + "!";
-
-        Intent notificationIntent;
-
-        if(download){
-            Uri path = Uri.fromFile(file);
-            notificationIntent = new Intent(Intent.ACTION_VIEW);
-            notificationIntent.setDataAndType(path, mIOUtil.findMimeTypeOfFile(file));
-            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Notification.FLAG_AUTO_CANCEL);
-        }else{
-            notificationIntent = new Intent(context, BrowserActivity.class);
-        }
-
-        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
-
-        notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
-
-        ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).notify(1, notification);
-    }
-
     /**
      *  Handles the chosen file from the UploadFile dialog
      */
@@ -224,90 +76,23 @@ public class BrowserActivity extends ListActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == UploadFileDialog.PICK_FILE_REQUEST) {
             if (resultCode == RESULT_OK) {
-                uploadFile(data);
+                //uploadFile(data);
             }
         }
     }
-
-    /**
-     * Handles the actual uploading of a file. Gets the filename from the passed intent.
-     */
-    private void uploadFile(Intent data) {
-        String filePath = data.getStringExtra(UploadFileDialog.EXTRA_FILE_PATH);
-        if (TextUtils.isEmpty(filePath)) {
-            return;
-        }
-
-        final File file = new File(filePath);
-
-        final ProgressDialog uploadProgressDialog =
-                new ProgressDialog(BrowserActivity.this);
-        uploadProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        uploadProgressDialog.setMessage(getString(R.string.uploading));
-        uploadProgressDialog.setCancelable(true);
-        uploadProgressDialog.show();
-
-        final LiveOperation uploadOperation =
-                mClient.uploadAsync(mCurrentFolderId,
-                        file.getName(),
-                        file,
-                        new LiveUploadOperationListener() {
-                            @Override
-                            public void onUploadProgress(int totalBytes,
-                                                         int bytesRemaining,
-                                                         LiveOperation operation) {
-                                int percentCompleted = computePercentCompleted(totalBytes, bytesRemaining);
-
-                                uploadProgressDialog.setProgress(percentCompleted);
-                            }
-
-                            @Override
-                            public void onUploadFailed(LiveOperationException exception,
-                                                       LiveOperation operation) {
-                                uploadProgressDialog.dismiss();
-                                Toast.makeText(getApplicationContext(), R.string.uploadError, Toast.LENGTH_SHORT).show();
-                            }
-
-                            @Override
-                            public void onUploadCompleted(LiveOperation operation) {
-                                uploadProgressDialog.dismiss();
-
-                                JSONObject result = operation.getResult();
-                                if (result.has(JsonKeys.ERROR)) {
-                                    JSONObject error = result.optJSONObject(JsonKeys.ERROR);
-                                    String message = error.optString(JsonKeys.MESSAGE);
-                                    String code = error.optString(JsonKeys.CODE);
-                                    showToast(getString(R.string.uploadError));
-                                    return;
-                                }
-                                showFileXloadedNotification(file, false);
-                                if(mUploadDialog){
-                                    finish();
-                                }else{
-                                    loadFolder(mCurrentFolderId);
-                                }
-                            }
-                        });
-
-        uploadProgressDialog.setOnCancelListener(new OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                uploadOperation.cancel();
-            }
-        });
-    }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent startIntent = getIntent();
+        mXloader = new XLoader(getApplicationContext());
+
         BrowserForSkyDriveApplication app = (BrowserForSkyDriveApplication) getApplication();
 
-        mSelectedView = new ArrayList<View>();
+        mCurrentlySelectedFiles = new ArrayList<SkyDriveObject>();
+        mCopyCutFiles = new ArrayList<SkyDriveObject>();
         mIOUtil = new IOUtil();
         mClient = app.getConnectClient();
-
 
         determineBrowserStateAndLayout(startIntent);
 
@@ -344,6 +129,8 @@ public class BrowserActivity extends ListActivity {
 
 
         });
+
+        /* Contextual Action Bar. Pre-11 functionality solved by checkbox selection and permanent menus. */
         if(Build.VERSION.SDK_INT < 10){
             lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                 @Override
@@ -443,8 +230,6 @@ public class BrowserActivity extends ListActivity {
                 }
             });
 
-        }else{
-            //TODO context menu
         }
     }
 
@@ -462,8 +247,8 @@ public class BrowserActivity extends ListActivity {
             uploadButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    uploadFile(new Intent().putExtra(UploadFileDialog.EXTRA_FILE_PATH,
-                            getIntent().getExtras().getString(UploadFileDialog.EXTRA_FILE_PATH)));
+                    //uploadFile(new Intent().putExtra(UploadFileDialog.EXTRA_FILE_PATH,
+                      //      getIntent().getExtras().getString(UploadFileDialog.EXTRA_FILE_PATH)));
                 }
             });
             mUploadDialog = true;
@@ -483,16 +268,23 @@ public class BrowserActivity extends ListActivity {
         }
     }
 
-    public void onCheckboxClicked(View v) {
-        // Perform action on clicks, depending on whether it's now checked
-        if (((CheckBox) v).isChecked()) {
-            ((SkyDriveListAdapter) getListAdapter()).setChecked(getListView().getPositionForView(v),true);
-            mSelectedView.add(v);
+    public void onCheckboxClicked(View checkedView) {
+        SkyDriveListAdapter adapter = (SkyDriveListAdapter) getListAdapter();
+        ListView listView = getListView();
+        SkyDriveObject skyDriveObject = adapter.getItem(listView.getPositionForView(checkedView));
+        if (((CheckBox) checkedView).isChecked()) {
+
+            adapter.setChecked(listView.getPositionForView(checkedView), true);
+            mCurrentlySelectedFiles.add(skyDriveObject);
         } else {
-            ((SkyDriveListAdapter) getListAdapter()).setChecked(getListView().getPositionForView(v),false);
-            mSelectedView.remove(v);
+            adapter.setChecked(listView.getPositionForView(checkedView), false);
+            mCurrentlySelectedFiles.remove(skyDriveObject);
+            mCurrentlySelectedFiles.trimToSize();
+
         }
     }
+
+
 
     /**
      *  Sets up the listadapter for the browser, making sure the correct dialogs are opened for different file types
@@ -526,16 +318,12 @@ public class BrowserActivity extends ListActivity {
             @Override
             public void visit(SkyDriveFile file) {
                 if (mUploadDialog) return;
-                Bundle b = new Bundle();
-                b.putString(JsonKeys.NAME, file.getName());
-                b.putString(JsonKeys.ID, file.getId());
-                b.putString(JsonKeys.LOCATION, file.getUploadLocation());
-                showDialog(DIALOG_DOWNLOAD_ID, b);
+                mXloader.downloadFile(mClient,file.getId(),
+                        new File(Environment.getExternalStorageDirectory() + "/SkyDrive/" + file.getName()));
             }
 
             @Override
             public void visit(SkyDriveVideo video) {
-                if (mUploadDialog) return;
                 if (mUploadDialog) return;
                 Bundle b = new Bundle();
                 b.putString(JsonKeys.NAME, video.getName());
@@ -563,10 +351,11 @@ public class BrowserActivity extends ListActivity {
 
         /* Checks to see if the Sharing activity started the browser. If yes, some changes are made. */
         Intent intentThatStartedMe = getIntent();
-        if (intentThatStartedMe.getAction() != null && intentThatStartedMe.getAction().equals("killerud.skydrive.SHARE_UPLOAD")) {
+        if (intentThatStartedMe.getAction() != null &&
+                intentThatStartedMe.getAction().equals("killerud.skydrive.SHARE_UPLOAD")) {
             if (intentThatStartedMe.getExtras().getString(UploadFileDialog.EXTRA_FILE_PATH) != null) {
-                uploadFile(new Intent().putExtra(UploadFileDialog.EXTRA_FILE_PATH,
-                        intentThatStartedMe.getExtras().getString(UploadFileDialog.EXTRA_FILE_PATH)));
+                //uploadFile(new Intent().putExtra(UploadFileDialog.EXTRA_FILE_PATH,
+                  //      intentThatStartedMe.getExtras().getString(UploadFileDialog.EXTRA_FILE_PATH)));
             }
         }
     }
@@ -577,6 +366,9 @@ public class BrowserActivity extends ListActivity {
     private void loadFolder(String folderId) {
         assert folderId != null;
         mCurrentFolderId = folderId;
+        mCurrentlySelectedFiles.clear();
+        ((SkyDriveListAdapter) getListAdapter()).clearChecked();
+
 
         final ProgressDialog progressDialog =
                 ProgressDialog.show(this, "", getString(R.string.navigateWait), true);
@@ -591,7 +383,7 @@ public class BrowserActivity extends ListActivity {
                     JSONObject error = result.optJSONObject(JsonKeys.ERROR);
                     String message = error.optString(JsonKeys.MESSAGE);
                     String code = error.optString(JsonKeys.CODE);
-                    showToast(code + ": " + message);
+                    Log.e("ASE", code + ": " + message);
                     return;
                 }
 
@@ -601,7 +393,8 @@ public class BrowserActivity extends ListActivity {
                 JSONArray data = result.optJSONArray(JsonKeys.DATA);
                 for (int i = 0; i < data.length(); i++) {
                     SkyDriveObject skyDriveObj = SkyDriveObject.create(data.optJSONObject(i));
-                    if (mUploadDialog && (skyDriveObj.getType().equals(SkyDriveFolder.TYPE) || skyDriveObj.getType().equals(SkyDriveAlbum.TYPE))) {
+                    if (mUploadDialog && (skyDriveObj.getType().equals(SkyDriveFolder.TYPE)
+                            || skyDriveObj.getType().equals(SkyDriveAlbum.TYPE))) {
                         skyDriveObjs.add(skyDriveObj);
                     } else if (!mUploadDialog) {
                         skyDriveObjs.add(skyDriveObj);
@@ -615,12 +408,43 @@ public class BrowserActivity extends ListActivity {
             public void onError(LiveOperationException exception, LiveOperation operation) {
                 progressDialog.dismiss();
 
-                showToast(exception.getMessage());
+                Log.e("ASE",exception.getMessage());
             }
         });
     }
 
     /* Menus and AB */
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu){
+        if(mCurrentlySelectedFiles.size()>0){
+            menu.getItem(8).setVisible(true); //Delete
+            menu.getItem(4).setVisible(true); //Rename
+            menu.getItem(5).setVisible(true); //Copy
+            menu.getItem(6).setVisible(true);  //Cut
+            menu.getItem(3).setVisible(true); //Download
+
+            menu.getItem(2).setVisible(false); //Reload
+            menu.getItem(0).setVisible(false); //New folder
+            menu.getItem(1).setVisible(false); //Upload file
+        }else if(mCurrentlySelectedFiles.size()<1){
+            menu.getItem(8).setVisible(false); //Delete
+            menu.getItem(4).setVisible(false); //Rename
+            menu.getItem(5).setVisible(false); //Copy
+            menu.getItem(6).setVisible(false); //Cut
+            menu.getItem(3).setVisible(false); //Download
+
+            menu.getItem(2).setVisible(true); //Reload
+            menu.getItem(0).setVisible(true); //New folder
+            menu.getItem(1).setVisible(true); //Upload file
+        }
+
+        if(mCopyCutFiles.size()>0){
+            menu.getItem(7).setVisible(true); //Paste
+        }else if(mCopyCutFiles.size()<1){
+            menu.getItem(7).setVisible(false); //Paste
+        }
+        return true;
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -632,6 +456,9 @@ public class BrowserActivity extends ListActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.download:
+                downloadSelectedFiles(mCurrentlySelectedFiles);
+                return true;
             case R.id.newFolder:
                 Intent startNewFolderDialog = new Intent(getApplicationContext(), NewFolderDialog.class);
                 startNewFolderDialog.putExtra("killerud.skydrive.CURRENT_FOLDER", mCurrentFolderId);
@@ -645,88 +472,39 @@ public class BrowserActivity extends ListActivity {
                 loadFolder(mCurrentFolderId);
                 return true;
             case R.id.copy:
-                mViewsToBeCopiedOrMoved = (ArrayList<View>) mSelectedView.clone();
+                mCopyCutFiles = (ArrayList<SkyDriveObject>) mCurrentlySelectedFiles.clone();
                 mCutNotPaste = false;
                 Toast.makeText(getApplicationContext(), "Selected files ready to paste", Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.cut:
-                mViewsToBeCopiedOrMoved = (ArrayList<View>) mSelectedView.clone();
+                mCopyCutFiles = (ArrayList<SkyDriveObject>) mCurrentlySelectedFiles.clone();
                 mCutNotPaste = true;
                 Toast.makeText(getApplicationContext(), "Selected files ready to paste", Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.paste:
-                pasteFiles(mViewsToBeCopiedOrMoved, mCutNotPaste);
+                mXloader.pasteFiles(mClient, mCopyCutFiles, mCurrentFolderId, mCutNotPaste);
+                mCopyCutFiles.clear();
                 return true;
             case R.id.delete:
-                deleteFilesFromView(mSelectedView);
+                mXloader.deleteFilesFromView(mClient, mCurrentlySelectedFiles);
+                ((SkyDriveListAdapter) getListAdapter()).clearChecked();
+                mCurrentlySelectedFiles.clear();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    private void deleteFilesFromView(ArrayList<View> selectedView) {
-        for(int i=0;i<selectedView.size();i++){
-            View view = selectedView.get(i);
-            final SkyDriveObject skyDriveObject = (SkyDriveObject) getListAdapter().getItem(getListView().getPositionForView(view));
-            final String fileId = skyDriveObject.getId();
-            mClient.deleteAsync(fileId, new LiveOperationListener() {
-                public void onError(LiveOperationException exception, LiveOperation operation) {
-                    Toast.makeText(getApplicationContext(), "Error deleting " + skyDriveObject.getName(), Toast.LENGTH_SHORT).show();
-                    Log.e("ASE", exception.getMessage());
-                }
-                public void onComplete(LiveOperation operation) {
-                    Toast.makeText(getApplicationContext(), "Deleted " + skyDriveObject.getName(), Toast.LENGTH_SHORT).show();
-                }
-            });
+    private void downloadSelectedFiles(ArrayList<SkyDriveObject> currentlySelectedFiles) {
+        for(int i = 0;i<currentlySelectedFiles.size();i++){
+            mXloader.downloadFile(mClient,currentlySelectedFiles.get(i).getId(),
+                    new File(Environment.getExternalStorageDirectory() +
+                            "/SkyDrive/" + currentlySelectedFiles.get(i).getName()));
         }
-        loadFolder(mCurrentFolderId);
     }
 
-    private void pasteFiles(ArrayList<View> selectedView, boolean cutNotCopy){
-        for(int i=0;i<selectedView.size();i++){
-            View view = selectedView.get(i);
-            final SkyDriveObject skyDriveObject = (SkyDriveObject) getListAdapter().getItem(getListView().getPositionForView(view));
-            final String fileId = skyDriveObject.getId();
-            if(cutNotCopy){
-                mClient.moveAsync(fileId, mCurrentFolderId, new LiveOperationListener() {
-                    public void onError(LiveOperationException exception, LiveOperation operation) {
-                        Toast.makeText(getApplicationContext(), "Error moving " + skyDriveObject.getName(), Toast.LENGTH_SHORT).show();
-                        Log.e("ASE", exception.getMessage());
-                    }
-                    public void onComplete(LiveOperation operation) {
-                        Toast.makeText(getApplicationContext(), "Moved " + skyDriveObject.getName() + " to current folder", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }else{
-                mClient.copyAsync(fileId, mCurrentFolderId, new LiveOperationListener() {
-                    public void onError(LiveOperationException exception, LiveOperation operation) {
-                        Toast.makeText(getApplicationContext(), "Error copying " + skyDriveObject.getName(), Toast.LENGTH_SHORT).show();
-                        Log.e("ASE", exception.getMessage());
-                    }
-                    public void onComplete(LiveOperation operation) {
-                        Toast.makeText(getApplicationContext(), "Copied " + skyDriveObject.getName() + " to current folder", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
 
-        }
-        loadFolder(mCurrentFolderId);
-    }
 
-    /* Util */
-
-    private void showToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-    }
-
-    private int computePercentCompleted(int totalBytes, int bytesRemaining) {
-        return (int) (((float) (totalBytes - bytesRemaining)) / totalBytes * 100);
-    }
-
-    private ProgressDialog showProgressDialog(String title, String message, boolean indeterminate) {
-        return ProgressDialog.show(this, title, message, indeterminate);
-    }
 
     /**
      * The SkyDrive list adapter. Determines the list item layout and display behaviour.
@@ -763,6 +541,11 @@ public class BrowserActivity extends ListActivity {
 
         public void setChecked(int pos, boolean checked){
             mCheckedPositions.put(pos,checked);
+            notifyDataSetChanged();
+        }
+
+        public void clearChecked(){
+            mCheckedPositions = new SparseBooleanArray();
             notifyDataSetChanged();
         }
 
@@ -860,7 +643,7 @@ public class BrowserActivity extends ListActivity {
                         @Override
                         public void onDownloadFailed(LiveOperationException exception,
                                                      LiveDownloadOperation operation) {
-                            showToast(exception.getMessage());
+                            Log.e("ASE",exception.getMessage());
                         }
 
                         @Override
