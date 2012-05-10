@@ -7,7 +7,9 @@
                   android:layout_height="wrap_content"
                   android:layout_width="fill_parent"
                   >
-
+                  <TextView android:id="@+id/folder_hierarchy"
+                            android:layout_height="wrap_content"
+                            android:layout_width="fill_parent" />
                   </LinearLayout>
     <ListView
 	    android:id="@id/android:list"

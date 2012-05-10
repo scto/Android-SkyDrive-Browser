@@ -149,7 +149,6 @@ class ApiRequestAsync<ResponseType> extends AsyncTask<Void, Long, Runnable>
     @Override
     protected Runnable doInBackground(Void... args) {
         ResponseType response;
-
         try {
             response = this.request.execute();
         } catch (LiveOperationException e) {

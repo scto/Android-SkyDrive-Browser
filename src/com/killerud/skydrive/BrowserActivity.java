@@ -7,7 +7,6 @@ import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.IBinder;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.*;
@@ -48,6 +47,8 @@ public class BrowserActivity extends ListActivity {
     private static final String HOME_FOLDER = "me/skydrive";
     private String mCurrentFolderId;
     private Stack<String> mPreviousFolderIds;
+    private Stack<String> mFolderHierarchy;
+    private TextView mFolderHierarchyView;
 
     /* File manipulation */
     private boolean mCutNotPaste;
@@ -76,7 +77,16 @@ public class BrowserActivity extends ListActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == UploadFileDialog.PICK_FILE_REQUEST) {
             if (resultCode == RESULT_OK) {
-                //uploadFile(data);
+                if(data.getAction().equals(UploadFileDialog.ACTION_SINGLE_FILE)){
+                    XLoader loader = new XLoader(getApplicationContext());
+                    loader.uploadFile(mClient,data.getStringExtra(UploadFileDialog.EXTRA_FILE_PATH),mCurrentFolderId);
+                }else if(data.getAction().equals(UploadFileDialog.ACTION_MULTIPLE_FILES)){
+                    XLoader loader = new XLoader(getApplicationContext());
+                    ArrayList<String> files = data.getStringArrayListExtra(UploadFileDialog.EXTRA_FILES_LIST);
+                    for(int i=0;i<files.size();i++){
+                        loader.uploadFile(mClient,files.get(i),mCurrentFolderId);
+                    }
+                }
             }
         }
     }
@@ -85,8 +95,12 @@ public class BrowserActivity extends ListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent startIntent = getIntent();
-        mXloader = new XLoader(getApplicationContext());
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
+        mXloader = new XLoader(getApplicationContext());
+        mPhotoAdapter = new SkyDriveListAdapter(this);
+
+        setListAdapter(mPhotoAdapter);
         BrowserForSkyDriveApplication app = (BrowserForSkyDriveApplication) getApplication();
 
         mCurrentlySelectedFiles = new ArrayList<SkyDriveObject>();
@@ -108,9 +122,9 @@ public class BrowserActivity extends ListActivity {
         ListView lv = getListView();
         setupListView(lv);
 
-        mPhotoAdapter = new SkyDriveListAdapter(this);
-        setListAdapter(mPhotoAdapter);
-
+        mFolderHierarchyView = (TextView) findViewById(R.id.folder_hierarchy);
+        mFolderHierarchy = new Stack<String>();
+        updateFolderHierarchy(false);
 
     }
 
@@ -131,106 +145,6 @@ public class BrowserActivity extends ListActivity {
         });
 
         /* Contextual Action Bar. Pre-11 functionality solved by checkbox selection and permanent menus. */
-        if(Build.VERSION.SDK_INT < 10){
-            lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-                @Override
-                public boolean onItemLongClick(AdapterView<?> av, View v, int
-                        pos, long id) {
-                    if (mActionMode != null) {
-                        return false;
-                    }
-                    // Start the CAB using the ActionMode.Callback defined above
-                    mActionMode = startActionMode(new ActionMode.Callback() {
-
-                        // Called when the action mode is created; startActionMode() was called
-                        @Override
-                        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-                            // Inflate a menu resource providing context menu items
-                            MenuInflater inflater = mode.getMenuInflater();
-                            inflater.inflate(R.menu.context_menu, menu);
-                            return true;
-                        }
-
-                        // Called each time the action mode is shown. Always called after onCreateActionMode, but
-                        // may be called multiple times if the mode is invalidated.
-                        @Override
-                        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-                            return false; // Return false if nothing is done
-                        }
-
-                        // Called when the user selects a contextual menu item
-                        @Override
-                        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-                            switch (item.getItemId()) {
-                                //case R.id.menu_share:
-                                  //  shareCurrentItem();
-                                    //mode.finish(); // Action picked, so close the CAB
-                                   // return true;
-                                //TODO
-                                default:
-                                    return false;
-                            }
-                        }
-
-                        // Called when the user exits the action mode. Changes have been made, so reload folder.
-                        @Override
-                        public void onDestroyActionMode(ActionMode mode) {
-                            mActionMode = null;
-                            loadFolder(mCurrentFolderId);
-                        }
-                    });
-                    v.setSelected(true);
-                    return true;
-                }
-            });
-            lv.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-            lv.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
-
-                @Override
-                public void onItemCheckedStateChanged(ActionMode mode, int position,
-                                                      long id, boolean checked) {
-                    //TODO
-                }
-
-                @Override
-                public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-                    // Respond to clicks on the actions in the CAB
-                    // Make sure to do operations on ALL SELECTED ITEMS
-                    switch (item.getItemId()) {
-                        //TODO
-                        //case R.id.menu_delete:
-                        //deleteSelectedItems();
-                        //mode.finish(); // Action picked, so close the CAB
-                        //return true;
-                        default:
-                            return false;
-                    }
-                }
-
-                @Override
-                public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-                    // Inflate the menu for the CAB
-                    MenuInflater inflater = mode.getMenuInflater();
-                    inflater.inflate(R.menu.context_menu_multi, menu);
-                    return true;
-                }
-
-                @Override
-                public void onDestroyActionMode(ActionMode mode) {
-                    // Here you can make any necessary updates to the activity when
-                    // the CAB is removed. By default, selected items are deselected/unchecked.
-                    loadFolder(mCurrentFolderId);
-                }
-
-                @Override
-                public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-                    // Here you can perform updates to the CAB due to
-                    // an invalidate() request
-                    return false;
-                }
-            });
-
-        }
     }
 
     /**
@@ -262,6 +176,8 @@ public class BrowserActivity extends ListActivity {
         if (keyCode == KeyEvent.KEYCODE_BACK && !mPreviousFolderIds.isEmpty()) {
             /* If the previous folder stack is empty, exit the application */
             loadFolder(mPreviousFolderIds.pop());
+            mFolderHierarchy.pop();
+            updateFolderHierarchy(false);
             return true;
         } else {
             return super.onKeyDown(keyCode, event);
@@ -281,6 +197,10 @@ public class BrowserActivity extends ListActivity {
             mCurrentlySelectedFiles.remove(skyDriveObject);
             mCurrentlySelectedFiles.trimToSize();
 
+        }
+
+        if(Build.VERSION.SDK_INT>10) {
+            invalidateOptionsMenu();
         }
     }
 
@@ -312,6 +232,9 @@ public class BrowserActivity extends ListActivity {
             @Override
             public void visit(SkyDriveFolder folder) {
                 mPreviousFolderIds.push(mCurrentFolderId);
+                mFolderHierarchy.push(folder.getName());
+                updateFolderHierarchy(true);
+                setTitle(folder.getName());
                 loadFolder(folder.getId());
             }
 
@@ -360,23 +283,37 @@ public class BrowserActivity extends ListActivity {
         }
     }
 
+    private void updateFolderHierarchy(boolean push){
+        String currentText =  mFolderHierarchyView.getText().toString();
+        String newText =  "";
+        if(push){
+            newText = currentText + ">" + mFolderHierarchy.get(mFolderHierarchy.size()-1);
+        }else{
+            StringBuilder builder = new StringBuilder();
+            for(int i=0;i<mFolderHierarchy.size();i++){
+                builder.append(mFolderHierarchy.get(i));
+                builder.append(">");
+            }
+            newText = builder.toString();
+        }
+        mFolderHierarchyView.setText(newText);
+    }
+
     /**
      * Gets the folder content for displaying
      */
     private void loadFolder(String folderId) {
-        assert folderId != null;
+        if(folderId == null) return;
+        setProgressBarIndeterminateVisibility(true);
         mCurrentFolderId = folderId;
-        mCurrentlySelectedFiles.clear();
+
+        if(mCurrentlySelectedFiles != null) mCurrentlySelectedFiles.clear();
         ((SkyDriveListAdapter) getListAdapter()).clearChecked();
 
-
-        final ProgressDialog progressDialog =
-                ProgressDialog.show(this, "", getString(R.string.navigateWait), true);
-
-        mClient.getAsync(folderId + "/files", new LiveOperationListener() {
+        if(mClient!= null) mClient.getAsync(folderId + "/files", new LiveOperationListener() {
             @Override
             public void onComplete(LiveOperation operation) {
-                progressDialog.dismiss();
+                setProgressBarIndeterminateVisibility(false);
 
                 JSONObject result = operation.getResult();
                 if (result.has(JsonKeys.ERROR)) {
@@ -406,8 +343,7 @@ public class BrowserActivity extends ListActivity {
 
             @Override
             public void onError(LiveOperationException exception, LiveOperation operation) {
-                progressDialog.dismiss();
-
+                setProgressBarIndeterminateVisibility(false);
                 Log.e("ASE",exception.getMessage());
             }
         });
@@ -486,7 +422,7 @@ public class BrowserActivity extends ListActivity {
                 mCopyCutFiles.clear();
                 return true;
             case R.id.delete:
-                mXloader.deleteFilesFromView(mClient, mCurrentlySelectedFiles);
+                mXloader.deleteFiles(mClient, mCurrentlySelectedFiles);
                 ((SkyDriveListAdapter) getListAdapter()).clearChecked();
                 mCurrentlySelectedFiles.clear();
                 return true;

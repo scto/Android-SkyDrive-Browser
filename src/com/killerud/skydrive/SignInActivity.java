@@ -43,6 +43,7 @@ public class SignInActivity extends Activity {
         mSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                try{
                 mAuthClient.login(SignInActivity.this, Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener() {
                     @Override
                     public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState) {
@@ -59,6 +60,11 @@ public class SignInActivity extends Activity {
                         Log.e(Constants.LOGTAG, exception.getMessage());
                     }
                 });
+                }catch (IllegalStateException e){
+                    /* Already logged in , or login in progress*/
+                    Log.e("ASE", e.getMessage());
+                }
+
             }
         });
 
@@ -67,24 +73,29 @@ public class SignInActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        mAuthClient.initialize(Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener() {
-            @Override
-            public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState) {
-                mInitializeDialog.dismiss();
-                if (status == LiveStatus.CONNECTED) {
-                    startBrowserActivity(session);
-                } else {
-                    Toast.makeText(getApplicationContext(), R.string.automaticSignInError, Toast.LENGTH_SHORT);
-                    Log.e(Constants.LOGTAG, "Initialize did not connect. Status is " + status + ".");
+        try{
+            mAuthClient.initialize(Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener() {
+                @Override
+                public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState) {
+                    mInitializeDialog.dismiss();
+                    if (status == LiveStatus.CONNECTED) {
+                        startBrowserActivity(session);
+                    } else {
+                        Toast.makeText(getApplicationContext(), R.string.automaticSignInError, Toast.LENGTH_SHORT);
+                        Log.e(Constants.LOGTAG, "Initialize did not connect. Status is " + status + ".");
+                    }
                 }
-            }
 
-            @Override
-            public void onAuthError(LiveAuthException exception, Object userState) {
-                mInitializeDialog.dismiss();
-                Log.e(Constants.LOGTAG, exception.getMessage());
-            }
-        });
+                @Override
+                public void onAuthError(LiveAuthException exception, Object userState) {
+                    mInitializeDialog.dismiss();
+                    Log.e(Constants.LOGTAG, exception.getMessage());
+                }
+            });
+        }catch (IllegalStateException e){
+            /* Already logged in, or login in progress */
+            Log.e("ASE", e.getMessage());
+        }
 
     }
 

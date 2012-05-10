@@ -38,9 +38,10 @@
     <string name="cancel">Cancel</string>
 
     <!-- Upload file dialog -->
-    <string name="uploading">Saving to your SkyDrive...</string>
+    <string name="uploading">Uploading to your SkyDrive...</string>
     <string name="uploadError">Something happened while uploading. The file was not saved in your SkyDrive.</string>
-    <string name="uploadToThisFolder">Save file here</string>
+    <string name="uploadToThisFolder">Upload here</string>
+    <string name="uploadSelected">Upload selected</string>
 
     <!-- Context menus -->
     <string name="delete">Delete</string>

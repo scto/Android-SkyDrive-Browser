@@ -12,11 +12,17 @@
 		android:drawSelectorOnTop="false">
 	</ListView>
 
+    <Button android:id="@+id/uploadSelected"
+            android:text="@string/uploadSelected"
+            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            android:layout_weight="0">
+    </Button>
 
 	<TextView
 	    android:id="@id/android:empty"
 	    android:layout_width="fill_parent"
 	    android:layout_height="fill_parent"
 	    android:text="@string/noItems" />
-	
+
 </LinearLayout>

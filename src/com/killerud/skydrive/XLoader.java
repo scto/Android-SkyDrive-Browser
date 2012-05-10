@@ -45,9 +45,9 @@ public class XLoader {
      *
      * @param client The LiveConnectClient for communicating with SkyDrive
      * @param localFilePath The path to the local file to be uploaded
-     * @param currentFolder The current SkyDrive folder, the one we upload to
+     * @param currentFolderId The current SkyDrive folder, the one we upload to
      */
-    public void uploadFile(LiveConnectClient client, String localFilePath, String currentFolder) {
+    public void uploadFile(LiveConnectClient client, String localFilePath, String currentFolderId) {
         //String filePath = data.getStringExtra(UploadFileDialog.EXTRA_FILE_PATH);
         if (TextUtils.isEmpty(localFilePath)) {
             return;
@@ -57,7 +57,7 @@ public class XLoader {
         createProgressNotification(file.getName(),false);
 
         final LiveOperation uploadOperation =
-                client.uploadAsync(currentFolder,
+                client.uploadAsync(currentFolderId,
                         file.getName(),
                         file,
                         new LiveUploadOperationListener() {
@@ -220,8 +220,12 @@ public class XLoader {
     }
 
 
-
-    public void deleteFilesFromView(LiveConnectClient client, final ArrayList<SkyDriveObject> fileIds) {
+    /**
+     * Deletes the files who's SkyDrive IDs are in the given parameter.
+     * @param client
+     * @param fileIds
+     */
+    public void deleteFiles(LiveConnectClient client, final ArrayList<SkyDriveObject> fileIds) {
         for(int i=0;i<fileIds.size();i++){
             final String fileId = fileIds.get(i).getId();
             client.deleteAsync(fileId, new LiveOperationListener() {
@@ -239,6 +243,14 @@ public class XLoader {
 
     }
 
+    /**
+     * Pastes the given files to the given folder and cuts/copies depending on the boolean value.
+     *
+     * @param client
+     * @param fileIds
+     * @param currentFolder
+     * @param cutNotCopy
+     */
     public void pasteFiles(LiveConnectClient client, final ArrayList<SkyDriveObject> fileIds, String currentFolder, boolean cutNotCopy){
         for(int i=0;i<fileIds.size();i++){
             final String fileId = fileIds.get(i).getId();
