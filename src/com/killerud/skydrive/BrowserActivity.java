@@ -12,13 +12,10 @@ import android.util.SparseBooleanArray;
 import android.view.*;
 import android.widget.*;
 import android.widget.AdapterView.OnItemClickListener;
-import com.killerud.skydrive.dialogs.NewFolderDialog;
-import com.killerud.skydrive.dialogs.PlayAudioDialog;
-import com.killerud.skydrive.dialogs.ViewPhotoDialog;
+import com.killerud.skydrive.dialogs.*;
 import com.killerud.skydrive.objects.*;
 import com.killerud.skydrive.util.IOUtil;
 import com.killerud.skydrive.util.JsonKeys;
-import com.killerud.skydrive.dialogs.UploadFileDialog;
 import com.microsoft.live.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -270,7 +267,6 @@ public class BrowserActivity extends ListActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        loadFolder(HOME_FOLDER);
 
         /* Checks to see if the Sharing activity started the browser. If yes, some changes are made. */
         Intent intentThatStartedMe = getIntent();
@@ -426,6 +422,18 @@ public class BrowserActivity extends ListActivity {
                 ((SkyDriveListAdapter) getListAdapter()).clearChecked();
                 mCurrentlySelectedFiles.clear();
                 return true;
+            case R.id.rename:
+                Intent startRenameDialog = new Intent(getApplicationContext(), RenameDialog.class);
+                ArrayList<String> fileIds = new ArrayList<String>();
+                ArrayList<String> fileNames = new ArrayList<String>();
+                for(int i=0;i<mCurrentlySelectedFiles.size();i++){
+                    fileIds.add(mCurrentlySelectedFiles.get(i).getId());
+                    fileNames.add(mCurrentlySelectedFiles.get(i).getName());
+                }
+                startRenameDialog.putExtra(RenameDialog.EXTRAS_FILE_IDS,fileIds);
+                startRenameDialog.putExtra(RenameDialog.EXTRAS_FILE_NAMES,fileNames);
+                startActivity(startRenameDialog);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -546,49 +554,6 @@ public class BrowserActivity extends ListActivity {
                     setIcon(R.drawable.image_x_generic);
                     setName(photo);
                     setChecked(isChecked(mPosition));
-
-                    // Try to find a smaller/thumbnail and use that source
-                    String thumbnailSource = null;
-                    String smallSource = null;
-                    for (SkyDrivePhoto.Image image : photo.getImages()) {
-                        if (image.getType().equals("small")) {
-                            smallSource = image.getSource();
-                        } else if (image.getType().equals("thumbnail")) {
-                            thumbnailSource = image.getSource();
-                        }
-                    }
-
-                    String source = thumbnailSource != null ? thumbnailSource :
-                            smallSource != null ? smallSource : null;
-
-                    // if we do not have a thumbnail or small image, just leave.
-                    if (source == null) {
-                        return;
-                    }
-
-                    // Since we are doing async calls and mView is constantly changing,
-                    // we need to hold on to this reference.
-                    final View v = mView;
-                    mClient.downloadAsync(source, new LiveDownloadOperationListener() {
-                        @Override
-                        public void onDownloadProgress(int totalBytes,
-                                                       int bytesRemaining,
-                                                       LiveDownloadOperation operation) {
-                        }
-
-                        @Override
-                        public void onDownloadFailed(LiveOperationException exception,
-                                                     LiveDownloadOperation operation) {
-                            Log.e("ASE",exception.getMessage());
-                        }
-
-                        @Override
-                        public void onDownloadCompleted(LiveDownloadOperation operation) {
-                            Bitmap bm = BitmapFactory.decodeStream(operation.getStream());
-                            ImageView imgView = (ImageView) v.findViewById(R.id.skyDriveItemIcon);
-                            imgView.setImageBitmap(bm);
-                        }
-                    });
                 }
 
                 @Override

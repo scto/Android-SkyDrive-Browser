@@ -12,6 +12,7 @@ import com.killerud.skydrive.objects.SkyDriveObject;
 import com.killerud.skydrive.util.IOUtil;
 import com.killerud.skydrive.util.JsonKeys;
 import com.microsoft.live.*;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -134,93 +135,6 @@ public class XLoader {
     }
 
     /**
-     * Creates a XLoad notification for the given file name
-     *
-     * @param fileName
-     * @param downloading Whether or not we are downloading. Determines text output.
-     */
-    private void createProgressNotification(String fileName, boolean downloading){
-        mNotificationProgress = new Notification();
-        mNotificationView = new RemoteViews(mContext.getPackageName(), R.layout.notification_xload);
-        mNotificationView.setImageViewResource(R.id.image, R.drawable.logo);
-        mNotificationView.setTextViewText(R.id.title, (downloading ? "Downloading " : "Uploading ") + fileName);
-        mNotificationView.setProgressBar(R.id.progressBar, 100, 0, false);
-        mNotificationProgress.contentView = mNotificationView;
-        mNotificationManager.notify(mNotificationProgressId, mNotificationProgress);
-    }
-
-
-    private int computePercentCompleted(int totalBytes, int bytesRemaining) {
-        return (int) (((float) (totalBytes - bytesRemaining)) / totalBytes * 100);
-    }
-
-
-    /**
-     * Checks the local storage for duplicates. If they exist, finds the next available name recursively.
-     *
-     * @param file The file to check for duplicates
-     * @return The reference to the file with its available file name
-     */
-    private File checkForFileDuplicateAndCreateCopy(File file){
-        if(!file.exists()){
-            return file;
-        }
-        int index = file.getName().lastIndexOf(".");
-        int copyNr = 1;
-        File result = new File(file.getName().substring(0,index) +
-                " Copy " + copyNr + file.getName().substring(index,file.getName().length()));
-        boolean availableFileNameFound = false;
-
-        while(availableFileNameFound){
-            if(result.exists()){
-                copyNr++;
-                result = new File(file.getName().substring(0,index) +
-                        " Copy " + copyNr + file.getName().substring(index,file.getName().length()));
-            }else{
-                availableFileNameFound = true;
-            }
-        }
-        return result;
-    }
-
-
-    /** Pings the user with a notification that a file was either downloaded or
-     * uploaded, depending on the given boolean. True = download, false = up.
-     *
-     * @param file The file to be displayed
-     * @param download Whether or not this is a download notification
-     */
-    private void showFileXloadedNotification(File file, boolean download) {
-        int icon = R.drawable.notification_icon;
-        CharSequence tickerText = file.getName() + " saved " + (download ? "from" : "to") + "SkyDrive!";
-        long when = System.currentTimeMillis();
-
-        Notification notification = new Notification(icon, tickerText, when);
-
-        Context context = mContext;
-        CharSequence contentTitle = mContext.getString(R.string.appName);
-        CharSequence contentText = file.getName() + " was saved to your " + (download ? "phone" : "SkyDrive") + "!";
-
-        Intent notificationIntent;
-
-        if(download){
-            Uri path = Uri.fromFile(file);
-            notificationIntent = new Intent(Intent.ACTION_VIEW);
-            notificationIntent.setDataAndType(path, mIOUtil.findMimeTypeOfFile(file));
-            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Notification.FLAG_AUTO_CANCEL);
-        }else{
-            notificationIntent = new Intent(context, XLoader.class);
-        }
-
-        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
-
-        notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
-
-        mNotificationManager.notify(mNotificationXLoadId, notification);
-    }
-
-
-    /**
      * Deletes the files who's SkyDrive IDs are in the given parameter.
      * @param client
      * @param fileIds
@@ -287,5 +201,142 @@ public class XLoader {
         }
 
     }
+
+
+    /**
+     * Renames the given files using the base name and (for anything above 0) the loop iteration for naming
+     * and likewise for description. Batch renaming, yay! :D
+     *
+     * @param client
+     * @param fileIds
+     * @param baseName
+     * @param baseDescription
+     */
+    public void renameFiles(LiveConnectClient client, final ArrayList<String> fileIds,
+                            final ArrayList<String> fileNames,
+                            String baseName, String baseDescription){
+        final LiveOperationListener operationListener = new LiveOperationListener() {
+            @Override
+            public void onComplete(LiveOperation operation) {
+                Log.i("ASE","File updated " + operation.getRawResult());
+            }
+
+            @Override
+            public void onError(LiveOperationException exception, LiveOperation operation) {
+                Log.e("ASE",exception.getMessage());
+                Toast.makeText(mContext,"Could not rename file",Toast.LENGTH_SHORT).show();
+            }
+        };
+
+        for(int i=0;i<fileIds.size();i++){
+            String fileId = fileIds.get(i);
+            try{
+                JSONObject body = new JSONObject();
+                String extension = "";
+                String fileName = fileNames.get(i);
+                int index = fileName.lastIndexOf(".");
+                if(index != -1){
+                    extension = fileName.substring(index, fileName.length());
+                }
+                /* Give name with added file extension */
+                body.put("name", baseName + (i>0?" " + i:"") + extension);
+                body.put("description", baseDescription + (i>0?" " + i:""));
+                client.putAsync(fileId,body,operationListener);
+            }catch (JSONException e){
+                Toast.makeText(mContext,"Could not rename file",Toast.LENGTH_SHORT).show();
+            }
+        }
+
+    }
+
+
+    /**
+     * Creates a XLoad notification for the given file name
+     *
+     * @param fileName
+     * @param downloading Whether or not we are downloading. Determines text output.
+     */
+    private void createProgressNotification(String fileName, boolean downloading){
+        mNotificationProgress = new Notification();
+        mNotificationView = new RemoteViews(mContext.getPackageName(), R.layout.notification_xload);
+        mNotificationView.setImageViewResource(R.id.image, R.drawable.logo);
+        mNotificationView.setTextViewText(R.id.title, (downloading ? "Downloading " : "Uploading ") + fileName);
+        mNotificationView.setProgressBar(R.id.progressBar, 100, 0, false);
+        mNotificationProgress.contentView = mNotificationView;
+        mNotificationManager.notify(mNotificationProgressId, mNotificationProgress);
+    }
+
+
+    private int computePercentCompleted(int totalBytes, int bytesRemaining) {
+        return (int) (((float) (totalBytes - bytesRemaining)) / totalBytes * 100);
+    }
+
+
+    /**
+     * Checks the local storage for duplicates. If they exist, finds the next available name recursively.
+     *
+     * @param file The file to check for duplicates
+     * @return The reference to the file with its available file name
+     */
+    private File checkForFileDuplicateAndCreateCopy(File file){
+        if(!file.exists()){
+            return file;
+        }
+        int index = file.getName().lastIndexOf(".");
+        int copyNr = 1;
+        File result = new File(file.getName().substring(0,index) +
+                " Copy " + copyNr + file.getName().substring(index,file.getName().length()));
+        boolean availableFileNameFound = false;
+
+        while(availableFileNameFound){
+            if(result.exists()){
+                copyNr++;
+                result = new File(file.getName().substring(0,index) +
+                        " Copy " + copyNr + file.getName().substring(index,file.getName().length()));
+            }else{
+                availableFileNameFound = true;
+            }
+        }
+        return result;
+    }
+
+
+    /** Pings the user with a notification that a file was either downloaded or
+     * uploaded, depending on the given boolean. True = download, false = up.
+     *
+     * @param file The file to be displayed
+     * @param download Whether or not this is a download notification
+     */
+    public void showFileXloadedNotification(File file, boolean download) {
+        int icon = R.drawable.notification_icon;
+        CharSequence tickerText = file.getName() + " saved " + (download ? "from" : "to") + "SkyDrive!";
+        long when = System.currentTimeMillis();
+
+        Notification notification = new Notification(icon, tickerText, when);
+
+        Context context = mContext;
+        CharSequence contentTitle = mContext.getString(R.string.appName);
+        CharSequence contentText = file.getName() + " was saved to your " + (download ? "phone" : "SkyDrive") + "!";
+
+        Intent notificationIntent;
+
+        if(download){
+            Uri path = Uri.fromFile(file);
+            notificationIntent = new Intent(Intent.ACTION_VIEW);
+            notificationIntent.setDataAndType(path, mIOUtil.findMimeTypeOfFile(file));
+            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Notification.FLAG_AUTO_CANCEL);
+        }else{
+            notificationIntent = new Intent(context, XLoader.class);
+        }
+
+        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
+
+        notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
+
+        mNotificationManager.notify(mNotificationXLoadId, notification);
+    }
+
+
+
 
 }

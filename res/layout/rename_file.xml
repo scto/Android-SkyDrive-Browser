@@ -9,14 +9,14 @@
         android:id="@+id/nameLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/folderName"
+        android:text="@string/name"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <EditText
         android:id="@+id/nameEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/folderName" >
+        android:hint="@string/name" >
 
         <requestFocus />
     </EditText>
@@ -24,14 +24,14 @@
         android:id="@+id/descriptionLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/folderDescription"
+        android:text="@string/description"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <EditText
         android:id="@+id/descriptionEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/folderDescription"
+        android:hint="@string/description"
         android:inputType="textMultiLine" />
 
     <LinearLayout
@@ -39,10 +39,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
         <Button
-            android:id="@+id/saveButton"
+            android:id="@+id/renameButton"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
-            android:text="@string/createFolder" />
+            android:text="@string/rename" />
         <Button
             android:id="@+id/cancelButton"
             android:layout_width="wrap_content"

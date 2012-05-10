@@ -32,10 +32,13 @@
 
 
     <!-- New folder dialog -->
-    <string name="name">Folder name</string>
-    <string name="description">Folder description</string>
+    <string name="folderName">Folder name</string>
+    <string name="folderDescription">Folder description</string>
     <string name="createFolder">Create folder</string>
     <string name="cancel">Cancel</string>
+    <string name="name">Name</string>
+    <string name="description">Description</string>
+    <string name="renameTitle">Rename files and folders</string>
 
     <!-- Upload file dialog -->
     <string name="uploading">Uploading to your SkyDrive...</string>

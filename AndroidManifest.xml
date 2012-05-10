@@ -55,12 +55,8 @@
         <activity android:name=".dialogs.ViewPhotoDialog"
                   android:theme="@style/LightThemeDialog" />
 
-        <service android:name=".XLoader"
-                 android:exported="false"
-                 android:label="app_name"
-                 android:permission="android.permission.INTERNET"
-                 />
-
+        <activity android:name=".dialogs.RenameDialog"
+                  android:theme="@style/LightThemeDialog" />
 
     </application>
 </manifest> 

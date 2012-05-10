@@ -20,6 +20,7 @@ import android.widget.*;
 import com.killerud.skydrive.BrowserActivity;
 import com.killerud.skydrive.BrowserForSkyDriveApplication;
 import com.killerud.skydrive.R;
+import com.killerud.skydrive.XLoader;
 import com.killerud.skydrive.objects.SkyDrivePhoto;
 import com.killerud.skydrive.util.IOUtil;
 import com.microsoft.live.LiveConnectClient;
@@ -34,26 +35,22 @@ import java.io.File;
  */
 public class ViewPhotoDialog extends Activity {
     private boolean mSavePhoto;
-    private String mFileName;
     private File mFile;
-    private IOUtil mIOUtil;
-    private LiveConnectClient mClient;
-    private String mPhotoName;
-    private String mPhotoId;
+    private XLoader mXLoader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mSavePhoto = false;
-        mIOUtil = new IOUtil();
+        mXLoader = new XLoader(getApplicationContext());
 
         Intent photoDetails = getIntent();
-        mPhotoId = photoDetails.getStringExtra("killerud.skydrive.PHOTO_ID");
-        mPhotoName = photoDetails.getStringExtra("killerud.skydrive.PHOTO_NAME");
+        String photoId = photoDetails.getStringExtra("killerud.skydrive.PHOTO_ID");
+        String photoName = photoDetails.getStringExtra("killerud.skydrive.PHOTO_NAME");
 
 
-        mClient = ((BrowserForSkyDriveApplication) getApplication()).getConnectClient();
+        LiveConnectClient client = ((BrowserForSkyDriveApplication) getApplication()).getConnectClient();
 
         /* Creates the layout.
         * The layout consists of a textview to let the user know we're loading,
@@ -78,7 +75,7 @@ public class ViewPhotoDialog extends Activity {
             @Override
             public void onClick(View view) {
                 mSavePhoto = true;
-                showFileXloadedNotification(mFile, true);
+                mXLoader.showFileXloadedNotification(mFile, true);
                 finish();
             }
         });
@@ -95,8 +92,8 @@ public class ViewPhotoDialog extends Activity {
 
         layout.addView(loadingText,new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
-        layout.addView(imageView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT));
+        layout.addView(imageView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
+                ViewGroup.LayoutParams.FILL_PARENT));
         buttonLayout.addView(saveButton,new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
         buttonLayout.addView(cancel,new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -116,8 +113,7 @@ public class ViewPhotoDialog extends Activity {
 
 
 
-        mFile = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/", mPhotoName);
-        mFileName = mFile.getName();
+        mFile = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/", photoName);
 
         if(mFile.exists()){
             imageView.setImageBitmap(BitmapFactory.decodeFile(mFile.getPath()));
@@ -131,7 +127,7 @@ public class ViewPhotoDialog extends Activity {
 //            progressDialog.show();
 
             final LiveDownloadOperation operation =
-                    mClient.downloadAsync(mPhotoId + "/content",
+                    client.downloadAsync(photoId + "/content",
                             mFile,
                             new LiveDownloadOperationListener() {
                                 @Override
@@ -154,18 +150,15 @@ public class ViewPhotoDialog extends Activity {
                                 @Override
                                 public void onDownloadCompleted(LiveDownloadOperation operation) {
                                     //progressDialog.dismiss();
-                                    imageView.setImageBitmap(BitmapFactory.decodeFile(mFile.getPath()));
-                                    layout.removeView(loadingText);
+                                    try{
+                                        imageView.setImageBitmap(BitmapFactory.decodeFile(mFile.getPath()));
+                                        layout.removeView(loadingText);
+                                    }catch (OutOfMemoryError e){
+                                        imageView.destroyDrawingCache();
+                                        loadingText.setText("Image too large! Please download instead.");
+                                    }
                                 }
                             });
-
-//            progressDialog.setOnCancelListener(new OnCancelListener() {
-//                @Override
-//                public void onCancel(DialogInterface dialog) {
-//                    operation.cancel();
-//                    if(mFile != null) mFile.delete();
-//                }
-//            });
         }
     }
 
@@ -180,47 +173,13 @@ public class ViewPhotoDialog extends Activity {
     protected void onStop(){
         super.onStop();
         if(mSavePhoto){
-            showFileXloadedNotification(mFile, true);
+            mXLoader.showFileXloadedNotification(mFile, true);
         }else{
             if(mFile != null) mFile.delete();
         }
     }
 
-    /** Pings the user with a notification that a file was either downloaded or
-     * uploaded, depending on the given boolean. True = download, false = up.
-     *
-     * @param file The file to be displayed
-     * @param download Whether or not this is a download notification
-     */
-    private void showFileXloadedNotification(File file, boolean download) {
-        int icon = R.drawable.notification_icon;
-        CharSequence tickerText = file.getName() + " saved " + (download ? "from" : "to") + "SkyDrive!";
-        long when = System.currentTimeMillis();
 
-        Notification notification = new Notification(icon, tickerText, when);
-
-        Context context = getApplicationContext();
-        CharSequence contentTitle = getString(R.string.appName);
-        CharSequence contentText = file.getName() + " was saved to your " + (download ? "phone" : "SkyDrive") + "!";
-
-        Intent notificationIntent;
-
-        if(download){
-            Uri path = Uri.fromFile(file);
-            notificationIntent = new Intent(Intent.ACTION_VIEW);
-            notificationIntent.setDataAndType(path, mIOUtil.findMimeTypeOfFile(file));
-            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Notification.FLAG_AUTO_CANCEL);
-        }else{
-            notificationIntent = new Intent(context, BrowserActivity.class);
-        }
-
-        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
-
-        notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
-
-        ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).notify(1, notification);
-
-    }
 
     private int computePercentCompleted(int totalBytes, int bytesRemaining) {
         return (int) (((float) (totalBytes - bytesRemaining)) / totalBytes * 100);

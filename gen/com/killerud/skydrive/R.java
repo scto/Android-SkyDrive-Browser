@@ -31,38 +31,34 @@ public final class R {
         public static final int video_x_generic=0x7f020011;
     }
     public static final class id {
-        public static final int browser_header_layout=0x7f070010;
+        public static final int browser_header_layout=0x7f07000f;
         public static final int buttonLayout=0x7f070004;
         public static final int cancelButton=0x7f070006;
         public static final int copy=0x7f07001b;
-        public static final int copyItems=0x7f070020;
         public static final int cut=0x7f07001c;
-        public static final int cutItems=0x7f070021;
         public static final int delete=0x7f07001e;
-        public static final int deleteItems=0x7f070022;
         public static final int descriptionEditText=0x7f070003;
         public static final int descriptionLabel=0x7f070002;
         public static final int download=0x7f070019;
-        public static final int folder_hierarchy=0x7f070011;
-        public static final int image=0x7f07000b;
-        public static final int introTextView=0x7f07000e;
-        public static final int layout=0x7f07000a;
-        public static final int linearLayout1=0x7f070014;
+        public static final int folder_hierarchy=0x7f070010;
+        public static final int image=0x7f070009;
+        public static final int introTextView=0x7f07000d;
+        public static final int layout=0x7f070008;
+        public static final int linearLayout1=0x7f070013;
         public static final int nameEditText=0x7f070001;
         public static final int nameLabel=0x7f070000;
-        public static final int nameTextView=0x7f070008;
+        public static final int nameTextView=0x7f070014;
         public static final int newFolder=0x7f070016;
         public static final int paste=0x7f07001d;
-        public static final int progressBar=0x7f07000d;
+        public static final int progressBar=0x7f07000b;
         public static final int reload=0x7f070018;
         public static final int rename=0x7f07001a;
+        public static final int renameButton=0x7f07000c;
         public static final int saveButton=0x7f070005;
-        public static final int selectedSkyDrive=0x7f070013;
-        public static final int share=0x7f07001f;
-        public static final int signInButton=0x7f07000f;
-        public static final int skyDriveItemIcon=0x7f070012;
-        public static final int title=0x7f07000c;
-        public static final int typeTextView=0x7f070009;
+        public static final int selectedSkyDrive=0x7f070012;
+        public static final int signInButton=0x7f07000e;
+        public static final int skyDriveItemIcon=0x7f070011;
+        public static final int title=0x7f07000a;
         public static final int uploadFile=0x7f070017;
         public static final int uploadSelected=0x7f070007;
         public static final int uploadToThisFolder=0x7f070015;
@@ -70,8 +66,8 @@ public final class R {
     public static final class layout {
         public static final int create_folder=0x7f030000;
         public static final int file_picker=0x7f030001;
-        public static final int file_picker_list_item=0x7f030002;
-        public static final int notification_xload=0x7f030003;
+        public static final int notification_xload=0x7f030002;
+        public static final int rename_file=0x7f030003;
         public static final int sign_in=0x7f030004;
         public static final int skydrive=0x7f030005;
         public static final int skydrive_list_item=0x7f030006;
@@ -79,8 +75,6 @@ public final class R {
     }
     public static final class menu {
         public static final int browser_menu=0x7f060000;
-        public static final int context_menu=0x7f060001;
-        public static final int context_menu_multi=0x7f060002;
     }
     public static final class string {
         /**  Sign in 
@@ -89,16 +83,16 @@ public final class R {
         public static final int automaticSignInError=0x7f040005;
         /**  Play audio dialog 
          */
-        public static final int buffering=0x7f040027;
+        public static final int buffering=0x7f04002a;
         public static final int cancel=0x7f040019;
-        public static final int close=0x7f040025;
-        public static final int copy=0x7f040021;
+        public static final int close=0x7f040028;
+        public static final int copy=0x7f040024;
         public static final int createFolder=0x7f040018;
-        public static final int cut=0x7f040020;
+        public static final int cut=0x7f040023;
         /**  Context menus 
          */
-        public static final int delete=0x7f04001e;
-        public static final int description=0x7f040017;
+        public static final int delete=0x7f040021;
+        public static final int description=0x7f04001b;
         /**  Download file dialog 
          */
         public static final int download=0x7f04000e;
@@ -106,14 +100,18 @@ public final class R {
         public static final int downloading=0x7f040011;
         /**  Error messages 
          */
-        public static final int errorFolderCouldNotBeCreated=0x7f04002f;
-        public static final int errorNoApplicationCouldOpenTheFile=0x7f040030;
-        public static final int errorOpeningAudioFile=0x7f040031;
+        public static final int errorFolderCouldNotBeCreated=0x7f040032;
+        public static final int errorNoApplicationCouldOpenTheFile=0x7f040033;
+        public static final int errorOpeningAudioFile=0x7f040034;
         public static final int fileAlreadySaved=0x7f040014;
         public static final int fileAlreadySavedMessage=0x7f040015;
         public static final int fileSaved=0x7f040012;
         public static final int fileWillBeDownloaded=0x7f04000f;
         public static final int firstWelcome=0x7f040002;
+        public static final int folderDescription=0x7f040017;
+        /**  New folder dialog 
+         */
+        public static final int folderName=0x7f040016;
         /**  Browser 
          */
         public static final int iconDescription=0x7f040007;
@@ -121,34 +119,33 @@ public final class R {
         public static final int initializing=0x7f040001;
         public static final int manualSignInError=0x7f040006;
         public static final int mySkyDrive=0x7f040004;
-        /**  New folder dialog 
-         */
-        public static final int name=0x7f040016;
+        public static final int name=0x7f04001a;
         public static final int navigateWait=0x7f04000c;
         public static final int newFolder=0x7f04000a;
         public static final int newFolderTitle=0x7f040009;
         public static final int noItems=0x7f040008;
         public static final int ok=0x7f040010;
-        public static final int paste=0x7f040026;
-        public static final int pause=0x7f04002a;
-        public static final int paused=0x7f04002b;
-        public static final int play=0x7f040029;
-        public static final int playing=0x7f040028;
-        public static final int reload=0x7f040023;
-        public static final int rename=0x7f040022;
-        public static final int save=0x7f040024;
-        public static final int saved=0x7f04002c;
-        public static final int share=0x7f04001f;
+        public static final int paste=0x7f040029;
+        public static final int pause=0x7f04002d;
+        public static final int paused=0x7f04002e;
+        public static final int play=0x7f04002c;
+        public static final int playing=0x7f04002b;
+        public static final int reload=0x7f040026;
+        public static final int rename=0x7f040025;
+        public static final int renameTitle=0x7f04001c;
+        public static final int save=0x7f040027;
+        public static final int saved=0x7f04002f;
+        public static final int share=0x7f040022;
         public static final int signIn=0x7f040003;
-        public static final int stop=0x7f04002d;
-        public static final int stopped=0x7f04002e;
-        public static final int uploadError=0x7f04001b;
+        public static final int stop=0x7f040030;
+        public static final int stopped=0x7f040031;
+        public static final int uploadError=0x7f04001e;
         public static final int uploadFile=0x7f04000b;
-        public static final int uploadSelected=0x7f04001d;
-        public static final int uploadToThisFolder=0x7f04001c;
+        public static final int uploadSelected=0x7f040020;
+        public static final int uploadToThisFolder=0x7f04001f;
         /**  Upload file dialog 
          */
-        public static final int uploading=0x7f04001a;
+        public static final int uploading=0x7f04001d;
     }
     public static final class style {
         public static final int LightTheme=0x7f050000;
