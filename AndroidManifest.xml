@@ -16,7 +16,7 @@
             android:theme="@style/LightTheme"
             android:debuggable="false"
             android:uiOptions="splitActionBarWhenNarrow"
-            android:icon="@drawable/logo">
+            android:icon="@drawable/icon">
 
         <activity android:name=".SignInActivity"
                   android:label="@string/appName">
