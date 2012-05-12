@@ -3,6 +3,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
+    <LinearLayout android:id="@+id/browser_header_layout"
+                  android:layout_height="wrap_content"
+                  android:layout_width="fill_parent"
+            >
+        <TextView android:id="@+id/folder_hierarchy"
+                  android:layout_height="wrap_content"
+                  android:layout_width="fill_parent" />
+    </LinearLayout>
 
     <ListView
 	    android:id="@id/android:list"

@@ -2,8 +2,6 @@ package com.killerud.skydrive;
 
 import android.app.*;
 import android.content.*;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -74,16 +72,10 @@ public class BrowserActivity extends ListActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == UploadFileDialog.PICK_FILE_REQUEST) {
             if (resultCode == RESULT_OK) {
-                if(data.getAction().equals(UploadFileDialog.ACTION_SINGLE_FILE)){
                     XLoader loader = new XLoader(getApplicationContext());
-                    loader.uploadFile(mClient,data.getStringExtra(UploadFileDialog.EXTRA_FILE_PATH),mCurrentFolderId);
-                }else if(data.getAction().equals(UploadFileDialog.ACTION_MULTIPLE_FILES)){
-                    XLoader loader = new XLoader(getApplicationContext());
-                    ArrayList<String> files = data.getStringArrayListExtra(UploadFileDialog.EXTRA_FILES_LIST);
-                    for(int i=0;i<files.size();i++){
-                        loader.uploadFile(mClient,files.get(i),mCurrentFolderId);
-                    }
-                }
+                    loader.uploadFile(mClient,
+                            data.getStringArrayListExtra(UploadFileDialog.EXTRA_FILES_LIST),
+                            mCurrentFolderId);
             }
         }
     }
@@ -158,10 +150,13 @@ public class BrowserActivity extends ListActivity {
             uploadButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    //uploadFile(new Intent().putExtra(UploadFileDialog.EXTRA_FILE_PATH,
-                      //      getIntent().getExtras().getString(UploadFileDialog.EXTRA_FILE_PATH)));
+                    mXloader.uploadFile(mClient,
+                            getIntent().getStringArrayListExtra(UploadFileDialog.EXTRA_FILES_LIST),
+                            mCurrentFolderId);
+                    finish();
                 }
             });
+
             mUploadDialog = true;
         } else {
             setContentView(R.layout.skydrive);
@@ -214,6 +209,8 @@ public class BrowserActivity extends ListActivity {
             @Override
             public void visit(SkyDriveAlbum album) {
                 mPreviousFolderIds.push(mCurrentFolderId);
+                mFolderHierarchy.push(album.getName());
+                updateFolderHierarchy(true);
                 loadFolder(album.getId());
             }
 
@@ -238,8 +235,10 @@ public class BrowserActivity extends ListActivity {
             @Override
             public void visit(SkyDriveFile file) {
                 if (mUploadDialog) return;
-                mXloader.downloadFile(mClient,file.getId(),
-                        new File(Environment.getExternalStorageDirectory() + "/SkyDrive/" + file.getName()));
+                ArrayList<SkyDriveObject> toDownload = new ArrayList<SkyDriveObject>();
+                toDownload.add(file);
+                toDownload.trimToSize();
+                mXloader.downloadFiles(mClient, toDownload);
             }
 
             @Override
@@ -255,10 +254,8 @@ public class BrowserActivity extends ListActivity {
             @Override
             public void visit(SkyDriveAudio audio) {
                 if (mUploadDialog) return;
+                ((BrowserForSkyDriveApplication)getApplication()).setCurrentMusic(audio);
                 Intent startAudioDialog = new Intent(getApplicationContext(), PlayAudioDialog.class);
-                startAudioDialog.putExtra("killerud.skydrive.AUDIO_ID", audio.getId());
-                startAudioDialog.putExtra("killerud.skydrive.AUDIO_NAME", audio.getName());
-                startAudioDialog.putExtra("killerud.skydrive.AUDIO_SOURCE", audio.getSource());
                 startActivity(startAudioDialog);
             }
         });
@@ -267,14 +264,15 @@ public class BrowserActivity extends ListActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
+        loadFolder(HOME_FOLDER);
         /* Checks to see if the Sharing activity started the browser. If yes, some changes are made. */
         Intent intentThatStartedMe = getIntent();
         if (intentThatStartedMe.getAction() != null &&
                 intentThatStartedMe.getAction().equals("killerud.skydrive.SHARE_UPLOAD")) {
-            if (intentThatStartedMe.getExtras().getString(UploadFileDialog.EXTRA_FILE_PATH) != null) {
-                //uploadFile(new Intent().putExtra(UploadFileDialog.EXTRA_FILE_PATH,
-                  //      intentThatStartedMe.getExtras().getString(UploadFileDialog.EXTRA_FILE_PATH)));
+            if (intentThatStartedMe.getExtras().getString(UploadFileDialog.EXTRA_FILES_LIST) != null) {
+                mXloader.uploadFile(mClient,
+                        intentThatStartedMe.getStringArrayListExtra(UploadFileDialog.EXTRA_FILES_LIST),
+                        mCurrentFolderId);
             }
         }
     }
@@ -282,6 +280,7 @@ public class BrowserActivity extends ListActivity {
     private void updateFolderHierarchy(boolean push){
         String currentText =  mFolderHierarchyView.getText().toString();
         String newText =  "";
+
         if(push){
             newText = currentText + ">" + mFolderHierarchy.get(mFolderHierarchy.size()-1);
         }else{
@@ -371,6 +370,8 @@ public class BrowserActivity extends ListActivity {
         }
 
         if(mCopyCutFiles.size()>0){
+            menu.getItem(5).setVisible(false); //Copy
+            menu.getItem(6).setVisible(false); //Cut
             menu.getItem(7).setVisible(true); //Paste
         }else if(mCopyCutFiles.size()<1){
             menu.getItem(7).setVisible(false); //Paste
@@ -389,38 +390,49 @@ public class BrowserActivity extends ListActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.download:
-                downloadSelectedFiles(mCurrentlySelectedFiles);
+                /* Downloads are done by calling recursively on a trimmed version of the same arraylist onComplete
+                *  Create a clone so selected aren't cleared logically.
+                */
+                mXloader.downloadFiles(mClient, (ArrayList<SkyDriveObject>) mCurrentlySelectedFiles.clone());
+                if(Build.VERSION.SDK_INT>10) invalidateOptionsMenu();
                 return true;
             case R.id.newFolder:
                 Intent startNewFolderDialog = new Intent(getApplicationContext(), NewFolderDialog.class);
                 startNewFolderDialog.putExtra("killerud.skydrive.CURRENT_FOLDER", mCurrentFolderId);
                 startActivity(startNewFolderDialog);
+                if(Build.VERSION.SDK_INT>10) invalidateOptionsMenu();
                 return true;
             case R.id.uploadFile:
                 Intent intent = new Intent(getApplicationContext(), UploadFileDialog.class);
                 startActivityForResult(intent, UploadFileDialog.PICK_FILE_REQUEST);
+                if(Build.VERSION.SDK_INT>10) invalidateOptionsMenu();
                 return true;
             case R.id.reload:
                 loadFolder(mCurrentFolderId);
+                if(Build.VERSION.SDK_INT>10) invalidateOptionsMenu();
                 return true;
             case R.id.copy:
                 mCopyCutFiles = (ArrayList<SkyDriveObject>) mCurrentlySelectedFiles.clone();
                 mCutNotPaste = false;
-                Toast.makeText(getApplicationContext(), "Selected files ready to paste", Toast.LENGTH_SHORT).show();
+                if(Build.VERSION.SDK_INT>10) invalidateOptionsMenu();
+                Toast.makeText(getApplicationContext(), R.string.copyCutSelectedFiles, Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.cut:
                 mCopyCutFiles = (ArrayList<SkyDriveObject>) mCurrentlySelectedFiles.clone();
                 mCutNotPaste = true;
-                Toast.makeText(getApplicationContext(), "Selected files ready to paste", Toast.LENGTH_SHORT).show();
+                if(Build.VERSION.SDK_INT>10) invalidateOptionsMenu();
+                Toast.makeText(getApplicationContext(), R.string.copyCutSelectedFiles, Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.paste:
                 mXloader.pasteFiles(mClient, mCopyCutFiles, mCurrentFolderId, mCutNotPaste);
                 mCopyCutFiles.clear();
+                if(Build.VERSION.SDK_INT>10) invalidateOptionsMenu();
                 return true;
             case R.id.delete:
                 mXloader.deleteFiles(mClient, mCurrentlySelectedFiles);
                 ((SkyDriveListAdapter) getListAdapter()).clearChecked();
                 mCurrentlySelectedFiles.clear();
+                if(Build.VERSION.SDK_INT>10) invalidateOptionsMenu();
                 return true;
             case R.id.rename:
                 Intent startRenameDialog = new Intent(getApplicationContext(), RenameDialog.class);
@@ -430,24 +442,18 @@ public class BrowserActivity extends ListActivity {
                     fileIds.add(mCurrentlySelectedFiles.get(i).getId());
                     fileNames.add(mCurrentlySelectedFiles.get(i).getName());
                 }
-                startRenameDialog.putExtra(RenameDialog.EXTRAS_FILE_IDS,fileIds);
-                startRenameDialog.putExtra(RenameDialog.EXTRAS_FILE_NAMES,fileNames);
+                startRenameDialog.putExtra(RenameDialog.EXTRAS_FILE_IDS, fileIds);
+                startRenameDialog.putExtra(RenameDialog.EXTRAS_FILE_NAMES, fileNames);
                 startActivity(startRenameDialog);
+
+                mCurrentlySelectedFiles.clear();
+                ((SkyDriveListAdapter)getListAdapter()).clearChecked();
+                if(Build.VERSION.SDK_INT>10) invalidateOptionsMenu();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
-
-    private void downloadSelectedFiles(ArrayList<SkyDriveObject> currentlySelectedFiles) {
-        for(int i = 0;i<currentlySelectedFiles.size();i++){
-            mXloader.downloadFile(mClient,currentlySelectedFiles.get(i).getId(),
-                    new File(Environment.getExternalStorageDirectory() +
-                            "/SkyDrive/" + currentlySelectedFiles.get(i).getName()));
-        }
-    }
-
-
 
 
     /**
@@ -490,6 +496,13 @@ public class BrowserActivity extends ListActivity {
 
         public void clearChecked(){
             mCheckedPositions = new SparseBooleanArray();
+            notifyDataSetChanged();
+        }
+
+        public void checkAll(){
+            for(int i=0;i<mSkyDriveObjs.size();i++){
+                mCheckedPositions.put(i,true);
+            }
             notifyDataSetChanged();
         }
 

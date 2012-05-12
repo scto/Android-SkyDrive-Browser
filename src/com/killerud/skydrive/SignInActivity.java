@@ -28,17 +28,15 @@ public class SignInActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.sign_in);
+
         mApp = (BrowserForSkyDriveApplication) getApplication();
 
         mResultTextView = (TextView) findViewById(R.id.introTextView);
         mAuthClient = new LiveAuthClient(this, Constants.APP_CLIENT_ID);
         mApp.setAuthClient(mAuthClient);
 
-        mInitializeDialog = ProgressDialog.show(this, "", getString(R.string.initializing), true);
-
         mSignInButton = (Button) findViewById(R.id.signInButton);
         mIntroText = (TextView) findViewById(R.id.introTextView);
-
 
         mSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -68,6 +66,7 @@ public class SignInActivity extends Activity {
             }
         });
 
+        mInitializeDialog = ProgressDialog.show(this, "", getString(R.string.initializing), true);
     }
 
     @Override

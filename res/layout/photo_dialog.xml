@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView  xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="fill_parent"
+             android:layout_height="fill_parent"
+             android:orientation="vertical">
+<LinearLayout
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+        android:orientation="vertical"
+        android:id="@+id/photo_dialog">
+
+    <TextView android:id="@+id/imageText"
+              android:layout_height="wrap_content"
+              android:layout_width="fill_parent"
+              android:text="@string/imageLoading"
+              />
+
+    <ImageView android:id="@+id/imageDialogImage"
+               android:layout_width="fill_parent"
+               android:layout_height="wrap_content"
+               android:scaleType="fitXY"
+               />
+
+    <RelativeLayout android:id="@+id/imageButtonLayout"
+                    android:layout_height="wrap_content"
+                    android:layout_width="fill_parent"
+                    >
+            <ImageButton android:id="@+id/imageSave"
+                         android:layout_alignRight="@id/imageButtonLayout"
+                         android:layout_height="wrap_content"
+                         android:layout_width="wrap_content"
+                         android:src="@android:drawable/ic_menu_save" />
+            <ImageButton android:id="@+id/imageCancel"
+                         android:layout_toRightOf="@id/imageSave"
+                         android:layout_height="wrap_content"
+                         android:layout_width="wrap_content"
+                         android:src="@android:drawable/ic_menu_close_clear_cancel" />
+    </RelativeLayout>
+
+</LinearLayout>
+
+</ScrollView>

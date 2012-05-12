@@ -19,6 +19,8 @@
     <string name="uploadFile">Save to SkyDrive</string>
     <string name="navigateWait">Talking to SkyDrive...</string>
     <string name="imageDisplayError">Could not show the image</string>
+    <string name="copyCutSelectedFiles">Selected files ready to paste</string>
+    <string name="imageLoading">Image is loading. Please wait.</string>
 
     <!-- Download file dialog -->
     <string name="download">Download</string>
@@ -32,12 +34,10 @@
 
 
     <!-- New folder dialog -->
-    <string name="folderName">Folder name</string>
-    <string name="folderDescription">Folder description</string>
     <string name="createFolder">Create folder</string>
     <string name="cancel">Cancel</string>
     <string name="name">Name</string>
-    <string name="description">Description</string>
+    <string name="description">Description (Optional)</string>
     <string name="renameTitle">Rename files and folders</string>
 
     <!-- Upload file dialog -->
@@ -45,6 +45,8 @@
     <string name="uploadError">Something happened while uploading. The file was not saved in your SkyDrive.</string>
     <string name="uploadToThisFolder">Upload here</string>
     <string name="uploadSelected">Upload selected</string>
+    <string name="selectAll">Select all</string>
+    <string name="selectNone">Select none</string>
 
     <!-- Context menus -->
     <string name="delete">Delete</string>

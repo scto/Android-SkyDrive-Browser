@@ -36,7 +36,6 @@ public class UploadFileDialog extends ListActivity {
     public static final int PICK_FILE_REQUEST = 0;
     public static final String ACTION_SINGLE_FILE = "uploadOneFile";
     public static final String ACTION_MULTIPLE_FILES = "uploadMultipleFiles";
-    public static final String EXTRA_FILE_PATH = "filePath";
     public static final String EXTRA_FILES_LIST = "filePaths";
 
     private File mCurrentFolder;
@@ -62,25 +61,43 @@ public class UploadFileDialog extends ListActivity {
                     loadFolder(file);
                 } else {
                     Intent data = new Intent();
-                    data.setAction(ACTION_SINGLE_FILE);
-                    data.putExtra(EXTRA_FILE_PATH, file.getPath());
+                    ArrayList<String> filePath = new ArrayList<String>();
+                    filePath.add(file.getPath());
+                    data.putExtra(EXTRA_FILES_LIST, filePath);
                     setResult(Activity.RESULT_OK, data);
                     finish();
                 }
             }
         });
 
+        Button selectAll = (Button) findViewById(R.id.uploadSelectAll);
+        selectAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                for(int i=0;i<mAdapter.getCount();i++){
+                    mCurrentlySelectedFiles.add(mAdapter.getItem(i).getPath());
+                }
+                ((UploadFileListAdapter)getListAdapter()).checkAll();
+            }
+        });
+
+        Button selectNone = (Button) findViewById(R.id.uploadSelectNone);
+        selectNone.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mCurrentlySelectedFiles.clear();
+                ((UploadFileListAdapter)getListAdapter()).clearChecked();
+            }
+        });
+
         mAdapter = new UploadFileListAdapter(UploadFileDialog.this);
         setListAdapter(mAdapter);
-
-        XLoader loader = new XLoader(getApplicationContext());
 
         Button uploadButton = (Button) findViewById(R.id.uploadSelected);
         uploadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent data = new Intent();
-                data.setAction(ACTION_MULTIPLE_FILES);
                 data.putExtra(EXTRA_FILES_LIST, mCurrentlySelectedFiles);
                 setResult(Activity.RESULT_OK, data);
                 finish();
@@ -201,6 +218,13 @@ public class UploadFileDialog extends ListActivity {
 
         public void clearChecked(){
             mCheckedPositions = new SparseBooleanArray();
+            notifyDataSetChanged();
+        }
+
+        public void checkAll(){
+            for(int i=0;i<mFiles.size();i++){
+                mCheckedPositions.put(i,true);
+            }
             notifyDataSetChanged();
         }
 

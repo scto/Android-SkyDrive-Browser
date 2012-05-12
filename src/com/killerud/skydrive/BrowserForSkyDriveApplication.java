@@ -1,6 +1,7 @@
 package com.killerud.skydrive;
 
 import android.app.Application;
+import com.killerud.skydrive.objects.SkyDriveAudio;
 import com.microsoft.live.LiveAuthClient;
 import com.microsoft.live.LiveConnectClient;
 import com.microsoft.live.LiveConnectSession;
@@ -15,7 +16,7 @@ public class BrowserForSkyDriveApplication extends Application {
     private LiveConnectClient mConnectClient;
     private LiveConnectSession mSession;
     private final String LOGCAT_TAG = "ASE";
-
+    private SkyDriveAudio mCurrentMusic;
     private String mFirstName;
 
     public LiveAuthClient getAuthClient() {
@@ -52,6 +53,15 @@ public class BrowserForSkyDriveApplication extends Application {
 
     public String getDebugTag(){
         return LOGCAT_TAG;
+    }
+
+
+    public void setCurrentMusic(SkyDriveAudio audio){
+        this.mCurrentMusic = audio;
+    }
+
+    public SkyDriveAudio getCurrentMusic(){
+        return this.mCurrentMusic;
     }
 
 }

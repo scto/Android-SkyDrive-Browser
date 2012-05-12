@@ -4,6 +4,7 @@ import android.app.*;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.RemoteViews;
@@ -43,18 +44,20 @@ public class XLoader {
 
     /**
      * Handles the uploading of a file. Manages a notification with a progressbar.
+     * Works recursively so large upload batches doesn't slow the phone to a crawl.
      *
      * @param client The LiveConnectClient for communicating with SkyDrive
-     * @param localFilePath The path to the local file to be uploaded
+     * @param localFilePaths The paths to the local file to be uploaded
      * @param currentFolderId The current SkyDrive folder, the one we upload to
      */
-    public void uploadFile(LiveConnectClient client, String localFilePath, String currentFolderId) {
-        //String filePath = data.getStringExtra(UploadFileDialog.EXTRA_FILE_PATH);
-        if (TextUtils.isEmpty(localFilePath)) {
+    public void uploadFile(final LiveConnectClient client, final ArrayList<String> localFilePaths, final String currentFolderId) {
+        if(localFilePaths.size()<=0){
             return;
         }
 
+        String localFilePath = localFilePaths.get(localFilePaths.size()-1);
         final File file = new File(localFilePath);
+
         createProgressNotification(file.getName(),false);
 
         final LiveOperation uploadOperation =
@@ -62,12 +65,21 @@ public class XLoader {
                         file.getName(),
                         file,
                         new LiveUploadOperationListener() {
+                            int lastPercent = 0;
                             @Override
                             public void onUploadProgress(int totalBytes,
                                                          int bytesRemaining,
                                                          LiveOperation operation) {
-                                mNotificationView.setProgressBar(R.id.progressBar,100,
-                                        computePercentCompleted(totalBytes,bytesRemaining),false);
+                                int newPercent = computePercentCompleted(totalBytes, bytesRemaining);
+                                /* This is done to limit the amount of updates to the notification
+                                 * Restrictionles updating makes the system crash, so beware!
+                                 */
+                                if(newPercent>lastPercent+5){
+                                    lastPercent = newPercent;
+                                    mNotificationProgress.contentView.setProgressBar(R.id.progressBar, 100,
+                                            lastPercent, false);
+                                    mNotificationManager.notify(mNotificationProgressId,mNotificationProgress);
+                                }
                             }
 
                             @Override
@@ -75,6 +87,10 @@ public class XLoader {
                                                        LiveOperation operation) {
                                 mNotificationManager.cancel(mNotificationProgressId);
                                 Toast.makeText(mContext, R.string.uploadError, Toast.LENGTH_SHORT).show();
+
+                                localFilePaths.remove(localFilePaths.size()-1);
+                                localFilePaths.trimToSize();
+                                uploadFile(client,localFilePaths,currentFolderId);
                             }
 
                             @Override
@@ -90,46 +106,72 @@ public class XLoader {
                                     return;
                                 }
                                 showFileXloadedNotification(file, false);
+                                localFilePaths.remove(localFilePaths.size()-1);
+                                localFilePaths.trimToSize();
+                                uploadFile(client,localFilePaths,currentFolderId);
                             }
                         });
     }
 
     /**
      * Handles the downloading of a file from SkyDrive. Manages a notification with a progressbar.
+     * Works recursively so large download batches doesn't slow the phone to a crawl.
      *
      * @param client The LiveConnectClient for communicating with SkyDrive
-     * @param fileId The ID of the file we wish to download
-     * @param localFile The local File object to write to (path here)
+     * @param fileIds The ID of the file we wish to download
      */
-    public void downloadFile(LiveConnectClient client, String fileId, File localFile) {
-        createProgressNotification(localFile.getName(), true);
-        final File fileToCreateLocally = checkForFileDuplicateAndCreateCopy(localFile);
-        //TODO   ERROR/ASE(4525): An error occured on the client during the operation.
+    public void downloadFiles(final LiveConnectClient client, final ArrayList<SkyDriveObject> fileIds) {
+        if(fileIds.size()<=0){
+            return;
+        }
+
+        SkyDriveObject skyDriveFile = fileIds.get(fileIds.size() - 1);
+        createProgressNotification(skyDriveFile.getName(), true);
+
+        final File fileToCreateLocally = checkForFileDuplicateAndCreateCopy(
+                new File(Environment.getExternalStorageDirectory() + "/SkyDrive/" + skyDriveFile.getName()));
+
         final LiveDownloadOperation operation =
-                client.downloadAsync(fileId + "/content",
+                client.downloadAsync(skyDriveFile.getId() + "/content",
                         fileToCreateLocally,
                         new LiveDownloadOperationListener() {
+                            int lastPercent = 0;
+
                             @Override
                             public void onDownloadProgress(int totalBytes,
                                                            int bytesRemaining,
                                                            LiveDownloadOperation operation) {
-                                mNotificationView.setProgressBar(R.id.progressBar,100,
-                                        computePercentCompleted(totalBytes,bytesRemaining),false);
+                                int newPercent = computePercentCompleted(totalBytes, bytesRemaining);
+                                if(newPercent>lastPercent+5){
+                                    lastPercent = newPercent;
+                                    mNotificationProgress.contentView.setProgressBar(R.id.progressBar, 100,
+                                            lastPercent, false);
+                                    mNotificationManager.notify(mNotificationProgressId,mNotificationProgress);
+                                }
                             }
 
                             @Override
                             public void onDownloadFailed(LiveOperationException exception,
                                                          LiveDownloadOperation operation) {
                                 mNotificationManager.cancel(mNotificationProgressId);
+                                Log.e("ASE", exception.getMessage());
+
                                 Toast.makeText(mContext, mContext.getString(R.string.downloadError),
                                         Toast.LENGTH_SHORT).show();
-                                Log.e("ASE",exception.getMessage());
+
+                                fileIds.remove(fileIds.size()-1);
+                                fileIds.trimToSize();
+                                downloadFiles(client, fileIds);
                             }
 
                             @Override
                             public void onDownloadCompleted(LiveDownloadOperation operation) {
                                 mNotificationManager.cancel(mNotificationProgressId);
                                 showFileXloadedNotification(fileToCreateLocally, true);
+
+                                fileIds.remove(fileIds.size()-1);
+                                fileIds.trimToSize();
+                                downloadFiles(client, fileIds);
                             }
                         });
     }
@@ -149,12 +191,12 @@ public class XLoader {
                     Log.e("ASE", exception.getMessage());
                 }
                 public void onComplete(LiveOperation operation) {
-                    Toast.makeText(mContext,
-                            "Deleted file"  + (fileIds.size()>1?"s":""), Toast.LENGTH_SHORT).show();
                 }
             });
         }
 
+        Toast.makeText(mContext,
+                "Deleted file"  + (fileIds.size()>1?"s":""), Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -176,9 +218,6 @@ public class XLoader {
                         Log.e("ASE", exception.getMessage());
                     }
                     public void onComplete(LiveOperation operation) {
-                        Toast.makeText(mContext,
-                                "Moved file"  + (fileIds.size()>1?"s":"") + " to current folder",
-                                Toast.LENGTH_SHORT).show();
                     }
                 });
             }else{
@@ -190,16 +229,15 @@ public class XLoader {
                     }
                     public void onComplete(LiveOperation operation) {
                         operation.getResult();
-
-                        Toast.makeText(mContext,
-                                "Copied file"  + (fileIds.size()>1?"s":"") + " to current folder",
-                                Toast.LENGTH_SHORT).show();
                     }
                 });
             }
 
         }
 
+        Toast.makeText(mContext,
+                "Moved file"  + (fileIds.size()>1?"s":"") + " to current folder",
+                Toast.LENGTH_SHORT).show();
     }
 
 
@@ -246,7 +284,7 @@ public class XLoader {
                 Toast.makeText(mContext,"Could not rename file",Toast.LENGTH_SHORT).show();
             }
         }
-
+        Toast.makeText(mContext,"File renamed",Toast.LENGTH_SHORT).show();
     }
 
 
@@ -257,12 +295,21 @@ public class XLoader {
      * @param downloading Whether or not we are downloading. Determines text output.
      */
     private void createProgressNotification(String fileName, boolean downloading){
-        mNotificationProgress = new Notification();
+        mNotificationProgress = new Notification(R.drawable.notification_icon,
+                (downloading ? "Downloading " : "Uploading ") + fileName,
+                System.currentTimeMillis());
+
+        mNotificationProgress.flags |= Notification.FLAG_ONGOING_EVENT;
+
         mNotificationView = new RemoteViews(mContext.getPackageName(), R.layout.notification_xload);
         mNotificationView.setImageViewResource(R.id.image, R.drawable.logo);
         mNotificationView.setTextViewText(R.id.title, (downloading ? "Downloading " : "Uploading ") + fileName);
         mNotificationView.setProgressBar(R.id.progressBar, 100, 0, false);
+
+        mNotificationProgress.contentIntent = PendingIntent.getActivity(mContext,
+                0,new Intent(mContext,BrowserActivity.class),0);
         mNotificationProgress.contentView = mNotificationView;
+
         mNotificationManager.notify(mNotificationProgressId, mNotificationProgress);
     }
 
@@ -284,7 +331,7 @@ public class XLoader {
         }
         int index = file.getName().lastIndexOf(".");
         int copyNr = 1;
-        File result = new File(file.getName().substring(0,index) +
+        File result = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/" + file.getName().substring(0,index) +
                 " Copy " + copyNr + file.getName().substring(index,file.getName().length()));
         boolean availableFileNameFound = false;
 

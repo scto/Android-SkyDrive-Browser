@@ -41,6 +41,7 @@ public class ViewPhotoDialog extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.photo_dialog);
 
         mSavePhoto = false;
         mXLoader = new XLoader(getApplicationContext());
@@ -51,26 +52,11 @@ public class ViewPhotoDialog extends Activity {
 
 
         LiveConnectClient client = ((BrowserForSkyDriveApplication) getApplication()).getConnectClient();
+        final LinearLayout layout = (LinearLayout) findViewById(R.id.photo_dialog);
+        final TextView textView = (TextView) layout.findViewById(R.id.imageText);
+        final ImageView imageView = (ImageView) layout.findViewById(R.id.imageDialogImage);
 
-        /* Creates the layout.
-        * The layout consists of a textview to let the user know we're loading,
-        * an imageview to display the image and a linearlayout containing the
-        * buttons. This is wrapped in a linearlayout, then a scrollview and displayed.
-        */
-        final ScrollView wrapper = new ScrollView(getApplicationContext());
-
-        final LinearLayout layout = new LinearLayout(wrapper.getContext());
-        layout.setOrientation(LinearLayout.VERTICAL);
-
-        final ImageView imageView = new ImageView(layout.getContext());
-        final TextView loadingText = new TextView(layout.getContext());
-        loadingText.setText(R.string.navigateWait);
-
-        final LinearLayout buttonLayout = new LinearLayout(layout.getContext());
-        buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
-
-        final ImageButton saveButton = new ImageButton(buttonLayout.getContext());
-        saveButton.setBackgroundResource(android.R.drawable.ic_menu_save);
+        final ImageButton saveButton = (ImageButton) layout.findViewById(R.id.imageSave);
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -80,8 +66,7 @@ public class ViewPhotoDialog extends Activity {
             }
         });
 
-        final ImageButton cancel = new ImageButton(buttonLayout.getContext());
-        cancel.setBackgroundResource(android.R.drawable.ic_menu_close_clear_cancel);
+        final ImageButton cancel = (ImageButton) layout.findViewById(R.id.imageCancel);
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -90,42 +75,13 @@ public class ViewPhotoDialog extends Activity {
             }
         });
 
-        layout.addView(loadingText,new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT));
-        layout.addView(imageView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
-                ViewGroup.LayoutParams.FILL_PARENT));
-        buttonLayout.addView(saveButton,new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT));
-        buttonLayout.addView(cancel,new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT));
-        layout.addView(buttonLayout,new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.FILL_PARENT));
-        wrapper.addView(layout,new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT));
-
-        addContentView(wrapper,
-                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT));
-
-
-
-
-
-
 
         mFile = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/", photoName);
 
         if(mFile.exists()){
             imageView.setImageBitmap(BitmapFactory.decodeFile(mFile.getPath()));
-            layout.removeView(loadingText);
+            layout.removeView(textView);
         }else{
-//            final ProgressDialog progressDialog =
-//                    new ProgressDialog(BrowserActivity.this);
-//            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-//            progressDialog.setMessage(getString(R.string.downloading));
-//            progressDialog.setCancelable(true);
-//            progressDialog.show();
-
             final LiveDownloadOperation operation =
                     client.downloadAsync(photoId + "/content",
                             mFile,
@@ -134,28 +90,23 @@ public class ViewPhotoDialog extends Activity {
                                 public void onDownloadProgress(int totalBytes,
                                                                int bytesRemaining,
                                                                LiveDownloadOperation operation) {
-                                    int percentCompleted =
-                                            computePercentCompleted(totalBytes, bytesRemaining);
 
-                                    //progressDialog.setProgress(percentCompleted);
                                 }
 
                                 @Override
                                 public void onDownloadFailed(LiveOperationException exception,
                                                              LiveDownloadOperation operation) {
-                                    //progressDialog.dismiss();
                                     Toast.makeText(getApplicationContext(),getString(R.string.downloadError), Toast.LENGTH_SHORT).show();
                                 }
 
                                 @Override
                                 public void onDownloadCompleted(LiveDownloadOperation operation) {
-                                    //progressDialog.dismiss();
                                     try{
                                         imageView.setImageBitmap(BitmapFactory.decodeFile(mFile.getPath()));
-                                        layout.removeView(loadingText);
+                                        layout.removeView(textView);
                                     }catch (OutOfMemoryError e){
                                         imageView.destroyDrawingCache();
-                                        loadingText.setText("Image too large! Please download instead.");
+                                        textView.setText("Image too large! Please download instead.");
                                     }
                                 }
                             });
@@ -178,11 +129,4 @@ public class ViewPhotoDialog extends Activity {
             if(mFile != null) mFile.delete();
         }
     }
-
-
-
-    private int computePercentCompleted(int totalBytes, int bytesRemaining) {
-        return (int) (((float) (totalBytes - bytesRemaining)) / totalBytes * 100);
-    }
-
 }

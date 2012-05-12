@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.killerud.skydrive.dialogs.UploadFileDialog;
 import com.microsoft.live.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -102,7 +103,7 @@ public class SharingReceiverActivity extends Activity {
         });
     }
 
-    public String parseUriToFilename(Uri uri) {
+    public String parseUriToFilePath(Uri uri) {
         String selectedImagePath = null;
         String filemanagerPath = uri.getPath();
 
@@ -138,9 +139,12 @@ public class SharingReceiverActivity extends Activity {
             Bundle extras = intentThatStartedMe.getExtras();
             if (extras.containsKey(Intent.EXTRA_STREAM)) {
                 Uri uri = (Uri) extras.getParcelable(Intent.EXTRA_STREAM);
-                String fileName = parseUriToFilename(uri);
+
+                ArrayList<String> filePath = new ArrayList<String>();
+                filePath.add(parseUriToFilePath(uri));
+
                 startIntent.setAction("killerud.skydrive.UPLOAD_PICK_FOLDER");
-                startIntent.putExtra(UploadFileDialog.EXTRA_FILE_PATH, fileName);
+                startIntent.putExtra(UploadFileDialog.EXTRA_FILES_LIST, filePath);
             }
         }
         startActivity(startIntent);

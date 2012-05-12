@@ -51,7 +51,7 @@
     <item android:id="@+id/paste"
           android:showAsAction="ifRoom"
           android:title="@string/paste"
-          android:icon="@drawable/ic_skydrive"
+          android:icon="@drawable/ic_menu_set_as"
           android:visible="false"
           />
     <item android:id="@+id/delete"
