@@ -2,6 +2,7 @@ package com.killerud.skydrive;
 
 import android.app.*;
 import android.content.*;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
@@ -457,6 +458,8 @@ public class BrowserActivity extends ListActivity {
     }
 
 
+
+
     /**
      * The SkyDrive list adapter. Determines the list item layout and display behaviour.
      */
@@ -471,6 +474,7 @@ public class BrowserActivity extends ListActivity {
             mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             mSkyDriveObjs = new ArrayList<SkyDriveObject>();
             mCheckedPositions = new SparseBooleanArray();
+
         }
 
         /**
@@ -569,25 +573,28 @@ public class BrowserActivity extends ListActivity {
                     setName(photo);
                     setChecked(isChecked(mPosition));
 
-                    mClient.downloadAsync(photo.getId()+"/picture?type=thumbnail",new LiveDownloadOperationListener() {
+
+                    // Since we are doing async calls and mView is constantly changing,
+                    // we need to hold on to this reference.
+                    final View v = mView;
+                    mClient.downloadAsync(photo.getId()+"/picture?type=thumbnail", new LiveDownloadOperationListener() {
+                        @Override
+                        public void onDownloadProgress(int totalBytes,
+                                                       int bytesRemaining,
+                                                       LiveDownloadOperation operation) {
+                        }
+
+                        @Override
+                        public void onDownloadFailed(LiveOperationException exception,
+                                                     LiveDownloadOperation operation) {
+
+                        }
+
                         @Override
                         public void onDownloadCompleted(LiveDownloadOperation operation) {
-                            try{
-                                ImageView img = (ImageView) mView.findViewById(R.id.skyDriveItemIcon);
-                                img.setImageBitmap(BitmapFactory.decodeStream(operation.getStream()));
-                            }catch (Exception e){
-                                setIcon(R.drawable.image_x_generic);
-                            }
-                        }
-
-                        @Override
-                        public void onDownloadFailed(LiveOperationException exception, LiveDownloadOperation operation) {
-                            setIcon(R.drawable.image_x_generic);
-                        }
-
-                        @Override
-                        public void onDownloadProgress(int totalBytes, int bytesRemaining, LiveDownloadOperation operation) {
-                            setIcon(R.drawable.image_x_generic);
+                            Bitmap bm = BitmapFactory.decodeStream(operation.getStream());
+                            ImageView imgView = (ImageView) v.findViewById(R.id.skyDriveItemIcon);
+                            imgView.setImageBitmap(bm);
                         }
                     });
                 }
