@@ -15,9 +15,18 @@ public class BrowserForSkyDriveApplication extends Application {
     private LiveAuthClient mAuthClient;
     private LiveConnectClient mConnectClient;
     private LiveConnectSession mSession;
-    private final String LOGCAT_TAG = "ASE";
     private SkyDriveAudio mCurrentMusic;
     private String mFirstName;
+    private BrowserActivity mCurrentBrowser;
+
+
+    public void setCurrentBrowser(BrowserActivity browser){
+        this.mCurrentBrowser = browser;
+    }
+
+    public BrowserActivity getCurrentBrowser(){
+        return this.mCurrentBrowser;
+    }
 
     public LiveAuthClient getAuthClient() {
         return mAuthClient;
@@ -50,11 +59,6 @@ public class BrowserForSkyDriveApplication extends Application {
     public String getUserFirstName(){
         return mFirstName;
     }
-
-    public String getDebugTag(){
-        return LOGCAT_TAG;
-    }
-
 
     public void setCurrentMusic(SkyDriveAudio audio){
         this.mCurrentMusic = audio;

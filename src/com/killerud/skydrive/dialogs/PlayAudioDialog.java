@@ -32,16 +32,16 @@ import java.util.ArrayList;
  */
 public class PlayAudioDialog extends Activity {
     private MediaPlayer mPlayer;
-    private boolean isPlaying;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        final XLoader loader = new XLoader(getApplicationContext());
-        final SkyDriveAudio audio = ((BrowserForSkyDriveApplication)getApplication()).getCurrentMusic();
         mPlayer = new MediaPlayer();
-        final LiveConnectClient client = ((BrowserForSkyDriveApplication) getApplication()).getConnectClient();
+
+        BrowserForSkyDriveApplication app = (BrowserForSkyDriveApplication) getApplication();
+        final SkyDriveAudio audio = app.getCurrentMusic();
+        final XLoader loader = new XLoader(app.getCurrentBrowser());
+        final LiveConnectClient client = app.getConnectClient();
 
         setContentView(R.layout.music_dialog);
         setTitle(audio.getName());
@@ -55,16 +55,14 @@ public class PlayAudioDialog extends Activity {
         playPauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (isPlaying) {
+                if (mPlayer.isPlaying()) {
                     mPlayer.pause();
                     playPauseButton.setImageResource(R.drawable.ic_media_play);
                     playerStatus.setText(getString(R.string.paused) + " " + audio.getName());
-                    isPlaying = false;
-                } else if (!isPlaying) {
+                } else if (!mPlayer.isPlaying()) {
                     mPlayer.start();
                     playPauseButton.setImageResource(R.drawable.ic_media_pause);
                     playerStatus.setText(getString(R.string.playing) + " " + audio.getName());
-                    isPlaying = true;
                 }
             }
         });
@@ -84,30 +82,9 @@ public class PlayAudioDialog extends Activity {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (file.exists()) {
-                    AlertDialog existsAlert = new AlertDialog.Builder(getApplicationContext()).create();
-                    existsAlert.setTitle(R.string.fileAlreadySaved);
-                    existsAlert.setMessage(getString(R.string.fileAlreadySavedMessage));
-                    existsAlert.setButton("Download", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            ArrayList<SkyDriveObject> file = new ArrayList<SkyDriveObject>();
-                            file.add(audio);
-                            loader.downloadFiles(client, file);
-                        }
-                    });
-                    existsAlert.setButton2("Cancel", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            finish();
-                        }
-                    });
-                    existsAlert.show();
-
-                } else {
-                    ArrayList<SkyDriveObject> file = new ArrayList<SkyDriveObject>();
-                    file.add(audio);
-                    loader.downloadFiles(client, file);
-                }
+                ArrayList<SkyDriveObject> file = new ArrayList<SkyDriveObject>();
+                file.add(audio);
+                loader.downloadFiles(client, file);
             }
         });
 
@@ -126,7 +103,6 @@ public class PlayAudioDialog extends Activity {
                 playerStatus.setText(getString(R.string.playing) + " " + audio.getName());
                 playPauseButton.setImageResource(R.drawable.ic_media_pause);
                 mPlayer.start();
-                isPlaying = true;
             }
         });
 
@@ -170,9 +146,15 @@ public class PlayAudioDialog extends Activity {
     @Override
     protected void onStop() {
         super.onStop();
-        mPlayer.stop();
-        mPlayer.release();
-        mPlayer = null;
+        if(mPlayer !=null){
+            try{
+                mPlayer.stop();
+            }catch (IllegalStateException e){
+            }finally {
+                mPlayer.release();
+                mPlayer = null;
+            }
+        }
     }
 
     private void showToast(String message) {

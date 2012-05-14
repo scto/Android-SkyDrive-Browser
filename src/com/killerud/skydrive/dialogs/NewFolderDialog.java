@@ -9,13 +9,13 @@ package com.killerud.skydrive.dialogs;
  */
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 import com.killerud.skydrive.BrowserForSkyDriveApplication;
+import com.killerud.skydrive.constants.Constants;
 import com.killerud.skydrive.R;
 import com.killerud.skydrive.util.JsonKeys;
 import com.microsoft.live.LiveConnectClient;
@@ -45,7 +45,7 @@ public class NewFolderDialog extends Activity {
 
         BrowserForSkyDriveApplication app = (BrowserForSkyDriveApplication) getApplication();
         mClient = app.getConnectClient();
-        LOGTAC = app.getDebugTag();
+        LOGTAC = Constants.LOGTAG;
 
 
         final EditText name = (EditText) findViewById(R.id.nameEditText);

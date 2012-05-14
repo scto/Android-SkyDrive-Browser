@@ -31,13 +31,13 @@ public class XLoader {
     private RemoteViews mNotificationView;
     private int mNotificationProgressId = 2;
     private int mNotificationXLoadId = 1;
-    private Context mContext;
+    private BrowserActivity mContext;
 
     private IOUtil mIOUtil;
 
 
-    public XLoader(Context context){
-        mContext = context;
+    public XLoader(BrowserActivity browserActivity){
+        mContext = browserActivity;
         mNotificationManager = (NotificationManager) mContext.getSystemService(Service.NOTIFICATION_SERVICE);
         mIOUtil = new IOUtil();
     }
@@ -52,11 +52,17 @@ public class XLoader {
      */
     public void uploadFile(final LiveConnectClient client, final ArrayList<String> localFilePaths, final String currentFolderId) {
         if(localFilePaths.size()<=0){
+            mContext.reloadFolder();
             return;
         }
 
         String localFilePath = localFilePaths.get(localFilePaths.size()-1);
         final File file = new File(localFilePath);
+
+        if(!file.exists()){
+            mContext.reloadFolder();
+            return;
+        }
 
         createProgressNotification(file.getName(),false);
 
@@ -86,7 +92,7 @@ public class XLoader {
                             public void onUploadFailed(LiveOperationException exception,
                                                        LiveOperation operation) {
                                 mNotificationManager.cancel(mNotificationProgressId);
-                                Toast.makeText(mContext, R.string.uploadError, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(mContext, mContext.getString(R.string.uploadError), Toast.LENGTH_SHORT).show();
 
                                 localFilePaths.remove(localFilePaths.size()-1);
                                 localFilePaths.trimToSize();
@@ -122,6 +128,7 @@ public class XLoader {
      */
     public void downloadFiles(final LiveConnectClient client, final ArrayList<SkyDriveObject> fileIds) {
         if(fileIds.size()<=0){
+            mContext.reloadFolder();
             return;
         }
 
@@ -181,22 +188,30 @@ public class XLoader {
      * @param client
      * @param fileIds
      */
-    public void deleteFiles(LiveConnectClient client, final ArrayList<SkyDriveObject> fileIds) {
-        for(int i=0;i<fileIds.size();i++){
-            final String fileId = fileIds.get(i).getId();
-            client.deleteAsync(fileId, new LiveOperationListener() {
-                public void onError(LiveOperationException exception, LiveOperation operation) {
-                    Toast.makeText(mContext,
-                            "Error deleting file"  + (fileIds.size()>1?"s":""), Toast.LENGTH_SHORT).show();
-                    Log.e("ASE", exception.getMessage());
-                }
-                public void onComplete(LiveOperation operation) {
-                }
-            });
+    public void deleteFiles(final LiveConnectClient client, final ArrayList<SkyDriveObject> fileIds) {
+        if(fileIds.size()<=0){
+            mContext.reloadFolder();
+            Toast.makeText(mContext,
+                    "Deleted file(s)", Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        Toast.makeText(mContext,
-                "Deleted file"  + (fileIds.size()>1?"s":""), Toast.LENGTH_SHORT).show();
+        final String fileId = fileIds.get(fileIds.size()-1).getId();
+        client.deleteAsync(fileId, new LiveOperationListener() {
+            public void onError(LiveOperationException exception, LiveOperation operation) {
+                Toast.makeText(mContext,
+                        "Error deleting file"  + (fileIds.size()>1?"s":""), Toast.LENGTH_SHORT).show();
+                Log.e("ASE", exception.getMessage());
+                fileIds.remove(fileIds.size()-1);
+                fileIds.trimToSize();
+                deleteFiles(client,fileIds);
+            }
+            public void onComplete(LiveOperation operation) {
+                fileIds.remove(fileIds.size()-1);
+                fileIds.trimToSize();
+                deleteFiles(client,fileIds);
+            }
+        });
     }
 
     /**
@@ -207,37 +222,52 @@ public class XLoader {
      * @param currentFolder
      * @param cutNotCopy
      */
-    public void pasteFiles(LiveConnectClient client, final ArrayList<SkyDriveObject> fileIds, String currentFolder, boolean cutNotCopy){
-        for(int i=0;i<fileIds.size();i++){
-            final String fileId = fileIds.get(i).getId();
-            if(cutNotCopy){
-                client.moveAsync(fileId, currentFolder, new LiveOperationListener() {
-                    public void onError(LiveOperationException exception, LiveOperation operation) {
-                        Toast.makeText(mContext,
-                                "Error moving file"  + (fileIds.size()>1?"s":""), Toast.LENGTH_SHORT).show();
-                        Log.e("ASE", exception.getMessage());
-                    }
-                    public void onComplete(LiveOperation operation) {
-                    }
-                });
-            }else{
-                client.copyAsync(fileId, currentFolder, new LiveOperationListener() {
-                    public void onError(LiveOperationException exception, LiveOperation operation) {
-                        Toast.makeText(mContext,
-                                "Error copying file" + (fileIds.size()>1?"s":""), Toast.LENGTH_SHORT).show();
-                        Log.e("ASE", exception.getMessage());
-                    }
-                    public void onComplete(LiveOperation operation) {
-                        operation.getResult();
-                    }
-                });
-            }
+    public void pasteFiles(final LiveConnectClient client,
+                           final ArrayList<SkyDriveObject> fileIds,
+                           final String currentFolder, final boolean cutNotCopy){
 
+        if(fileIds.size()<=0){
+            Toast.makeText(mContext,
+                    "Moved file(s)",
+                    Toast.LENGTH_SHORT).show();
+            mContext.reloadFolder();
+            return;
         }
 
-        Toast.makeText(mContext,
-                "Moved file"  + (fileIds.size()>1?"s":"") + " to current folder",
-                Toast.LENGTH_SHORT).show();
+        final String fileId = fileIds.get(fileIds.size()-1).getId();
+        if(cutNotCopy){
+            client.moveAsync(fileId, currentFolder, new LiveOperationListener() {
+                public void onError(LiveOperationException exception, LiveOperation operation) {
+                    Toast.makeText(mContext,
+                            "Error moving file"  + (fileIds.size()>1?"s":""), Toast.LENGTH_SHORT).show();
+                    Log.e("ASE", exception.getMessage());
+                    fileIds.remove(fileIds.size()-1);
+                    fileIds.trimToSize();
+                    pasteFiles(client,fileIds,currentFolder,cutNotCopy);
+                }
+                public void onComplete(LiveOperation operation) {
+                    fileIds.remove(fileIds.size()-1);
+                    fileIds.trimToSize();
+                    pasteFiles(client,fileIds,currentFolder,cutNotCopy);
+                }
+            });
+        }else{
+            client.copyAsync(fileId, currentFolder, new LiveOperationListener() {
+                public void onError(LiveOperationException exception, LiveOperation operation) {
+                    Toast.makeText(mContext,
+                            "Error copying file" + (fileIds.size()>1?"s":""), Toast.LENGTH_SHORT).show();
+                    Log.e("ASE", exception.getMessage());
+                    fileIds.remove(fileIds.size()-1);
+                    fileIds.trimToSize();
+                    pasteFiles(client,fileIds,currentFolder,cutNotCopy);
+                }
+                public void onComplete(LiveOperation operation) {
+                    fileIds.remove(fileIds.size()-1);
+                    fileIds.trimToSize();
+                    pasteFiles(client,fileIds,currentFolder,cutNotCopy);
+                }
+            });
+        }
     }
 
 
@@ -250,41 +280,57 @@ public class XLoader {
      * @param baseName
      * @param baseDescription
      */
-    public void renameFiles(LiveConnectClient client, final ArrayList<String> fileIds,
+    public void renameFiles(final LiveConnectClient client, final ArrayList<String> fileIds,
                             final ArrayList<String> fileNames,
-                            String baseName, String baseDescription){
+                            final String baseName, final String baseDescription){
+        if(fileIds.size()<=0){
+            Toast.makeText(mContext,"File renamed",Toast.LENGTH_SHORT).show();
+            mContext.reloadFolder();
+            return;
+        }
+
+
         final LiveOperationListener operationListener = new LiveOperationListener() {
             @Override
             public void onComplete(LiveOperation operation) {
+                fileIds.remove(fileIds.size()-1);
+                fileIds.trimToSize();
+                fileNames.remove(fileNames.size()-1);
+                fileNames.trimToSize();
+                renameFiles(client, fileIds, fileNames, baseName, baseDescription);
                 Log.i("ASE","File updated " + operation.getRawResult());
             }
 
             @Override
             public void onError(LiveOperationException exception, LiveOperation operation) {
                 Log.e("ASE",exception.getMessage());
+                fileIds.remove(fileIds.size()-1);
+                fileIds.trimToSize();
+                fileNames.remove(fileNames.size()-1);
+                fileNames.trimToSize();
+                renameFiles(client,fileIds,fileNames,baseName,baseDescription);
                 Toast.makeText(mContext,"Could not rename file",Toast.LENGTH_SHORT).show();
             }
         };
 
-        for(int i=0;i<fileIds.size();i++){
-            String fileId = fileIds.get(i);
+
+            String fileId = fileIds.get(fileIds.size()-1);
             try{
                 JSONObject body = new JSONObject();
                 String extension = "";
-                String fileName = fileNames.get(i);
+                String fileName = fileNames.get(fileNames.size()-1);
                 int index = fileName.lastIndexOf(".");
+                /* If a file extension exists (not a folder) */
                 if(index != -1){
                     extension = fileName.substring(index, fileName.length());
                 }
-                /* Give name with added file extension */
-                body.put("name", baseName + (i>0?" " + i:"") + extension);
-                body.put("description", baseDescription + (i>0?" " + i:""));
+                /* Give name with added file extension, if any */
+                body.put("name", baseName + (fileIds.size()-1>0?" " + (fileIds.size()-1):"") + extension);
+                body.put("description", baseDescription + (fileIds.size()-1>0?" " + (fileIds.size()-1):""));
                 client.putAsync(fileId,body,operationListener);
             }catch (JSONException e){
                 Toast.makeText(mContext,"Could not rename file",Toast.LENGTH_SHORT).show();
             }
-        }
-        Toast.makeText(mContext,"File renamed",Toast.LENGTH_SHORT).show();
     }
 
 
@@ -302,7 +348,7 @@ public class XLoader {
         mNotificationProgress.flags |= Notification.FLAG_ONGOING_EVENT;
 
         mNotificationView = new RemoteViews(mContext.getPackageName(), R.layout.notification_xload);
-        mNotificationView.setImageViewResource(R.id.image, R.drawable.logo);
+        mNotificationView.setImageViewResource(R.id.image, R.drawable.icon);
         mNotificationView.setTextViewText(R.id.title, (downloading ? "Downloading " : "Uploading ") + fileName);
         mNotificationView.setProgressBar(R.id.progressBar, 100, 0, false);
 
@@ -330,9 +376,15 @@ public class XLoader {
             return file;
         }
         int index = file.getName().lastIndexOf(".");
+        String extension = "";
+        String fileName = file.getName();
+        if(index != -1){
+            extension = file.getName().substring(index, fileName.length());
+            fileName = fileName.substring(0,index);
+        }
         int copyNr = 1;
-        File result = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/" + file.getName().substring(0,index) +
-                " Copy " + copyNr + file.getName().substring(index,file.getName().length()));
+        File result = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/" +
+                fileName + " Copy " + copyNr + extension);
         boolean availableFileNameFound = false;
 
         while(availableFileNameFound){

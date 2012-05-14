@@ -11,7 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.killerud.skydrive.dialogs.UploadFileDialog;
+import com.killerud.skydrive.constants.Constants;
 import com.microsoft.live.*;
 
 import java.util.ArrayList;
@@ -135,7 +135,8 @@ public class SharingReceiverActivity extends Activity {
         /* This is the key that opens up for uploading <|:D~ */
         Intent intentThatStartedMe = getIntent();
         Intent startIntent = new Intent(getApplicationContext(), BrowserActivity.class);
-        if(intentThatStartedMe.getAction() != null && intentThatStartedMe.getAction().equals(Intent.ACTION_SEND)){
+        if(intentThatStartedMe.getAction() != null
+                && intentThatStartedMe.getAction().equals(Intent.ACTION_SEND)){
             Bundle extras = intentThatStartedMe.getExtras();
             if (extras.containsKey(Intent.EXTRA_STREAM)) {
                 Uri uri = (Uri) extras.getParcelable(Intent.EXTRA_STREAM);
@@ -144,7 +145,19 @@ public class SharingReceiverActivity extends Activity {
                 filePath.add(parseUriToFilePath(uri));
 
                 startIntent.setAction("killerud.skydrive.UPLOAD_PICK_FOLDER");
-                startIntent.putExtra(UploadFileDialog.EXTRA_FILES_LIST, filePath);
+                startIntent.putExtra(UploadFileActivity.EXTRA_FILES_LIST, filePath);
+            }
+        }else if(intentThatStartedMe.getAction() != null
+                && intentThatStartedMe.getAction().equals(Intent.ACTION_SEND_MULTIPLE)){
+            Bundle extras = intentThatStartedMe.getExtras();
+            if(extras.containsKey(Intent.EXTRA_STREAM)){
+                ArrayList<Uri> fileList = intentThatStartedMe.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+                ArrayList<String> filePaths = new ArrayList<String>();
+                for(int i=0;i<fileList.size();i++){
+                    filePaths.add(parseUriToFilePath(fileList.get(i)));
+                }
+                startIntent.setAction("killerud.skydrive.UPLOAD_PICK_FOLDER");
+                startIntent.putExtra(UploadFileActivity.EXTRA_FILES_LIST, filePaths);
             }
         }
         startActivity(startIntent);

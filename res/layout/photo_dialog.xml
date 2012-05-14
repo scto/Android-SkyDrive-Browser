@@ -18,7 +18,7 @@
     <ImageView android:id="@+id/imageDialogImage"
                android:layout_width="fill_parent"
                android:layout_height="wrap_content"
-               android:scaleType="fitXY"
+               android:scaleType="centerInside"
                />
 
     <RelativeLayout android:id="@+id/imageButtonLayout"

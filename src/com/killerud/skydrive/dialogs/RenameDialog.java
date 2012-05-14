@@ -44,7 +44,7 @@ public class RenameDialog extends Activity{
 
         final EditText name = (EditText) findViewById(R.id.nameEditText);
         final EditText description = (EditText) findViewById(R.id.descriptionEditText);
-        final XLoader loader = new XLoader(getApplicationContext());
+        final XLoader loader = new XLoader(app.getCurrentBrowser());
 
         findViewById(R.id.renameButton).setOnClickListener(new View.OnClickListener() {
             @Override

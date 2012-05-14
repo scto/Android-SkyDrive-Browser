@@ -44,14 +44,14 @@ public class ViewPhotoDialog extends Activity {
         setContentView(R.layout.photo_dialog);
 
         mSavePhoto = false;
-        mXLoader = new XLoader(getApplicationContext());
 
         Intent photoDetails = getIntent();
         String photoId = photoDetails.getStringExtra("killerud.skydrive.PHOTO_ID");
         String photoName = photoDetails.getStringExtra("killerud.skydrive.PHOTO_NAME");
 
-
-        LiveConnectClient client = ((BrowserForSkyDriveApplication) getApplication()).getConnectClient();
+        BrowserForSkyDriveApplication app = (BrowserForSkyDriveApplication) getApplication();
+        LiveConnectClient client = app.getConnectClient();
+        mXLoader = new XLoader(app.getCurrentBrowser());
         final LinearLayout layout = (LinearLayout) findViewById(R.id.photo_dialog);
         final TextView textView = (TextView) layout.findViewById(R.id.imageText);
         final ImageView imageView = (ImageView) layout.findViewById(R.id.imageDialogImage);

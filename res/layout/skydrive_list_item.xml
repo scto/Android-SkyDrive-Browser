@@ -6,17 +6,13 @@
 
     <ImageView
         android:id="@+id/skyDriveItemIcon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="50dip"
+        android:layout_height="50dip"
         android:layout_gravity="center_vertical"
+        android:scaleType="centerInside"
         android:contentDescription="@string/iconDescription" />
 
-    <CheckBox android:id="@+id/selectedSkyDrive"
-              android:layout_height="wrap_content"
-              android:layout_width="wrap_content"
-              android:onClick="onCheckboxClicked"
-              android:focusable="false"
-            />
+
     <LinearLayout
         android:id="@+id/linearLayout1"
         android:layout_width="match_parent"

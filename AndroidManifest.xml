@@ -35,14 +35,19 @@
 
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
                 <data android:mimeType="image/*" />
+                <data android:mimeType="text/*" />
+                <data android:mimeType="video/*" />
+                <data android:mimeType="application/pdf" /> <!-- Sadly most file types here are not allowed by MS. PDF one of the few. -->
+                <data android:mimeType="audio/*" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".dialogs.UploadFileDialog"
+        <activity android:name=".UploadFileActivity"
                   android:label="@string/uploadFile"
-                android:theme ="@style/LightThemeDialog"
+                android:theme ="@style/LightTheme"
                 />
 
         <activity android:name=".dialogs.NewFolderDialog"

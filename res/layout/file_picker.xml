@@ -7,37 +7,15 @@
 	<ListView
 	    android:id="@id/android:list"
 		android:layout_width="fill_parent"
-		android:layout_height="0dp"
+		android:layout_height="fill_parent"
 		android:layout_weight="2"
 		android:drawSelectorOnTop="false">
 	</ListView>
 
-    <LinearLayout android:layout_width="fill_parent"
-                  android:layout_height="wrap_content"
-            android:id="@+id/uploadButtonLayout">
-
-        <Button android:id="@+id/uploadSelectAll"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/selectAll"
-                android:layout_weight="1" />
-        <Button android:id="@+id/uploadSelectNone"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/selectNone"/>
-    </LinearLayout>
-
-    <Button android:id="@+id/uploadSelected"
-            android:text="@string/uploadSelected"
-            android:layout_height="wrap_content"
-            android:layout_width="fill_parent">
-    </Button>
-
 	<TextView
 	    android:id="@id/android:empty"
 	    android:layout_width="fill_parent"
-	    android:layout_height="fill_parent"
+	    android:layout_height="wrap_content"
 	    android:text="@string/noItems" />
 
 </LinearLayout>
