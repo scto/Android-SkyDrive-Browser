@@ -449,7 +449,7 @@ public class UploadFileActivity extends SherlockListActivity
             if(title.equalsIgnoreCase(ContextItems.MENU_TITLE_UPLOAD))
             {
                 Intent data = new Intent();
-                data.putExtra(EXTRA_FILES_LIST, mCurrentlySelectedFiles);
+                data.putExtra(EXTRA_FILES_LIST, (ArrayList<String>) mCurrentlySelectedFiles.clone());
                 setResult(Activity.RESULT_OK, data);
                 mode.finish();
                 finish();

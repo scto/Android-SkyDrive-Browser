@@ -250,32 +250,6 @@ public class BrowserActivity extends SherlockListActivity
         updateFolderHierarchy(false);
     }
 
-    public void onCheckboxClicked(View checkedView)
-    {
-        if (mActionMode == null)
-        {
-            mActionMode = startActionMode(new SkyDriveActionMode());
-        }
-
-        SkyDriveListAdapter adapter = (SkyDriveListAdapter) getListAdapter();
-        ListView listView = getListView();
-        SkyDriveObject skyDriveObject = adapter.getItem(listView.getPositionForView(checkedView));
-        if (((CheckBox) checkedView).isChecked())
-        {
-            adapter.setChecked(listView.getPositionForView(checkedView), true);
-            mCurrentlySelectedFiles.add(skyDriveObject);
-        }
-        else
-        {
-            adapter.setChecked(listView.getPositionForView(checkedView), false);
-            mCurrentlySelectedFiles.remove(skyDriveObject);
-            mCurrentlySelectedFiles.trimToSize();
-
-        }
-        supportInvalidateOptionsMenu();
-    }
-
-
     /**
      * Sets up the listadapter for the browser, making sure the correct dialogs are opened for different file types
      */
@@ -511,6 +485,27 @@ public class BrowserActivity extends SherlockListActivity
                 setSupportProgressBarIndeterminateVisibility(true);
                 mXloader.pasteFiles(mClient, mCopyCutFiles, mCurrentFolderId, mCutNotPaste);
                 return true;
+            case R.id.signOut:
+                setSupportProgressBarIndeterminateVisibility(true);
+                ((BrowserForSkyDriveApplication) getApplication()).getAuthClient().logout(new LiveAuthListener() {
+                    @Override
+                    public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState) {
+                        setSupportProgressBarIndeterminateVisibility(false);
+                        Toast.makeText(getApplicationContext(), R.string.loggedOut, Toast.LENGTH_SHORT);
+                        startActivity(new Intent(getApplicationContext(),SignInActivity.class));
+                        finish();
+                        Log.e(Constants.LOGTAG, "Logged out. Status is " + status + ".");
+                    }
+
+                    @Override
+                    public void onAuthError(LiveAuthException exception, Object userState) {
+                        setSupportProgressBarIndeterminateVisibility(false);
+                        startActivity(new Intent(getApplicationContext(),SignInActivity.class));
+                        finish();
+                        Log.e(Constants.LOGTAG, exception.getMessage());
+                    }
+                    });
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -723,9 +718,13 @@ public class BrowserActivity extends SherlockListActivity
                                     fileOut.flush();
                                     fileOut.close();
                                     Log.i(Constants.LOGTAG, "Thumb cached for image " + photo.getName());
-                                } catch (IOException e)
+                                } catch (Exception e)
                                 {
-                                    /* Couldn't save thumbnail. No biggie. */
+                                    /* Couldn't save thumbnail. No biggie.
+                                    * Exception here rather than IOException
+                                    * doe to rare cases of crashes when activity
+                                    * loses focus during load.
+                                    * */
                                     Log.e(Constants.LOGTAG, "Could not cache thumbnail for " + photo.getName()
                                             + ". " + e.getMessage());
                                 }

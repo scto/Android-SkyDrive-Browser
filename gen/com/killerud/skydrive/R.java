@@ -894,6 +894,7 @@ containing a value of this type.
         public static final int showHome=0x7f040005;
         public static final int showTitle=0x7f040007;
         public static final int signInButton=0x7f040041;
+        public static final int signOut=0x7f04004c;
         public static final int skyDriveItemIcon=0x7f040044;
         public static final int tabMode=0x7f040003;
         public static final int title=0x7f040037;
@@ -981,7 +982,7 @@ containing a value of this type.
         public static final int automaticSignInError=0x7f090010;
         /**  Play audio dialog 
          */
-        public static final int buffering=0x7f090037;
+        public static final int buffering=0x7f090039;
         public static final int cancel=0x7f090024;
         public static final int close=0x7f090035;
         public static final int copy=0x7f090031;
@@ -1001,9 +1002,9 @@ containing a value of this type.
         public static final int downloading=0x7f09001e;
         /**  Error messages 
          */
-        public static final int errorFolderCouldNotBeCreated=0x7f09003f;
-        public static final int errorNoApplicationCouldOpenTheFile=0x7f090040;
-        public static final int errorOpeningAudioFile=0x7f090041;
+        public static final int errorFolderCouldNotBeCreated=0x7f090041;
+        public static final int errorNoApplicationCouldOpenTheFile=0x7f090042;
+        public static final int errorOpeningAudioFile=0x7f090043;
         public static final int fileAlreadySaved=0x7f090021;
         public static final int fileAlreadySavedMessage=0x7f090022;
         public static final int fileSaved=0x7f09001f;
@@ -1015,6 +1016,7 @@ containing a value of this type.
         public static final int imageDisplayError=0x7f090018;
         public static final int imageLoading=0x7f09001a;
         public static final int initializing=0x7f09000c;
+        public static final int loggedOut=0x7f090038;
         public static final int manualSignInError=0x7f090011;
         public static final int mySkyDrive=0x7f09000f;
         public static final int name=0x7f090025;
@@ -1024,21 +1026,22 @@ containing a value of this type.
         public static final int noItems=0x7f090013;
         public static final int ok=0x7f09001d;
         public static final int paste=0x7f090036;
-        public static final int pause=0x7f09003a;
-        public static final int paused=0x7f09003b;
-        public static final int play=0x7f090039;
-        public static final int playing=0x7f090038;
+        public static final int pause=0x7f09003c;
+        public static final int paused=0x7f09003d;
+        public static final int play=0x7f09003b;
+        public static final int playing=0x7f09003a;
         public static final int reload=0x7f090033;
         public static final int rename=0x7f090032;
         public static final int renameTitle=0x7f090027;
         public static final int save=0x7f090034;
-        public static final int saved=0x7f09003c;
+        public static final int saved=0x7f09003e;
         public static final int selectAll=0x7f09002c;
         public static final int selectNone=0x7f09002d;
         public static final int share=0x7f09002f;
         public static final int signIn=0x7f09000e;
-        public static final int stop=0x7f09003d;
-        public static final int stopped=0x7f09003e;
+        public static final int signOut=0x7f090037;
+        public static final int stop=0x7f09003f;
+        public static final int stopped=0x7f090040;
         public static final int uploadError=0x7f090029;
         public static final int uploadFile=0x7f090016;
         public static final int uploadSelected=0x7f09002b;

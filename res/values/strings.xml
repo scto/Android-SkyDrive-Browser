@@ -58,6 +58,8 @@
     <string name="save">Save</string>
     <string name="close">Close</string>
     <string name="paste">Paste</string>
+    <string name="signOut">Sign out</string>
+    <string name="loggedOut">Logged out</string>
 
     <!-- Play audio dialog -->
     <string name="buffering">Buffering</string>

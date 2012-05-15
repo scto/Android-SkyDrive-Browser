@@ -284,6 +284,7 @@ public class XLoader {
                             final ArrayList<String> fileNames,
                             final String baseName, final String baseDescription){
         if(fileIds.size()<=0){
+            mContext.setSupportProgressBarIndeterminateVisibility(false);
             Toast.makeText(mContext,"File renamed",Toast.LENGTH_SHORT).show();
             mContext.reloadFolder();
             return;

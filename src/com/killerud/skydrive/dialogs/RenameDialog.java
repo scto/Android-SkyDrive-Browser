@@ -49,6 +49,7 @@ public class RenameDialog extends Activity{
         findViewById(R.id.renameButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                ((BrowserForSkyDriveApplication)getApplication()).getCurrentBrowser().setSupportProgressBarIndeterminateVisibility(true);
                 loader.renameFiles(client,fileIds, fileNames,
                         name.getText().toString(),
                         description.getText().toString());

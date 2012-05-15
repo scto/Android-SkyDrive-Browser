@@ -29,5 +29,10 @@
           android:visible="false"
           />
 
+    <item   android:id="@+id/signOut"
+          android:showAsAction="withText|never"
+          android:title="@string/signOut" />
+
+
 
 </menu>
