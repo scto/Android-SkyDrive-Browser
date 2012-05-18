@@ -1,9 +1,12 @@
 package com.killerud.skydrive;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -23,18 +26,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Stack;
 
-public class UploadFileActivity extends SherlockListActivity
+public class FileBrowserActivity extends SherlockListActivity
 {
     private ArrayList<String> mCurrentlySelectedFiles;
 
-
-    public static final int PICK_FILE_REQUEST = 0;
     public static final String EXTRA_FILES_LIST = "filePaths";
 
     private File mCurrentFolder;
     private Stack<File> mPreviousFolders;
-    private UploadFileListAdapter mAdapter;
+    private BrowserListAdapter mAdapter;
     private ActionMode mActionMode;
+    private Context mContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -42,15 +44,13 @@ public class UploadFileActivity extends SherlockListActivity
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
-
-        setTitle("Upload to SkyDrive");
+        setTitle("Saved files");
         setContentView(R.layout.file_picker);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-
         mCurrentlySelectedFiles = new ArrayList<String>();
         mPreviousFolders = new Stack<File>();
-        mAdapter = new UploadFileListAdapter(getApplicationContext());
+        mAdapter = new BrowserListAdapter(getApplicationContext());
         setListAdapter(mAdapter);
 
         ListView lv = getListView();
@@ -79,7 +79,7 @@ public class UploadFileActivity extends SherlockListActivity
                 }else{
                     mAdapter.setChecked(position, true);
                     mCurrentlySelectedFiles.add(
-                            ((UploadFileListAdapter) getListAdapter()).getItem(position).getPath());
+                            ((BrowserListAdapter) getListAdapter()).getItem(position).getPath());
                 }
             }
         });
@@ -90,10 +90,10 @@ public class UploadFileActivity extends SherlockListActivity
             {
                 if (mActionMode == null)
                 {
-                    mActionMode = startActionMode(new UploadActionMode());
+                    mActionMode = startActionMode(new BrowserActionMode());
                     mAdapter.setChecked(position, true);
                     mCurrentlySelectedFiles.add(
-                            ((UploadFileListAdapter) getListAdapter()).getItem(position).getPath());
+                            ((BrowserListAdapter) getListAdapter()).getItem(position).getPath());
                 }
                 return true;
             }
@@ -113,6 +113,53 @@ public class UploadFileActivity extends SherlockListActivity
         {
             return super.onKeyDown(keyCode, event);
         }
+    }
+
+    @Override
+    protected void onStart()
+    {
+        super.onStart();
+        File skyDriveFolder = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/");
+        if(!skyDriveFolder.exists()){
+            skyDriveFolder.mkdirs();
+        }
+        loadFolder(skyDriveFolder);
+        mContext = getApplicationContext();
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        switch (item.getItemId())
+        {
+            case android.R.id.home:
+                navigateBack();
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private void navigateBack()
+    {
+        if (mPreviousFolders.isEmpty())
+        {
+            finish();
+            return;
+        }
+        loadFolder(mPreviousFolders.pop());
+    }
+
+    private void loadFolder(File folder)
+    {
+        assert folder.isDirectory();
+        mCurrentFolder = folder;
+        setSupportProgressBarIndeterminateVisibility(true);
+        ArrayList<File> adapterFiles = mAdapter.getFiles();
+        adapterFiles.clear();
+        adapterFiles.addAll(Arrays.asList(folder.listFiles()));
+        mAdapter.clearChecked();
+        mAdapter.notifyDataSetChanged();
+        setSupportProgressBarIndeterminateVisibility(false);
     }
 
     private String getFileExtension(File file)
@@ -264,49 +311,7 @@ public class UploadFileActivity extends SherlockListActivity
         return R.drawable.text_x_preview;
     }
 
-    @Override
-    protected void onStart()
-    {
-        super.onStart();
-        loadFolder(new File("/"));
-    }
-
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-        switch (item.getItemId())
-        {
-            case android.R.id.home:
-                navigateBack();
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    private void navigateBack()
-    {
-        if (mPreviousFolders.isEmpty())
-        {
-            finish();
-            return;
-        }
-        loadFolder(mPreviousFolders.pop());
-    }
-
-    private void loadFolder(File folder)
-    {
-        assert folder.isDirectory();
-        mCurrentFolder = folder;
-        setSupportProgressBarIndeterminateVisibility(true);
-        ArrayList<File> adapterFiles = mAdapter.getFiles();
-        adapterFiles.clear();
-        adapterFiles.addAll(Arrays.asList(folder.listFiles()));
-        mAdapter.clearChecked();
-        mAdapter.notifyDataSetChanged();
-        setSupportProgressBarIndeterminateVisibility(false);
-    }
-
-    private class UploadFileListAdapter extends BaseAdapter
+    private class BrowserListAdapter extends BaseAdapter
     {
         private final LayoutInflater mInflater;
         private final ArrayList<File> mFiles;
@@ -314,7 +319,7 @@ public class UploadFileActivity extends SherlockListActivity
         private SparseBooleanArray mCheckedPositions;
         private int mPosition;
 
-        public UploadFileListAdapter(Context context)
+        public BrowserListAdapter(Context context)
         {
             mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             mFiles = new ArrayList<File>();
@@ -402,18 +407,19 @@ public class UploadFileActivity extends SherlockListActivity
     }
 
 
-    private class UploadActionMode implements com.actionbarsherlock.view.ActionMode.Callback
+    private class BrowserActionMode implements com.actionbarsherlock.view.ActionMode.Callback
     {
 
         @Override
         public boolean onCreateActionMode(com.actionbarsherlock.view.ActionMode mode, Menu menu)
         {
+           menu.add(ContextItems.MENU_TITLE_DELETE)
+                    .setIcon(android.R.drawable.ic_menu_delete)
+                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM|
+                            MenuItem.SHOW_AS_ACTION_WITH_TEXT);
             menu.add(ContextItems.MENU_TITLE_SELECT_ALL)
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT
                             | MenuItem.SHOW_AS_ACTION_NEVER);
-            menu.add(ContextItems.MENU_TITLE_UPLOAD)
-                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT
-                            | MenuItem.SHOW_AS_ACTION_ALWAYS);
             return true;
         }
 
@@ -427,15 +433,7 @@ public class UploadFileActivity extends SherlockListActivity
         public boolean onActionItemClicked(final com.actionbarsherlock.view.ActionMode mode, MenuItem item)
         {
             String title = item.getTitle().toString();
-            if(title.equalsIgnoreCase(ContextItems.MENU_TITLE_UPLOAD))
-            {
-                Intent data = new Intent();
-                data.putExtra(EXTRA_FILES_LIST, (ArrayList<String>) mCurrentlySelectedFiles.clone());
-                setResult(Activity.RESULT_OK, data);
-                mode.finish();
-                finish();
-                return true;
-            }else if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_SELECT_ALL))
+            if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_SELECT_ALL))
             {
                 mAdapter.checkAll();
                 item.setTitle(ContextItems.MENU_TITLE_DESELECT_ALL);
@@ -445,6 +443,49 @@ public class UploadFileActivity extends SherlockListActivity
             {
                 mAdapter.clearChecked();
                 item.setTitle(ContextItems.MENU_TITLE_SELECT_ALL);
+                return true;
+            }else if(title.equalsIgnoreCase(ContextItems.MENU_TITLE_DELETE)){
+                final AlertDialog dialog = new AlertDialog.Builder(getSupportActionBar().getThemedContext()).create();
+                dialog.setTitle("Delete files?");
+                dialog.setIcon(R.drawable.warning_triangle);
+                StringBuilder deleteMessage = new StringBuilder();
+                deleteMessage.append("The following files will be deleted: \n\n");
+                for (int i = 0; i < mCurrentlySelectedFiles.size(); i++)
+                {
+                    int index =     mCurrentlySelectedFiles.get(i).lastIndexOf("/");
+                    if(index != -1){
+                        deleteMessage.append(mCurrentlySelectedFiles.get(i)
+                            .substring(index+1));
+                        deleteMessage.append("\n");
+                    }
+                }
+                deleteMessage.append("Are you sure you want to do this?");
+
+                dialog.setMessage(deleteMessage.toString());
+                dialog.setButton("Yes", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i)
+                    {
+                        for(int j=0;j<mCurrentlySelectedFiles.size();j++){
+                            File file = new File(mCurrentlySelectedFiles.get(j));
+                            if(file.exists()){
+                                file.delete();
+                            }
+                        }
+                        ((BrowserListAdapter) getListAdapter()).notifyDataSetChanged();
+                        mode.finish();
+                    }
+                });
+                dialog.setButton2("No!", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i)
+                    {
+                        dialog.dismiss();
+                    }
+                });
+                dialog.show();
                 return true;
             }
             else
@@ -461,6 +502,7 @@ public class UploadFileActivity extends SherlockListActivity
             mAdapter.clearChecked();
             mActionMode = null;
             mCurrentlySelectedFiles.clear();
+            ((BrowserListAdapter) getListAdapter()).notifyDataSetChanged();
             supportInvalidateOptionsMenu();
         }
     }

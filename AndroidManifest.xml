@@ -50,6 +50,11 @@
                 android:theme ="@style/LightTheme"
                 />
 
+        <activity android:name=".FileBrowserActivity"
+                  android:label="@string/savedFiles"
+                  android:theme ="@style/LightTheme"
+                />
+
         <activity android:name=".dialogs.NewFolderDialog"
                   android:label="@string/createFolder"
                   android:theme="@style/LightThemeDialog"

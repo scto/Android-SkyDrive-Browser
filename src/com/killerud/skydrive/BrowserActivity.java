@@ -485,6 +485,9 @@ public class BrowserActivity extends SherlockListActivity
                 setSupportProgressBarIndeterminateVisibility(true);
                 mXloader.pasteFiles(mClient, mCopyCutFiles, mCurrentFolderId, mCutNotPaste);
                 return true;
+            case R.id.savedFiles:
+                startActivity(new Intent(getApplicationContext(),FileBrowserActivity.class));
+                return true;
             case R.id.signOut:
                 setSupportProgressBarIndeterminateVisibility(true);
                 ((BrowserForSkyDriveApplication) getApplication()).getAuthClient().logout(new LiveAuthListener() {
@@ -982,7 +985,7 @@ public class BrowserActivity extends SherlockListActivity
             }
             else if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_DELETE))
             {
-                final AlertDialog dialog = new AlertDialog.Builder(getApplicationContext()).create();
+                final AlertDialog dialog = new AlertDialog.Builder(getSupportActionBar().getThemedContext()).create();
                 dialog.setTitle("Delete files?");
                 dialog.setIcon(R.drawable.warning_triangle);
                 StringBuilder deleteMessage = new StringBuilder();
@@ -1001,7 +1004,7 @@ public class BrowserActivity extends SherlockListActivity
                     public void onClick(DialogInterface dialogInterface, int i)
                     {
                         setSupportProgressBarIndeterminateVisibility(true);
-                        mXloader.deleteFiles(mClient, mCurrentlySelectedFiles);
+                        mXloader.deleteFiles(mClient, (ArrayList<SkyDriveObject>) mCurrentlySelectedFiles.clone());
                         ((SkyDriveListAdapter) getListAdapter()).clearChecked();
                         mCurrentlySelectedFiles.clear();
                         mode.finish();
@@ -1021,7 +1024,7 @@ public class BrowserActivity extends SherlockListActivity
             }
             else if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_RENAME))
             {
-                Intent startRenameDialog = new Intent(getApplicationContext(), RenameDialog.class);
+                Intent startRenameDialog = new Intent(getSupportActionBar().getThemedContext(), RenameDialog.class);
                 ArrayList<String> fileIds = new ArrayList<String>();
                 ArrayList<String> fileNames = new ArrayList<String>();
                 for (int i = 0; i < mCurrentlySelectedFiles.size(); i++)

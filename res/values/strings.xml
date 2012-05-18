@@ -60,6 +60,7 @@
     <string name="paste">Paste</string>
     <string name="signOut">Sign out</string>
     <string name="loggedOut">Logged out</string>
+    <string name="savedFiles">Saved files</string>
 
     <!-- Play audio dialog -->
     <string name="buffering">Buffering</string>
