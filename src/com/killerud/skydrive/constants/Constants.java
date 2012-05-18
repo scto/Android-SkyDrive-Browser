@@ -6,7 +6,7 @@ package com.killerud.skydrive.constants;
  * Time: 14:03
  */
 final public class Constants {
-    public static final String APP_CLIENT_ID = "00000000480BBC67";
+    public static final String APP_CLIENT_ID = "00000000400C35DF";
 
     /* App permissions. Be as precise as possible. */
     public static final String[] APP_SCOPES = {

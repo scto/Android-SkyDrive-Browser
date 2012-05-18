@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
-import android.text.TextUtils;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
@@ -34,6 +33,12 @@ public class XLoader {
     private BrowserActivity mContext;
 
     private IOUtil mIOUtil;
+    
+    private String[]  mSupportedFileTypes = new String[]{
+            "3g2","3gp","ai","bmp","chm","doc","docm","docx","dot","dotx","epub","gif",
+            "jpeg","jpg","mp4","one","pdf","png","pot","potm","potx","pps","ppsm","ppsx",
+            "ppt","pptm","pptx","psd","tif", "tiff","txt","xls","xlsb","xlsm","xlsx",
+            "wav","webp","wmv"};
 
 
     public XLoader(BrowserActivity browserActivity){
@@ -59,8 +64,26 @@ public class XLoader {
         String localFilePath = localFilePaths.get(localFilePaths.size()-1);
         final File file = new File(localFilePath);
 
+        String fileExtension = file.getName().substring(file.getName().lastIndexOf(".")+1);
+        boolean supported = false;
+        for(int i=0;i<mSupportedFileTypes.length;i++){
+            if(fileExtension.equals(mSupportedFileTypes[i])){
+                supported = true;
+            }
+        }
+
+        if(!supported){
+            fileNotSupportedBySkyDriveNotification(file);
+            localFilePaths.remove(localFilePaths.size()-1);
+            localFilePaths.trimToSize();
+            uploadFile(client,localFilePaths,currentFolderId);
+            return;
+        }
+
         if(!file.exists()){
-            mContext.reloadFolder();
+            localFilePaths.remove(localFilePaths.size()-1);
+            localFilePaths.trimToSize();
+            uploadFile(client,localFilePaths,currentFolderId);
             return;
         }
 
@@ -349,7 +372,7 @@ public class XLoader {
         mNotificationProgress.flags |= Notification.FLAG_ONGOING_EVENT;
 
         mNotificationView = new RemoteViews(mContext.getPackageName(), R.layout.notification_xload);
-        mNotificationView.setImageViewResource(R.id.image, R.drawable.icon);
+        mNotificationView.setImageViewResource(R.id.image, R.drawable.notification_icon);
         mNotificationView.setTextViewText(R.id.title, (downloading ? "Downloading " : "Uploading ") + fileName);
         mNotificationView.setProgressBar(R.id.progressBar, 100, 0, false);
 
@@ -431,6 +454,30 @@ public class XLoader {
 
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
 
+        notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
+
+        mNotificationManager.notify(mNotificationXLoadId, notification);
+    }
+
+
+    /**
+     * Notifies the user that the given file is unsupported by SkyDrive and has promptly been skipped for upload
+     *
+     * @param file
+     */
+    private void fileNotSupportedBySkyDriveNotification(File file){
+                int icon = R.drawable.notification_icon;
+        CharSequence tickerText = file.getName() + " cannot be uploaded to SkyDrive by third-party apps and has been skipped...";
+        long when = System.currentTimeMillis();
+
+        Notification notification = new Notification(icon, tickerText, when);
+
+        Context context = mContext;
+        CharSequence contentTitle = mContext.getString(R.string.appName);
+        CharSequence contentText = file.getName() + " is of a file type that cannot be uploaded to SkyDrive by third-party apps and has been skipped...";
+
+        Intent notificationIntent = new Intent(context, XLoader.class);
+        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
         notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
 
         mNotificationManager.notify(mNotificationXLoadId, notification);
