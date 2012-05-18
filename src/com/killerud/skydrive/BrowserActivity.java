@@ -22,7 +22,10 @@ import com.actionbarsherlock.view.*;
 import com.killerud.skydrive.constants.Constants;
 import com.killerud.skydrive.constants.ContextItems;
 import com.killerud.skydrive.constants.SortCriteria;
-import com.killerud.skydrive.dialogs.*;
+import com.killerud.skydrive.dialogs.NewFolderDialog;
+import com.killerud.skydrive.dialogs.PlayAudioDialog;
+import com.killerud.skydrive.dialogs.RenameDialog;
+import com.killerud.skydrive.dialogs.ViewPhotoDialog;
 import com.killerud.skydrive.objects.*;
 import com.killerud.skydrive.util.JsonKeys;
 import com.microsoft.live.*;
@@ -31,7 +34,6 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Stack;
 
@@ -337,6 +339,11 @@ public class BrowserActivity extends SherlockListActivity
                         mCurrentFolderId);
             }
         }
+        else
+        {
+            /* Let's only do this while using the app proper, and while the folder content is loading */
+            handleLocalCache();
+        }
     }
 
     private void updateFolderHierarchy(boolean push)
@@ -367,6 +374,63 @@ public class BrowserActivity extends SherlockListActivity
         supportInvalidateOptionsMenu();
         loadFolder(mCurrentFolderId);
     }
+
+    private void handleLocalCache()
+    {
+        final File thumbCacheFolder = new File(Environment.getExternalStorageDirectory()
+                + "/Android/data/com.killerud.skydrive/thumbs/");
+
+        /* No cache for us to handle */
+        if (!thumbCacheFolder.exists())
+        {
+            return;
+        }
+
+        /* This block could potentially be a while, so run it in a new thread */
+        new Thread(new Runnable()
+        {
+            public void run()
+            {
+                File[] cacheContents = thumbCacheFolder.listFiles();
+                long cacheSize = 0l;
+
+                for (int i = 0; i < cacheContents.length; i++)
+                {
+                    cacheSize += cacheContents[i].length();
+                }
+
+                if (cacheSize > Constants.CACHE_MAX_SIZE)
+                {
+
+                    boolean cachePruned = false;
+                    int fileIndex = 0;
+
+                    while (!cachePruned)
+                    {
+                        try
+                        {
+                            cacheSize -= cacheContents[fileIndex].length();
+                            cacheContents[fileIndex].delete();
+                            Log.i(Constants.LOGTAG, "Thumb cache pruned");
+                        } catch (IndexOutOfBoundsException e)
+                        {
+                            cachePruned = true;
+                            Log.e(Constants.LOGTAG, "Error on thumb cache prune. " + e.getMessage());
+                        } finally
+                        {
+                            if (cacheSize < Constants.CACHE_MAX_SIZE - 50)
+                            {
+                                cachePruned = true;
+                            }
+
+                            fileIndex++;
+                        }
+                    }
+                }
+            }
+        }).start();
+    }
+
 
     /**
      * Gets the folder content for displaying
@@ -486,28 +550,31 @@ public class BrowserActivity extends SherlockListActivity
                 mXloader.pasteFiles(mClient, mCopyCutFiles, mCurrentFolderId, mCutNotPaste);
                 return true;
             case R.id.savedFiles:
-                startActivity(new Intent(getApplicationContext(),FileBrowserActivity.class));
+                startActivity(new Intent(getApplicationContext(), FileBrowserActivity.class));
                 return true;
             case R.id.signOut:
                 setSupportProgressBarIndeterminateVisibility(true);
-                ((BrowserForSkyDriveApplication) getApplication()).getAuthClient().logout(new LiveAuthListener() {
+                ((BrowserForSkyDriveApplication) getApplication()).getAuthClient().logout(new LiveAuthListener()
+                {
                     @Override
-                    public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState) {
+                    public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState)
+                    {
                         setSupportProgressBarIndeterminateVisibility(false);
                         Toast.makeText(getApplicationContext(), R.string.loggedOut, Toast.LENGTH_SHORT);
-                        startActivity(new Intent(getApplicationContext(),SignInActivity.class));
+                        startActivity(new Intent(getApplicationContext(), SignInActivity.class));
                         finish();
                         Log.e(Constants.LOGTAG, "Logged out. Status is " + status + ".");
                     }
 
                     @Override
-                    public void onAuthError(LiveAuthException exception, Object userState) {
+                    public void onAuthError(LiveAuthException exception, Object userState)
+                    {
                         setSupportProgressBarIndeterminateVisibility(false);
-                        startActivity(new Intent(getApplicationContext(),SignInActivity.class));
+                        startActivity(new Intent(getApplicationContext(), SignInActivity.class));
                         finish();
                         Log.e(Constants.LOGTAG, exception.getMessage());
                     }
-                    });
+                });
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -802,32 +869,32 @@ public class BrowserActivity extends SherlockListActivity
                     if (index != -1)
                     {
                         /* Starting from the index includes the dot, so we add one  */
-                        String extension = file.getName().substring(index+1,
+                        String extension = file.getName().substring(index + 1,
                                 file.getName().length());
 
                         /* Try to do the most popular types first to hopefully
                            limit the number of comparisons */
-                        if(extension.equalsIgnoreCase("doc")||
-                                extension.equalsIgnoreCase("odt")||
-                                extension.equalsIgnoreCase("fodt")||
+                        if (extension.equalsIgnoreCase("doc") ||
+                                extension.equalsIgnoreCase("odt") ||
+                                extension.equalsIgnoreCase("fodt") ||
                                 extension.equalsIgnoreCase("docx") ||
                                 extension.equalsIgnoreCase("odf"))
                         {
                             return R.drawable.office_document;
                         }
-                        else if(extension.equalsIgnoreCase("ppt")||
-                                extension.equalsIgnoreCase("pps")||
-                                extension.equalsIgnoreCase("pptx")||
-                                extension.equalsIgnoreCase("ppsx")||
-                                extension.equalsIgnoreCase("odp")||
+                        else if (extension.equalsIgnoreCase("ppt") ||
+                                extension.equalsIgnoreCase("pps") ||
+                                extension.equalsIgnoreCase("pptx") ||
+                                extension.equalsIgnoreCase("ppsx") ||
+                                extension.equalsIgnoreCase("odp") ||
                                 extension.equalsIgnoreCase("fodp"))
                         {
                             return R.drawable.office_presentation;
                         }
-                        else if(extension.equalsIgnoreCase("ods")||
-                                extension.equalsIgnoreCase("xls")||
-                                extension.equalsIgnoreCase("xlr")||
-                                extension.equalsIgnoreCase("xlsx")||
+                        else if (extension.equalsIgnoreCase("ods") ||
+                                extension.equalsIgnoreCase("xls") ||
+                                extension.equalsIgnoreCase("xlr") ||
+                                extension.equalsIgnoreCase("xlsx") ||
                                 extension.equalsIgnoreCase("ots"))
                         {
                             return R.drawable.office_spreadsheet;
@@ -835,7 +902,8 @@ public class BrowserActivity extends SherlockListActivity
                         else if (extension.equalsIgnoreCase("pdf"))
                         {
                             return R.drawable.document_pdf;
-                        }else if (extension.equalsIgnoreCase("zip") ||
+                        }
+                        else if (extension.equalsIgnoreCase("zip") ||
                                 extension.equalsIgnoreCase("rar") ||
                                 extension.equalsIgnoreCase("gz") ||
                                 extension.equalsIgnoreCase("bz2") ||
@@ -848,7 +916,7 @@ public class BrowserActivity extends SherlockListActivity
                         {
                             return R.drawable.archive_sevenzip;
                         }
-                        else if(extension.equalsIgnoreCase("torrent"))
+                        else if (extension.equalsIgnoreCase("torrent"))
                         {
                             return R.drawable.document_torrent;
                         }
@@ -868,7 +936,7 @@ public class BrowserActivity extends SherlockListActivity
                         {
                             return R.drawable.executable_apk;
                         }
-                        else if (extension.equalsIgnoreCase("html")||
+                        else if (extension.equalsIgnoreCase("html") ||
                                 extension.equalsIgnoreCase("htm"))
                         {
                             return R.drawable.text_html;
@@ -885,25 +953,25 @@ public class BrowserActivity extends SherlockListActivity
                         {
                             return R.drawable.executable_rpm;
                         }
-                        else if(extension.equalsIgnoreCase("java") ||
+                        else if (extension.equalsIgnoreCase("java") ||
                                 extension.equalsIgnoreCase("class"))
                         {
                             return R.drawable.document_java;
                         }
-                        else if(extension.equalsIgnoreCase("pl")||
+                        else if (extension.equalsIgnoreCase("pl") ||
                                 extension.equalsIgnoreCase("plc"))
                         {
                             return R.drawable.document_perl;
                         }
-                        else if(extension.equalsIgnoreCase("php"))
+                        else if (extension.equalsIgnoreCase("php"))
                         {
                             return R.drawable.document_php;
                         }
-                        else if(extension.equalsIgnoreCase("py"))
+                        else if (extension.equalsIgnoreCase("py"))
                         {
                             return R.drawable.document_python;
                         }
-                        else if(extension.equalsIgnoreCase("rb"))
+                        else if (extension.equalsIgnoreCase("rb"))
                         {
                             return R.drawable.document_ruby;
                         }

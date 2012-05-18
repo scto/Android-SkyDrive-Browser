@@ -107,7 +107,4 @@ public class SignInActivity extends Activity {
         finish();
     }
 
-    private String fetchUserFirstName(){
-        return null;
-    }
 }

@@ -10,11 +10,14 @@ final public class Constants {
 
     /* App permissions. Be as precise as possible. */
     public static final String[] APP_SCOPES = {
-            "wl.signin",
+            "wl.offline_access",
             "wl.skydrive_update"
     };
 
     public static final String LOGTAG = "ASE";
+
+    /* Bytes */
+    public static final long CACHE_MAX_SIZE = 10485760l; //10MB
 
     private Constants() {
         throw new AssertionError("Unable to create Constants object.");
