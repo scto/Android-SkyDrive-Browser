@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -12,6 +14,7 @@ import android.widget.Toast;
 import com.killerud.skydrive.constants.Constants;
 import com.microsoft.live.*;
 
+import java.io.File;
 import java.util.Arrays;
 
 public class SignInActivity extends Activity {
@@ -29,6 +32,8 @@ public class SignInActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.sign_in);
+
+        handleLocalCache();
 
         mApp = (BrowserForSkyDriveApplication) getApplication();
 
@@ -95,8 +100,167 @@ public class SignInActivity extends Activity {
         }catch (IllegalStateException e){
             /* Already logged in, or login in progress */
             Log.e("ASE", e.getMessage());
+            startActivity(new Intent(getApplicationContext(), BrowserActivity.class));
+            finish();
+        }
+    }
+
+    private void handleLocalCache()
+    {
+        handleFileCache();
+        handleThumbCache();
+    }
+
+    private void handleFileCache()
+    {
+        final File fileCacheFolder = new File(Environment.getExternalStorageDirectory()
+                + "/Android/data/com.killerud.skydrive/cache/");
+
+        /* No cache for us to handle */
+        if (!fileCacheFolder.exists())
+        {
+            return;
         }
 
+        /* This block could potentially be a while, so run it in a new thread */
+        new Thread(new Runnable()
+        {
+            public void run()
+            {
+                File[] cacheContents = fileCacheFolder.listFiles();
+                long cacheSize = 0l;
+
+                for (int i = 0; i < cacheContents.length; i++)
+                {
+                    cacheSize += cacheContents[i].length();
+                }
+
+                if (cacheSize > Constants.CACHE_MAX_SIZE)
+                {
+
+                    boolean cachePruned = false;
+                    int fileIndex = 0;
+
+                    while (!cachePruned)
+                    {
+                        try
+                        {
+                            cacheSize -= cacheContents[fileIndex].length();
+                            cacheContents[fileIndex].delete();
+                            Log.i(Constants.LOGTAG, "File cache pruned");
+                        } catch (IndexOutOfBoundsException e)
+                        {
+                            cachePruned = true;
+                            Log.e(Constants.LOGTAG, "Error on file cache prune. " + e.getMessage());
+                        } finally
+                        {
+                            if (cacheSize < Constants.CACHE_MAX_SIZE - 50)
+                            {
+                                cachePruned = true;
+                            }
+
+                            fileIndex++;
+                        }
+                    }
+                }
+            }
+        }).start();
+    }
+
+
+    private void handleThumbCache()
+    {
+        final File thumbCacheFolder = new File(Environment.getExternalStorageDirectory()
+                + "/Android/data/com.killerud.skydrive/thumbs/");
+
+        /* No cache for us to handle */
+        if (!thumbCacheFolder.exists())
+        {
+            return;
+        }
+
+        /* This block could potentially be a while, so run it in a new thread */
+        new Thread(new Runnable()
+        {
+            public void run()
+            {
+                File[] cacheContents = thumbCacheFolder.listFiles();
+                long cacheSize = 0l;
+
+                for (int i = 0; i < cacheContents.length; i++)
+                {
+                    cacheSize += cacheContents[i].length();
+                }
+
+                if (cacheSize > Constants.THUMBS_MAX_SIZE)
+                {
+
+                    boolean cachePruned = false;
+                    int fileIndex = 0;
+
+                    while (!cachePruned)
+                    {
+                        try
+                        {
+                            cacheSize -= cacheContents[fileIndex].length();
+                            cacheContents[fileIndex].delete();
+                            Log.i(Constants.LOGTAG, "Thumb cache pruned");
+                        } catch (IndexOutOfBoundsException e)
+                        {
+                            cachePruned = true;
+                            Log.e(Constants.LOGTAG, "Error on thumb cache prune. " + e.getMessage());
+                        } finally
+                        {
+                            if (cacheSize < Constants.THUMBS_MAX_SIZE - 50)
+                            {
+                                cachePruned = true;
+                            }
+
+                            fileIndex++;
+                        }
+                    }
+                }
+            }
+        }).start();
+    }
+
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        if (keyCode == KeyEvent.KEYCODE_BACK)
+        {
+            if(mAuthClient != null){
+                try{
+                    mAuthClient.logout(new LiveAuthListener()
+                    {
+                        @Override
+                        public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState)
+                        {
+
+                        }
+
+                        @Override
+                        public void onAuthError(LiveAuthException exception, Object userState)
+                        {
+
+                        }
+                    });
+                }catch (IllegalStateException e){
+                    Toast.makeText(getApplicationContext(),"Error during login", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            }
+            if(mInitializeDialog != null){
+                mInitializeDialog.dismiss();
+            }
+
+            return super.onKeyDown(keyCode, event);
+        }
+        else
+        {
+            return super.onKeyDown(keyCode, event);
+        }
     }
 
     private void startBrowserActivity(LiveConnectSession session) {

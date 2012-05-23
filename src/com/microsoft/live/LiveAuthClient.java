@@ -6,7 +6,17 @@
 
 package com.microsoft.live;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
+
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -14,11 +24,8 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
-import com.microsoft.live.OAuth.ErrorType;
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
 
-import java.util.*;
+import com.microsoft.live.OAuth.ErrorType;
 
 /**
  * {@code LiveAuthClient} is a class responsible for retrieving a {@link LiveConnectSession}, which
@@ -75,7 +82,7 @@ public class LiveAuthClient {
     }
 
     /**
-     * This class observes an OAuthRequest and calls the appropriate Listener method.
+     * This class observes an {@link OAuthRequest} and calls the appropriate Listener method.
      * On a successful response, it will call the
      * {@link LiveAuthListener#onAuthComplete(LiveStatus, LiveConnectSession, Object)}.
      * On an exception or an unsuccessful response, it will call
@@ -209,7 +216,7 @@ public class LiveAuthClient {
     /**
      * Responsible for all network (i.e., HTTP) calls.
      * Tests will want to change this to mock the network and HTTP responses.
-     * @see #setHttpClient(org.apache.http.client.HttpClient)
+     * @see #setHttpClient(HttpClient)
      */
     private HttpClient httpClient;
 
@@ -250,10 +257,10 @@ public class LiveAuthClient {
      * The {@link LiveConnectSession} will be returned by calling
      * {@link LiveAuthListener#onAuthComplete(LiveStatus, LiveConnectSession, Object)}.
      * Otherwise, the {@link LiveAuthListener#onAuthError(LiveAuthException, Object)} will be
-     * called. These methods will be called on the sign_in/UI thread.
+     * called. These methods will be called on the main/UI thread.
      *
      * If the wl.offline_access scope is used, a refresh_token is stored in the given
-     * {@link android.app.Activity}'s SharedPreferences
+     * {@link Activity}'s {@link SharedPerfences}.
      *
      * @param scopes to initialize the {@link LiveConnectSession} with.
      *        See <a href="http://msdn.microsoft.com/en-us/library/hh243646.aspx">MSDN Live Connect
@@ -270,10 +277,10 @@ public class LiveAuthClient {
      * The {@link LiveConnectSession} will be returned by calling
      * {@link LiveAuthListener#onAuthComplete(LiveStatus, LiveConnectSession, Object)}.
      * Otherwise, the {@link LiveAuthListener#onAuthError(LiveAuthException, Object)} will be
-     * called. These methods will be called on the sign_in/UI thread.
+     * called. These methods will be called on the main/UI thread.
      *
      * If the wl.offline_access scope is used, a refresh_token is stored in the given
-     * {@link android.app.Activity}'s SharedPreferences
+     * {@link Activity}'s {@link SharedPerfences}.
      *
      * @param scopes to initialize the {@link LiveConnectSession} with.
      *        See <a href="http://msdn.microsoft.com/en-us/library/hh243646.aspx">MSDN Live Connect
@@ -323,10 +330,10 @@ public class LiveAuthClient {
      * The {@link LiveConnectSession} will be returned by calling
      * {@link LiveAuthListener#onAuthComplete(LiveStatus, LiveConnectSession, Object)}.
      * Otherwise, the {@link LiveAuthListener#onAuthError(LiveAuthException, Object)} will be
-     * called. These methods will be called on the sign_in/UI thread.
+     * called. These methods will be called on the main/UI thread.
      *
      * If the wl.offline_access scope is used, a refresh_token is stored in the given
-     * {@link android.app.Activity}'s SharedPreferences
+     * {@link Activity}'s {@link SharedPerfences}.
      *
      * This initialize will use the last successfully used scopes from either a login or initialize.
      *
@@ -342,10 +349,10 @@ public class LiveAuthClient {
      * The {@link LiveConnectSession} will be returned by calling
      * {@link LiveAuthListener#onAuthComplete(LiveStatus, LiveConnectSession, Object)}.
      * Otherwise, the {@link LiveAuthListener#onAuthError(LiveAuthException, Object)} will be
-     * called. These methods will be called on the sign_in/UI thread.
+     * called. These methods will be called on the main/UI thread.
      *
      * If the wl.offline_access scope is used, a refresh_token is stored in the given
-     * {@link android.app.Activity}'s SharedPreferences
+     * {@link Activity}'s {@link SharedPerfences}.
      *
      * This initialize will use the last successfully used scopes from either a login or initialize.
      *
@@ -359,14 +366,14 @@ public class LiveAuthClient {
     /**
      * Logs in an user with the given scopes.
      *
-     * login displays a {@link android.app.Dialog} that will prompt the
+     * login displays a {@link Dialog} that will prompt the
      * user for a username and password, and ask for consent to use the given scopes.
      * A {@link LiveConnectSession} will be returned by calling
      * {@link LiveAuthListener#onAuthComplete(LiveStatus, LiveConnectSession, Object)}.
      * Otherwise, the {@link LiveAuthListener#onAuthError(LiveAuthException, Object)} will be
-     * called. These methods will be called on the sign_in/UI thread.
+     * called. These methods will be called on the main/UI thread.
      *
-     * @param activity {@link android.app.Activity} instance to display the Login dialog on.
+     * @param activity {@link Activity} instance to display the Login dialog on.
      * @param scopes to initialize the {@link LiveConnectSession} with.
      *        See <a href="http://msdn.microsoft.com/en-us/library/hh243646.aspx">MSDN Live Connect
      *        Reference's Scopes and permissions</a> for a list of scopes and explanations.
@@ -380,14 +387,14 @@ public class LiveAuthClient {
     /**
      * Logs in an user with the given scopes.
      *
-     * login displays a {@link android.app.Dialog} that will prompt the
+     * login displays a {@link Dialog} that will prompt the
      * user for a username and password, and ask for consent to use the given scopes.
      * A {@link LiveConnectSession} will be returned by calling
      * {@link LiveAuthListener#onAuthComplete(LiveStatus, LiveConnectSession, Object)}.
      * Otherwise, the {@link LiveAuthListener#onAuthError(LiveAuthException, Object)} will be
-     * called. These methods will be called on the sign_in/UI thread.
+     * called. These methods will be called on the main/UI thread.
      *
-     * @param activity {@link android.app.Activity} instance to display the Login dialog on
+     * @param activity {@link Activity} instance to display the Login dialog on
      * @param scopes to initialize the {@link LiveConnectSession} with.
      *        See <a href="http://msdn.microsoft.com/en-us/library/hh243646.aspx">MSDN Live Connect
      *        Reference's Scopes and permissions</a> for a list of scopes and explanations.
@@ -516,7 +523,7 @@ public class LiveAuthClient {
         listener.onAuthComplete(LiveStatus.UNKNOWN, null, userState);
     }
 
-    /** @return The {@link org.apache.http.client.HttpClient} instance used by this {@code LiveAuthClient}. */
+    /** @return The {@link HttpClient} instance used by this {@code LiveAuthClient}. */
     HttpClient getHttpClient() {
         return this.httpClient;
     }
@@ -557,7 +564,7 @@ public class LiveAuthClient {
     }
 
     /**
-     * Sets the {@link org.apache.http.client.HttpClient} that is used for HTTP requests by this {@code LiveAuthClient}.
+     * Sets the {@link HttpClient} that is used for HTTP requests by this {@code LiveAuthClient}.
      * Tests will want to change this to mock the network/HTTP responses.
      * @param client The new HttpClient to be set.
      */
@@ -568,7 +575,7 @@ public class LiveAuthClient {
 
     /**
      * Clears the refresh token from this {@code LiveAuthClient}'s
-     * {@link android.app.Activity#getPreferences(int)}.
+     * {@link Activity#getPreferences(int)}.
      *
      * @return true if the refresh token was successfully cleared.
      */
@@ -594,7 +601,7 @@ public class LiveAuthClient {
 
     /**
      * Retrieves the refresh token from this {@code LiveAuthClient}'s
-     * {@link android.app.Activity#getPreferences(int)}.
+     * {@link Activity#getPreferences(int)}.
      *
      * @return the refresh token from persistent storage.
      */

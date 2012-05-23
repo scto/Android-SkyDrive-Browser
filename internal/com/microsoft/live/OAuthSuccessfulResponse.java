@@ -6,12 +6,14 @@
 
 package com.microsoft.live;
 
-import android.text.TextUtils;
-import com.microsoft.live.OAuth.TokenType;
+import java.util.Map;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Map;
+import android.text.TextUtils;
+
+import com.microsoft.live.OAuth.TokenType;
 
 /**
  * OAuthSuccessfulResponse represents a successful response form an OAuth server.
@@ -87,8 +89,8 @@ class OAuthSuccessfulResponse implements OAuthResponse {
             throw new LiveAuthException(ErrorMessages.SERVER_ERROR, e);
         }
 
-        final Builder builder =
-                new Builder(accessToken, tokenType);
+        final OAuthSuccessfulResponse.Builder builder =
+                new OAuthSuccessfulResponse.Builder(accessToken, tokenType);
 
         final String authenticationToken = fragmentParameters.get(OAuth.AUTHENTICATION_TOKEN);
         if (authenticationToken != null) {

@@ -6,6 +6,16 @@
 
 package com.microsoft.live;
 
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.http.client.HttpClient;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -19,12 +29,14 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-import android.webkit.*;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
+import android.webkit.SslErrorHandler;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import org.apache.http.client.HttpClient;
-
-import java.util.*;
 
 /**
  * AuthorizationRequest performs an Authorization Request by launching a WebView Dialog that
@@ -64,7 +76,7 @@ class AuthorizationRequest implements ObservableOAuthRequest, OAuthRequestObserv
              * based on the query parameters the method will either return an error, or proceed with
              * an AccessTokenRequest.
              *
-             * @param view {@link android.webkit.WebView} that this is attached to.
+             * @param view {@link WebView} that this is attached to.
              * @param url of the page being started
              */
             @Override
@@ -336,7 +348,7 @@ class AuthorizationRequest implements ObservableOAuthRequest, OAuthRequestObserv
     /**
      * Called when the response uri contains an access_token in the fragment.
      *
-     * This method reads the response and calls back the LiveOAuthListener on the UI/sign_in thread,
+     * This method reads the response and calls back the LiveOAuthListener on the UI/main thread,
      * and then dismisses the dialog window.
      *
      * See <a href="http://tools.ietf.org/html/draft-ietf-oauth-v2-22#section-1.3.1">Section
@@ -373,7 +385,7 @@ class AuthorizationRequest implements ObservableOAuthRequest, OAuthRequestObserv
 
         // Since we DO have an authorization code, launch an AccessTokenRequest.
         // We do this asynchronously to prevent the HTTP IO from occupying the
-        // UI/sign_in thread (which we are on right now).
+        // UI/main thread (which we are on right now).
         AccessTokenRequest request = new AccessTokenRequest(this.client,
                                                             this.clientId,
                                                             this.redirectUri,
@@ -399,8 +411,8 @@ class AuthorizationRequest implements ObservableOAuthRequest, OAuthRequestObserv
         // the fragment or the query parameters. The response could
         // either be successful or it could contain an error.
         // Check all situations and call the listener's appropriate callback.
-        // Callback the listener on the UI/sign_in thread. We could call it right away since
-        // we are on the UI/sign_in thread, but it is probably better that we finish up with
+        // Callback the listener on the UI/main thread. We could call it right away since
+        // we are on the UI/main thread, but it is probably better that we finish up with
         // the WebView code before we callback on the listener.
         boolean hasFragment = endUri.getFragment() != null;
         boolean hasQueryParameters = endUri.getQuery() != null;
@@ -459,7 +471,7 @@ class AuthorizationRequest implements ObservableOAuthRequest, OAuthRequestObserv
      * Called when end uri had an error in either the fragment or the query parameter.
      *
      * This method constructs the proper exception, calls the listener's appropriate callback method
-     * on the sign_in/UI thread, and then dismisses the dialog window.
+     * on the main/UI thread, and then dismisses the dialog window.
      *
      * @param error containing an error code
      * @param errorDescription optional text with additional information
@@ -476,7 +488,7 @@ class AuthorizationRequest implements ObservableOAuthRequest, OAuthRequestObserv
      * Called when an invalid uri (i.e., a uri that does not contain an error or a successful
      * response).
      *
-     * This method constructs an exception, calls the listener's appropriate callback on the sign_in/UI
+     * This method constructs an exception, calls the listener's appropriate callback on the main/UI
      * thread, and then dismisses the dialog window.
      */
     private void onInvalidUri() {

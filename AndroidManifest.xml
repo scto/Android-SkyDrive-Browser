@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.killerud.skydrive"
-          android:versionCode="4"
-          android:versionName="1.5.2">
+          android:versionCode="5"
+          android:versionName="2.0">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
@@ -11,7 +11,6 @@
 
     <application
             android:label="@string/appName"
-            android:hardwareAccelerated="true"
             android:name=".BrowserForSkyDriveApplication"
             android:theme="@style/LightTheme"
             android:debuggable="false"

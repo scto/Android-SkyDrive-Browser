@@ -6,10 +6,10 @@
 
 package com.microsoft.live;
 
-import android.net.Uri;
-import android.net.Uri.Builder;
-import android.os.Build;
-import android.text.TextUtils;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AUTH;
@@ -21,9 +21,10 @@ import org.apache.http.message.BasicHeader;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import android.net.Uri;
+import android.net.Uri.Builder;
+import android.os.Build;
+import android.text.TextUtils;
 
 /**
  * ApiRequest is an abstract base class that represents an Http Request made by the API.
@@ -50,9 +51,9 @@ abstract class ApiRequest<ResponseType> {
             }
         };
 
-        protected abstract void appendQueryParameter(Builder builder);
+        protected abstract void appendQueryParameter(Uri.Builder builder);
 
-        private static void appendSuppressRedirects(Builder builder, Boolean value) {
+        private static void appendSuppressRedirects(Uri.Builder builder, Boolean value) {
             builder.appendQueryParameter(QueryParameters.SUPPRESS_REDIRECTS, value.toString());
         }
     }
@@ -70,9 +71,9 @@ abstract class ApiRequest<ResponseType> {
             }
         };
 
-        protected abstract void appendQueryParameter(Builder builder);
+        protected abstract void appendQueryParameter(Uri.Builder builder);
 
-        private static void appendSuppressResponseCodes(Builder builder, Boolean value) {
+        private static void appendSuppressResponseCodes(Uri.Builder builder, Boolean value) {
             builder.appendQueryParameter(QueryParameters.SUPPRESS_RESPONSE_CODES, value.toString());
         }
     }
@@ -104,7 +105,7 @@ abstract class ApiRequest<ResponseType> {
     private final String path;
     private final ResponseHandler<ResponseType> responseHandler;
     private final LiveConnectSession session;
-    protected final Builder requestUri;
+    protected final Uri.Builder requestUri;
 
     public ApiRequest(LiveConnectSession session,
                       HttpClient client,
@@ -138,7 +139,7 @@ abstract class ApiRequest<ResponseType> {
         this.responseHandler = responseHandler;
         this.path = path;
 
-        Builder builder;
+        Uri.Builder builder;
         Uri pathUri = Uri.parse(path);
         if (pathUri.isAbsolute()) {
             builder = pathUri.buildUpon();

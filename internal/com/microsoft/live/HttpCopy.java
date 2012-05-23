@@ -6,10 +6,10 @@
 
 package com.microsoft.live;
 
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-
 import java.net.URI;
 import java.net.URISyntaxException;
+
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 
 /**
  * HttpCopy represents an HTTP COPY operation.

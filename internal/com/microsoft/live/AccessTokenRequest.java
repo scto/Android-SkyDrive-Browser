@@ -6,13 +6,15 @@
 
 package com.microsoft.live;
 
-import android.text.TextUtils;
-import com.microsoft.live.OAuth.GrantType;
+import java.util.List;
+
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
-import java.util.List;
+import android.text.TextUtils;
+
+import com.microsoft.live.OAuth.GrantType;
 
 /**
  * AccessTokenRequest represents a request for an Access Token.

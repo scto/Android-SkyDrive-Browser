@@ -6,8 +6,6 @@
 
 package com.microsoft.live;
 
-import android.net.Uri;
-import android.text.TextUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -15,6 +13,9 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import android.net.Uri;
+import android.text.TextUtils;
 
 class UploadRequest extends EntityEnclosingApiRequest<JSONObject> {
 

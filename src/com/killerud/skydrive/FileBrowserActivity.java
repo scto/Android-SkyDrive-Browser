@@ -36,7 +36,7 @@ public class FileBrowserActivity extends SherlockListActivity
     private Stack<File> mPreviousFolders;
     private BrowserListAdapter mAdapter;
     private ActionMode mActionMode;
-    private Context mContext;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -124,7 +124,6 @@ public class FileBrowserActivity extends SherlockListActivity
             skyDriveFolder.mkdirs();
         }
         loadFolder(skyDriveFolder);
-        mContext = getApplicationContext();
     }
 
     public boolean onOptionsItemSelected(MenuItem item)
@@ -418,8 +417,7 @@ public class FileBrowserActivity extends SherlockListActivity
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM|
                             MenuItem.SHOW_AS_ACTION_WITH_TEXT);
             menu.add(ContextItems.MENU_TITLE_SELECT_ALL)
-                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT
-                            | MenuItem.SHOW_AS_ACTION_NEVER);
+                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
             return true;
         }
 

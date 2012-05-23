@@ -6,15 +6,16 @@
 
 package com.microsoft.live;
 
-import android.os.AsyncTask;
-import com.microsoft.live.EntityEnclosingApiRequest.UploadProgressListener;
-
 import java.util.ArrayList;
+
+import android.os.AsyncTask;
+
+import com.microsoft.live.EntityEnclosingApiRequest.UploadProgressListener;
 
 /**
  * ApiRequestAsync performs an async ApiRequest by subclassing AsyncTask
  * and executing the request inside of doInBackground and giving the
- * response to the appropriate listener on the sign_in/UI thread.
+ * response to the appropriate listener on the main/UI thread.
  */
 class ApiRequestAsync<ResponseType> extends AsyncTask<Void, Long, Runnable>
                                     implements UploadProgressListener {
@@ -117,7 +118,7 @@ class ApiRequestAsync<ResponseType> extends AsyncTask<Void, Long, Runnable>
     /**
      * Constructs a new ApiRequestAsync object and initializes its member variables.
      *
-     * @param request operation to launch in an asynchronous manner
+     * @param operation to launch in an asynchronous manner
      */
     public ApiRequestAsync(ApiRequest<ResponseType> request) {
         assert request != null;
@@ -149,6 +150,7 @@ class ApiRequestAsync<ResponseType> extends AsyncTask<Void, Long, Runnable>
     @Override
     protected Runnable doInBackground(Void... args) {
         ResponseType response;
+
         try {
             response = this.request.execute();
         } catch (LiveOperationException e) {
@@ -161,7 +163,7 @@ class ApiRequestAsync<ResponseType> extends AsyncTask<Void, Long, Runnable>
     @Override
     protected void onPostExecute(Runnable result) {
         super.onPostExecute(result);
-        new Thread(result).run();
+        result.run();
     }
 
     @Override

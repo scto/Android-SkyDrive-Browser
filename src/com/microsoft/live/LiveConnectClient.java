@@ -6,8 +6,26 @@
 
 package com.microsoft.live;
 
-import android.os.AsyncTask;
-import android.text.TextUtils;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -30,24 +48,19 @@ import org.apache.http.protocol.HTTP;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
+import android.os.AsyncTask;
+import android.text.TextUtils;
 
 /**
  * {@code LiveConnectClient} is a class that is responsible for making requests over to the
  * Live Connect REST API. In order to perform requests, a {@link LiveConnectSession} is required.
- * A {@link LiveConnectSession} can be created from a {@link com.microsoft.live.LiveAuthClient}.
+ * A {@link LiveConnectSession} can be created from a {@link LiveAuthClient}.
  *
  * {@code LiveConnectClient} provides methods to perform both synchronous and asynchronous calls
  * on the Live Connect REST API. A synchronous method's corresponding asynchronous method is
  * suffixed with "Async" (e.g., the synchronous method, get, has a corresponding asynchronous
  * method called, getAsync). Asynchronous methods require a call back listener that will be called
- * back on the sign_in/UI thread on completion, error, or progress.
+ * back on the main/UI thread on completion, error, or progress.
  */
 public class LiveConnectClient {
 
@@ -555,7 +568,7 @@ public class LiveConnectClient {
      *
      * @param is to convert to a {@code byte[]}.
      * @return a new {@code byte[]} from the InputStream.
-     * @throws java.io.IOException if there was an error reading or closing the InputStream.
+     * @throws IOException if there was an error reading or closing the InputStream.
      */
     private static byte[] toByteArray(InputStream is) throws IOException {
         ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
@@ -645,7 +658,7 @@ public class LiveConnectClient {
      *
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
-     * be called. Both of these methods will be called on the sign_in/UI thread.
+     * be called. Both of these methods will be called on the main/UI thread.
      *
      * @param path object_id of the resource to copy.
      * @param destination the folder_id where the resource will be copied to.
@@ -668,7 +681,7 @@ public class LiveConnectClient {
      *
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
-     * be called. Both of these methods will be called on the sign_in/UI thread.
+     * be called. Both of these methods will be called on the main/UI thread.
      *
      * @param path object_id of the resource to copy.
      * @param destination the folder_id where the resource will be copied to
@@ -725,7 +738,7 @@ public class LiveConnectClient {
      *
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
-     * be called. Both of these methods will be called on the sign_in/UI thread.
+     * be called. Both of these methods will be called on the main/UI thread.
      *
      * @param path object_id of the resource to delete.
      * @param listener called on either completion or error during the delete request.
@@ -744,7 +757,7 @@ public class LiveConnectClient {
      *
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
-     * be called. Both of these methods will be called on the sign_in/UI thread.
+     * be called. Both of these methods will be called on the main/UI thread.
      *
      * @param path object_id of the resource to delete.
      * @param listener called on either completion or error during the delete request.
@@ -769,7 +782,7 @@ public class LiveConnectClient {
 
     /**
      * Downloads a resource by performing a synchronous HTTP GET on the Live Connect REST API that
-     * returns the response as an {@link java.io.InputStream}.
+     * returns the response as an {@link InputStream}.
      *
      * @param path object_id of the resource to download.
      * @throws LiveOperationException if there is an error during the execution of the request.
@@ -794,7 +807,7 @@ public class LiveConnectClient {
 
     /**
      * Downloads a resource by performing an asynchronous HTTP GET on the Live Connect REST API that
-     * returns the response as an {@link java.io.InputStream}.
+     * returns the response as an {@link InputStream}.
      *
      * {@link LiveDownloadOperationListener#onDownloadCompleted(LiveDownloadOperation)} will be
      * called on success.
@@ -804,7 +817,7 @@ public class LiveConnectClient {
      * Otherwise on error,
      * {@link LiveDownloadOperationListener#onDownloadFailed(LiveOperationException,
      * LiveDownloadOperation)} will
-     * be called. All of these methods will be called on the sign_in/UI thread.
+     * be called. All of these methods will be called on the main/UI thread.
      *
      * @param path object_id of the resource to download.
      * @param listener called on either completion or error during the download request.
@@ -819,7 +832,7 @@ public class LiveConnectClient {
 
     /**
      * Downloads a resource by performing an asynchronous HTTP GET on the Live Connect REST API that
-     * returns the response as an {@link java.io.InputStream}.
+     * returns the response as an {@link InputStream}.
      *
      * {@link LiveDownloadOperationListener#onDownloadCompleted(LiveDownloadOperation)} will be
      * called on success.
@@ -829,7 +842,7 @@ public class LiveConnectClient {
      * Otherwise on error,
      * {@link LiveDownloadOperationListener#onDownloadFailed(LiveOperationException,
      * LiveDownloadOperation)} will
-     * be called. All of these methods will be called on the sign_in/UI thread.
+     * be called. All of these methods will be called on the main/UI thread.
      *
      * @param path object_id of the resource to download.
      * @param listener called on either completion or error during the download request.
@@ -860,6 +873,7 @@ public class LiveConnectClient {
                                                File file,
                                                LiveDownloadOperationListener listener,
                                                Object userState) {
+        assertValidPath(path);
         if (listener == null) {
             listener = NULL_DOWNLOAD_OPERATION_LISTENER;
         }
@@ -875,6 +889,7 @@ public class LiveConnectClient {
 
         request.addObserver(new ContentLengthObserver(operation));
         asyncRequest.addObserver(new FileDownloadObserver(operation, listener, file));
+
 
         asyncRequest.execute();
 
@@ -904,7 +919,7 @@ public class LiveConnectClient {
      *
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
-     * be called. Both of these methods will be called on the sign_in/UI thread.
+     * be called. Both of these methods will be called on the main/UI thread.
      *
      * @param path of the resource to retrieve.
      * @param listener called on either completion or error during the get request.
@@ -921,7 +936,7 @@ public class LiveConnectClient {
      *
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
-     * be called. Both of these methods will be called on the sign_in/UI thread.
+     * be called. Both of these methods will be called on the main/UI thread.
      *
      * @param path object_id of the resource to retrieve.
      * @param listener called on either completion or error during the get request.
@@ -973,7 +988,7 @@ public class LiveConnectClient {
      *
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
-     * be called. Both of these methods will be called on the sign_in/UI thread.
+     * be called. Both of these methods will be called on the main/UI thread.
      *
      * @param path object_id of the resource to move.
      * @param destination the folder_id to where the resource will be moved to.
@@ -996,7 +1011,7 @@ public class LiveConnectClient {
      *
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
-     * be called. Both of these methods will be called on the sign_in/UI thread.
+     * be called. Both of these methods will be called on the main/UI thread.
      *
      * @param path object_id of the resource to move.
      * @param destination the folder_id to where the resource will be moved to.
@@ -1079,7 +1094,7 @@ public class LiveConnectClient {
      *
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
-     * be called. Both of these methods will be called on the sign_in/UI thread.
+     * be called. Both of these methods will be called on the main/UI thread.
      *
      * @param path object_id of the post request.
      * @param body body of the post request.
@@ -1099,7 +1114,7 @@ public class LiveConnectClient {
      *
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
-     * be called. Both of these methods will be called on the sign_in/UI thread.
+     * be called. Both of these methods will be called on the main/UI thread.
      *
      * @param path object_id of the post request.
      * @param body body of the post request.
@@ -1136,7 +1151,7 @@ public class LiveConnectClient {
      *
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
-     * be called. Both of these methods will be called on the sign_in/UI thread.
+     * be called. Both of these methods will be called on the main/UI thread.
      *
      * @param path object_id of the post request.
      * @param body body of the post request.
@@ -1156,7 +1171,7 @@ public class LiveConnectClient {
      *
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
-     * be called. Both of these methods will be called on the sign_in/UI thread.
+     * be called. Both of these methods will be called on the main/UI thread.
      *
      * @param path object_id of the post request.
      * @param body body of the post request.
@@ -1238,7 +1253,7 @@ public class LiveConnectClient {
      *
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
-     * be called. Both of these methods will be called on the sign_in/UI thread.
+     * be called. Both of these methods will be called on the main/UI thread.
      *
      * @param path object_id of the put request.
      * @param body body of the put request.
@@ -1258,7 +1273,7 @@ public class LiveConnectClient {
      *
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
-     * be called. Both of these methods will be called on the sign_in/UI thread.
+     * be called. Both of these methods will be called on the main/UI thread.
      *
      * @param path of the put request.
      * @param body of the put request.
@@ -1295,7 +1310,7 @@ public class LiveConnectClient {
      *
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
-     * be called. Both of these methods will be called on the sign_in/UI thread.
+     * be called. Both of these methods will be called on the main/UI thread.
      *
      * @param path object_id of the put request.
      * @param body body of the put request.
@@ -1315,7 +1330,7 @@ public class LiveConnectClient {
      *
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
-     * be called. Both of these methods will be called on the sign_in/UI thread.
+     * be called. Both of these methods will be called on the main/UI thread.
      *
      * @param path object_id of the put request.
      * @param body body of the put request.
@@ -1346,7 +1361,7 @@ public class LiveConnectClient {
 
     /**
      * Uploads a resource by performing a synchronous HTTP PUT on the Live Connect REST API that
-     * returns the response as an {@link java.io.InputStream}.
+     * returns the response as an {@link InputStream}.
      *
      * @param path location to upload to
      * @param filename name of the new resource
@@ -1362,7 +1377,7 @@ public class LiveConnectClient {
 
     /**
      * Uploads a resource by performing a synchronous HTTP PUT on the Live Connect REST API that
-     * returns the response as an {@link java.io.InputStream}.
+     * returns the response as an {@link InputStream}.
      *
      * @param path location to upload to
      * @param filename name of the new resource
@@ -1429,15 +1444,15 @@ public class LiveConnectClient {
 
     /**
      * Uploads a resource by performing an asynchronous HTTP PUT on the Live Connect REST API that
-     * returns the response as an {@link java.io.InputStream}.
+     * returns the response as an {@link InputStream}.
      *
      * {@link LiveUploadOperationListener#onUploadCompleted(LiveOperation)} will be called on
      * success.
      * {@link LiveUploadOperationListener#onUploadProgress(int, int, LiveOperation) will be called
-     * on upload progress. Both of these methods will be called on the sign_in/UI thread.
+     * on upload progress. Both of these methods will be called on the main/UI thread.
      * Otherwise,
      * {@link LiveUploadOperationListener#onUploadFailed(LiveOperationException, LiveOperation)}
-     * will be called. This method will NOT be called on the sign_in/UI thread.
+     * will be called. This method will NOT be called on the main/UI thread.
      *
      * @param path location to upload to
      * @param filename name of the new resource
@@ -1501,15 +1516,15 @@ public class LiveConnectClient {
 
     /**
      * Uploads a resource by performing an asynchronous HTTP PUT on the Live Connect REST API that
-     * returns the response as an {@link java.io.InputStream}.
+     * returns the response as an {@link InputStream}.
      *
      * {@link LiveUploadOperationListener#onUploadCompleted(LiveOperation)} will be called on
      * success.
      * {@link LiveUploadOperationListener#onUploadProgress(int, int, LiveOperation) will be called
-     * on upload progress. Both of these methods will be called on the sign_in/UI thread.
+     * on upload progress. Both of these methods will be called on the main/UI thread.
      * Otherwise,
      * {@link LiveUploadOperationListener#onUploadFailed(LiveOperationException, LiveOperation)}
-     * will be called. This method will NOT be called on the sign_in/UI thread.
+     * will be called. This method will NOT be called on the main/UI thread.
      *
      * @param path location to upload to.
      * @param filename name of the new resource.
@@ -1527,15 +1542,15 @@ public class LiveConnectClient {
 
     /**
      * Uploads a resource by performing an asynchronous HTTP PUT on the Live Connect REST API that
-     * returns the response as an {@link java.io.InputStream}.
+     * returns the response as an {@link InputStream}.
      *
      * {@link LiveUploadOperationListener#onUploadCompleted(LiveOperation)} will be called on
      * success.
      * {@link LiveUploadOperationListener#onUploadProgress(int, int, LiveOperation) will be called
-     * on upload progress. Both of these methods will be called on the sign_in/UI thread.
+     * on upload progress. Both of these methods will be called on the main/UI thread.
      * Otherwise,
      * {@link LiveUploadOperationListener#onUploadFailed(LiveOperationException, LiveOperation)}
-     * will be called. This method will NOT be called on the sign_in/UI thread.
+     * will be called. This method will NOT be called on the main/UI thread.
      *
      * @param path location to upload to.
      * @param filename name of the new resource.
@@ -1697,6 +1712,8 @@ public class LiveConnectClient {
      * Creates a new LiveOperation and executes it synchronously.
      *
      * @param request
+     * @param listener
+     * @param userState arbitrary object that is used to determine the caller of the method.
      * @return a new LiveOperation.
      */
     private LiveOperation execute(ApiRequest<JSONObject> request) throws LiveOperationException {

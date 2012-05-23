@@ -6,8 +6,9 @@
 
 package com.microsoft.live;
 
-import android.text.TextUtils;
 import org.json.JSONObject;
+
+import android.text.TextUtils;
 
 public class LiveOperation {
 

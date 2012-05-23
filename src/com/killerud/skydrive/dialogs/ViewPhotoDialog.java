@@ -17,6 +17,7 @@ import android.os.Environment;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+import com.actionbarsherlock.app.SherlockActivity;
 import com.killerud.skydrive.BrowserActivity;
 import com.killerud.skydrive.BrowserForSkyDriveApplication;
 import com.killerud.skydrive.R;
@@ -33,7 +34,7 @@ import java.io.File;
 /** The photo dialog. Downloads and displays an image, but does not save the
  * image unless the user presses the save button (i.e. acts as a cache)
  */
-public class ViewPhotoDialog extends Activity {
+public class ViewPhotoDialog extends SherlockActivity {
     private boolean mSavePhoto;
     private File mFile;
     private XLoader mXLoader;
@@ -101,13 +102,8 @@ public class ViewPhotoDialog extends Activity {
 
                                 @Override
                                 public void onDownloadCompleted(LiveDownloadOperation operation) {
-                                    try{
-                                        imageView.setImageBitmap(BitmapFactory.decodeFile(mFile.getPath()));
-                                        layout.removeView(textView);
-                                    }catch (OutOfMemoryError e){
-                                        imageView.destroyDrawingCache();
-                                        textView.setText("Image too large! Please download instead.");
-                                    }
+                                    imageView.setImageBitmap(BitmapFactory.decodeFile(mFile.getPath()));
+                                    layout.removeView(textView);
                                 }
                             });
         }

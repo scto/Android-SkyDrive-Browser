@@ -15,6 +15,7 @@ import android.os.Environment;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+import com.actionbarsherlock.app.SherlockActivity;
 import com.killerud.skydrive.BrowserForSkyDriveApplication;
 import com.killerud.skydrive.R;
 import com.killerud.skydrive.XLoader;
@@ -30,7 +31,7 @@ import java.util.ArrayList;
  * and allows the user to pause, play, stop, and save the song, or
  * dismiss the dialog
  */
-public class PlayAudioDialog extends Activity {
+public class PlayAudioDialog extends SherlockActivity {
     private MediaPlayer mPlayer;
 
     @Override
@@ -51,6 +52,10 @@ public class PlayAudioDialog extends Activity {
         final TextView playerStatus = (TextView) layout.findViewById(R.id.audioText);
         playerStatus.setText(getString(R.string.buffering) + " " + audio.getName());
 
+        final File file = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/", audio.getName());
+
+
+
         final ImageButton playPauseButton = (ImageButton) buttonLayout.findViewById(R.id.audioPlayPause);
         playPauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,6 +68,22 @@ public class PlayAudioDialog extends Activity {
                     mPlayer.start();
                     playPauseButton.setImageResource(R.drawable.ic_media_pause);
                     playerStatus.setText(getString(R.string.playing) + " " + audio.getName());
+                }else{
+                    try {
+                        if(file.exists()){
+                            mPlayer.setDataSource(file.getPath());
+                        }else{
+                            mPlayer.setDataSource(audio.getSource());
+                        }
+                        mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                        mPlayer.prepareAsync();
+                    } catch (IllegalArgumentException e) {
+                        showToast(e.getMessage());
+                    } catch (IllegalStateException e) {
+                        showToast(e.getMessage());
+                    } catch (IOException e) {
+                        showToast(e.getMessage());
+                    }
                 }
             }
         });
@@ -76,7 +97,6 @@ public class PlayAudioDialog extends Activity {
             }
         });
 
-        final File file = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/", audio.getName());
 
         final ImageButton saveButton = (ImageButton) buttonLayout.findViewById(R.id.audioSave);
         saveButton.setOnClickListener(new View.OnClickListener() {
@@ -125,13 +145,10 @@ public class PlayAudioDialog extends Activity {
             mPlayer.prepareAsync();
         } catch (IllegalArgumentException e) {
             showToast(e.getMessage());
-            return;
         } catch (IllegalStateException e) {
             showToast(e.getMessage());
-            return;
         } catch (IOException e) {
             showToast(e.getMessage());
-            return;
         }
 
 

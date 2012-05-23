@@ -14,11 +14,24 @@ final public class Constants {
             "wl.skydrive_update"
     };
 
+
     public static final String LOGTAG = "ASE";
 
-    /* Bytes */
-    public static final long CACHE_MAX_SIZE = 10485760l; //10MB
 
+    /* Actions */
+    public static final String ACTION_CANCEL_DOWN = "com.killerud.skydrive.CANCEL_DOWN";
+    public static final String ACTION_CANCEL_UP = "com.killerud.skydrive.CANCEL_UP";
+
+    /* Saved state */
+    public static final String STATE_CURRENT_FOLDER = "currentFolderState";
+    public static final String STATE_CURRENT_HIERARCHY = "currentFolderHierarchyState";
+    public static final String STATE_PREVIOUS_FOLDERS = "previousFolderIdsState";
+    public static final String STATE_CURRENTLY_SELECTED  = "currentlySelectedFiles";
+
+
+    /* Bytes */
+    public static final long THUMBS_MAX_SIZE = 10485760; //10MB
+    public static final long CACHE_MAX_SIZE = 104857600; //100MB
     private Constants() {
         throw new AssertionError("Unable to create Constants object.");
     }

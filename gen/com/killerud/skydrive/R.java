@@ -863,7 +863,7 @@ containing a value of this type.
         public static final int audioText=0x7f04002f;
         public static final int browser_header_layout=0x7f040042;
         public static final int buttonLayout=0x7f04002b;
-        public static final int cancelButton=0x7f04002d;
+        public static final int cancelButton=0x7f04002c;
         public static final int descriptionEditText=0x7f04002a;
         public static final int descriptionLabel=0x7f040029;
         public static final int disableHome=0x7f040009;
@@ -889,7 +889,7 @@ containing a value of this type.
         public static final int progressBar=0x7f040038;
         public static final int reload=0x7f04004a;
         public static final int renameButton=0x7f04003f;
-        public static final int saveButton=0x7f04002c;
+        public static final int saveButton=0x7f04002d;
         public static final int savedFiles=0x7f04004c;
         public static final int showCustom=0x7f040008;
         public static final int showHome=0x7f040005;

@@ -8,6 +8,7 @@ import android.os.Environment;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
+import com.killerud.skydrive.constants.Constants;
 import com.killerud.skydrive.objects.SkyDriveObject;
 import com.killerud.skydrive.util.IOUtil;
 import com.killerud.skydrive.util.JsonKeys;
@@ -89,7 +90,7 @@ public class XLoader {
 
         createProgressNotification(file.getName(),false);
 
-        final LiveOperation uploadOperation =
+        final LiveOperation operation =
                 client.uploadAsync(currentFolderId,
                         file.getName(),
                         file,
@@ -141,6 +142,55 @@ public class XLoader {
                             }
                         });
     }
+
+
+    /**
+     * A user might not want to download and save a file when clicking it, so cache it locally instead.
+     * Actual downloading is performed either in-dialog or with select -> download.
+     *
+     * @param client
+     * @param fileId
+     */
+    public void cacheFile(final LiveConnectClient client, SkyDriveObject fileId){
+        createProgressNotification(fileId.getName(), true);
+
+        final File fileToCreateLocally = checkForFileDuplicateAndCreateCopy(
+                new File(Environment.getExternalStorageDirectory() + "/Android/data/com.killerud.skydrive/cache/" + fileId.getName()));
+        final LiveDownloadOperation operation =
+                client.downloadAsync(fileId.getId() + "/content",
+                        fileToCreateLocally,
+                        new LiveDownloadOperationListener() {
+                            int lastPercent = 0;
+
+                            @Override
+                            public void onDownloadProgress(int totalBytes,
+                                                           int bytesRemaining,
+                                                           LiveDownloadOperation operation) {
+                                int newPercent = computePercentCompleted(totalBytes, bytesRemaining);
+                                if(newPercent>lastPercent+5){
+                                    lastPercent = newPercent;
+                                    mNotificationProgress.contentView.setProgressBar(R.id.progressBar, 100,
+                                            lastPercent, false);
+                                    mNotificationManager.notify(mNotificationProgressId,mNotificationProgress);
+                                }
+                            }
+
+                            @Override
+                            public void onDownloadFailed(LiveOperationException exception,
+                                                         LiveDownloadOperation operation) {
+                                mNotificationManager.cancel(mNotificationProgressId);
+                                Log.e("ASE", exception.getMessage());
+                                Toast.makeText(mContext, mContext.getString(R.string.downloadError),
+                                        Toast.LENGTH_SHORT).show();
+                            }
+
+                            @Override
+                            public void onDownloadCompleted(LiveDownloadOperation operation) {
+                                mNotificationManager.cancel(mNotificationProgressId);
+                            }
+                        });
+    }
+
 
     /**
      * Handles the downloading of a file from SkyDrive. Manages a notification with a progressbar.
@@ -376,8 +426,16 @@ public class XLoader {
         mNotificationView.setTextViewText(R.id.title, (downloading ? "Downloading " : "Uploading ") + fileName);
         mNotificationView.setProgressBar(R.id.progressBar, 100, 0, false);
 
-        mNotificationProgress.contentIntent = PendingIntent.getActivity(mContext,
-                0,new Intent(mContext,BrowserActivity.class),0);
+        Intent cancelOperation = new Intent(mContext,BrowserActivity.class);
+        if(downloading)
+        {
+            cancelOperation.setAction(Constants.ACTION_CANCEL_DOWN);
+        }else{
+            cancelOperation.setAction(Constants.ACTION_CANCEL_UP);
+        }
+
+        mNotificationProgress.contentIntent = PendingIntent.getActivity(
+                mContext, 0 , cancelOperation, 0);
         mNotificationProgress.contentView = mNotificationView;
 
         mNotificationManager.notify(mNotificationProgressId, mNotificationProgress);
@@ -482,8 +540,5 @@ public class XLoader {
 
         mNotificationManager.notify(mNotificationXLoadId, notification);
     }
-
-
-
 
 }

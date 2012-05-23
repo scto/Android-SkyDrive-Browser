@@ -6,16 +6,16 @@
 
 package com.microsoft.live;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.entity.HttpEntityWrapper;
-
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.entity.HttpEntityWrapper;
 
 /**
  * EntityEnclosingApiRequest is an ApiRequest with a body.

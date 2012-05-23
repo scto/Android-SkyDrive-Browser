@@ -4,8 +4,11 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -32,8 +35,10 @@ import com.microsoft.live.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Stack;
 
@@ -99,22 +104,22 @@ public class BrowserActivity extends SherlockListActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        Intent startIntent = getIntent();
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
         mXloader = new XLoader(this);
         mPhotoAdapter = new SkyDriveListAdapter(this);
-
         setListAdapter(mPhotoAdapter);
+
         BrowserForSkyDriveApplication app = (BrowserForSkyDriveApplication) getApplication();
+        mClient = app.getConnectClient();
 
         mCurrentlySelectedFiles = new ArrayList<SkyDriveObject>();
         mCopyCutFiles = new ArrayList<SkyDriveObject>();
-        mClient = app.getConnectClient();
-
-        determineBrowserStateAndLayout(startIntent);
-
         mPreviousFolderIds = new Stack<String>();
+        mCurrentFolderId = HOME_FOLDER;
+
+        determineBrowserStateAndLayout(getIntent());
+
 
         /* Makes sure that a local SkyDrive folder exists */
         File sdcard = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/");
@@ -128,12 +133,39 @@ public class BrowserActivity extends SherlockListActivity
 
         mFolderHierarchyView = (TextView) findViewById(R.id.folder_hierarchy);
         mFolderHierarchy = new Stack<String>();
-        updateFolderHierarchy(false);
+        mFolderHierarchy.push("Home");
+        updateFolderHierarchy(null);
 
         app.setCurrentBrowser(this);
 
         mActionBar = getSupportActionBar();
-        mActionBar.setDisplayHomeAsUpEnabled(true);
+
+        if (savedInstanceState != null && savedInstanceState.containsKey(Constants.STATE_CURRENT_FOLDER))
+        {
+            mCurrentFolderId = savedInstanceState.getString(Constants.STATE_CURRENT_FOLDER, HOME_FOLDER);
+        }
+        if (savedInstanceState != null && savedInstanceState.containsKey(Constants.STATE_CURRENT_HIERARCHY))
+        {
+            mFolderHierarchy = new Stack<String>();
+            String[] hierarchy = savedInstanceState.getStringArray(Constants.STATE_CURRENT_HIERARCHY);
+            for (int i = 0; i < hierarchy.length; i++)
+            {
+                mFolderHierarchy.push(hierarchy[i]);
+            }
+            updateFolderHierarchy(null);
+
+        }
+        if (savedInstanceState != null && savedInstanceState.containsKey(Constants.STATE_PREVIOUS_FOLDERS))
+        {
+            mPreviousFolderIds = new Stack<String>();
+            String[] folderIds = savedInstanceState.getStringArray(Constants.STATE_PREVIOUS_FOLDERS);
+            for (int i = 0; i < folderIds.length; i++)
+            {
+                mPreviousFolderIds.push(folderIds[i]);
+            }
+        }
+
+        loadFolder(mCurrentFolderId);
     }
 
     /**
@@ -151,7 +183,7 @@ public class BrowserActivity extends SherlockListActivity
             {
                 if (mActionMode != null)
                 {
-                    boolean rowIsChecked = mPhotoAdapter.isChecked(position);
+                    boolean rowIsChecked = mPhotoAdapter.isSelected(position);
                     if (rowIsChecked)
                     {
                         /* It's checked. Time to make it not! */
@@ -230,8 +262,14 @@ public class BrowserActivity extends SherlockListActivity
         if (keyCode == KeyEvent.KEYCODE_BACK)
         {
             /* If the previous folder stack is empty, exit the application */
-            navigateBack();
-            return true;
+            if (navigateBack())
+            {
+                return true;
+            }
+            else
+            {
+                return super.onKeyDown(keyCode, event);
+            }
         }
         else
         {
@@ -239,17 +277,40 @@ public class BrowserActivity extends SherlockListActivity
         }
     }
 
-    private void navigateBack()
+    private boolean navigateBack()
     {
-        if (mPreviousFolderIds.isEmpty()
-                || mFolderHierarchy.isEmpty())
+        if (mPreviousFolderIds.isEmpty())
         {
-            if (mActionBar != null) mActionBar.setDisplayHomeAsUpEnabled(false);
+            if (mActionBar != null)
+            {
+                mActionBar.setDisplayHomeAsUpEnabled(false);
+            }
+
+            return false;
+        }
+
+        loadFolder(mPreviousFolderIds.pop());
+        if (!mFolderHierarchy.isEmpty())
+        {
+            mFolderHierarchy.pop();
+            updateFolderHierarchy(null);
+        }
+
+        return true;
+    }
+
+    private void pushPreviousFolderId(String folderId)
+    {
+
+        if (!mPreviousFolderIds.isEmpty()
+                && mPreviousFolderIds.peek().equals(folderId))
+        {
             return;
         }
-        loadFolder(mPreviousFolderIds.pop());
-        mFolderHierarchy.pop();
-        updateFolderHierarchy(false);
+        else
+        {
+            mPreviousFolderIds.push(folderId);
+        }
     }
 
     /**
@@ -265,9 +326,8 @@ public class BrowserActivity extends SherlockListActivity
             @Override
             public void visit(SkyDriveAlbum album)
             {
-                mPreviousFolderIds.push(mCurrentFolderId);
-                mFolderHierarchy.push(album.getName());
-                updateFolderHierarchy(true);
+                pushPreviousFolderId(mCurrentFolderId);
+                updateFolderHierarchy(album);
                 loadFolder(album.getId());
             }
 
@@ -284,10 +344,8 @@ public class BrowserActivity extends SherlockListActivity
             @Override
             public void visit(SkyDriveFolder folder)
             {
-                mPreviousFolderIds.push(mCurrentFolderId);
-                mFolderHierarchy.push(folder.getName());
-                updateFolderHierarchy(true);
-                setTitle(folder.getName());
+                pushPreviousFolderId(mCurrentFolderId);
+                updateFolderHierarchy(folder);
                 loadFolder(folder.getId());
             }
 
@@ -326,7 +384,6 @@ public class BrowserActivity extends SherlockListActivity
     protected void onStart()
     {
         super.onStart();
-        loadFolder(HOME_FOLDER);
         /* Checks to see if the Sharing activity started the browser. If yes, some changes are made. */
         Intent intentThatStartedMe = getIntent();
         if (intentThatStartedMe.getAction() != null &&
@@ -339,24 +396,76 @@ public class BrowserActivity extends SherlockListActivity
                         mCurrentFolderId);
             }
         }
-        else
-        {
-            /* Let's only do this while using the app proper, and while the folder content is loading */
-            handleLocalCache();
-        }
     }
 
-    private void updateFolderHierarchy(boolean push)
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        /* Checks to see if the progress notification was clicked and started the activity
+        if(mXloader != null){
+            //No XLoader means no operations
+            Intent intentThatStartedMe = getIntent();
+            if(intentThatStartedMe.getAction() != null &&
+                intentThatStartedMe.getAction().equals(Constants.ACTION_CANCEL_DOWN)){
+
+                mXloader.cancelCurrentDownloadOperation();
+            }
+
+            if(intentThatStartedMe.getAction() != null &&
+                    intentThatStartedMe.getAction().equals(Constants.ACTION_CANCEL_UP)){
+
+                mXloader.cancelCurrentUploadOperation();
+            }
+
+        }
+        */
+    }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState)
+    {
+        super.onSaveInstanceState(savedInstanceState);
+
+        savedInstanceState.putString(Constants.STATE_CURRENT_FOLDER, mCurrentFolderId);
+
+        String[] hierarcy = new String[mFolderHierarchy.size()];
+        for (int i = 0; i < hierarcy.length; i++)
+        {
+            hierarcy[i] = mFolderHierarchy.get(i);
+        }
+
+        String[] previous = new String[mPreviousFolderIds.size()];
+        for (int i = 0; i < previous.length; i++)
+        {
+            previous[i] = mPreviousFolderIds.get(i);
+        }
+
+        savedInstanceState.putStringArray(Constants.STATE_CURRENT_HIERARCHY, hierarcy);
+        savedInstanceState.putStringArray(Constants.STATE_PREVIOUS_FOLDERS, previous);
+
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState)
+    {
+        super.onRestoreInstanceState(savedInstanceState);
+//---retrieve the information persisted earlier---
+        String ID = savedInstanceState.getString("ID");
+    }
+
+    private void updateFolderHierarchy(SkyDriveObject folder)
     {
         String currentText = mFolderHierarchyView.getText().toString();
         String newText = "";
 
-        if (push)
+        if (folder == null)
         {
-            newText = currentText + ">" + mFolderHierarchy.get(mFolderHierarchy.size() - 1);
-        }
-        else
-        {
+            if (!mFolderHierarchy.isEmpty())
+            {
+                setTitle(mFolderHierarchy.peek());
+            }
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < mFolderHierarchy.size(); i++)
             {
@@ -365,6 +474,20 @@ public class BrowserActivity extends SherlockListActivity
             }
             newText = builder.toString();
         }
+        else
+        {
+            if (!mFolderHierarchy.peek().equals(folder.getName()))
+            {
+                mFolderHierarchy.push(folder.getName());
+                newText = currentText + ">" + mFolderHierarchy.peek();
+                setTitle(folder.getName());
+            }
+            else
+            {
+                newText = currentText;
+            }
+        }
+
         mFolderHierarchyView.setText(newText);
     }
 
@@ -373,62 +496,6 @@ public class BrowserActivity extends SherlockListActivity
         setSupportProgressBarIndeterminateVisibility(false);
         supportInvalidateOptionsMenu();
         loadFolder(mCurrentFolderId);
-    }
-
-    private void handleLocalCache()
-    {
-        final File thumbCacheFolder = new File(Environment.getExternalStorageDirectory()
-                + "/Android/data/com.killerud.skydrive/thumbs/");
-
-        /* No cache for us to handle */
-        if (!thumbCacheFolder.exists())
-        {
-            return;
-        }
-
-        /* This block could potentially be a while, so run it in a new thread */
-        new Thread(new Runnable()
-        {
-            public void run()
-            {
-                File[] cacheContents = thumbCacheFolder.listFiles();
-                long cacheSize = 0l;
-
-                for (int i = 0; i < cacheContents.length; i++)
-                {
-                    cacheSize += cacheContents[i].length();
-                }
-
-                if (cacheSize > Constants.CACHE_MAX_SIZE)
-                {
-
-                    boolean cachePruned = false;
-                    int fileIndex = 0;
-
-                    while (!cachePruned)
-                    {
-                        try
-                        {
-                            cacheSize -= cacheContents[fileIndex].length();
-                            cacheContents[fileIndex].delete();
-                            Log.i(Constants.LOGTAG, "Thumb cache pruned");
-                        } catch (IndexOutOfBoundsException e)
-                        {
-                            cachePruned = true;
-                            Log.e(Constants.LOGTAG, "Error on thumb cache prune. " + e.getMessage());
-                        } finally
-                        {
-                            if (cacheSize < Constants.CACHE_MAX_SIZE - 50)
-                            {
-                                cachePruned = true;
-                            }
-
-                            fileIndex++;
-                        }
-                    }
-                }
-            }
-        }).start();
     }
 
 
@@ -616,7 +683,7 @@ public class BrowserActivity extends SherlockListActivity
             return mSkyDriveObjs.size();
         }
 
-        public boolean isChecked(int pos)
+        public boolean isSelected(int pos)
         {
             return mCheckedPositions.get(pos, false);
         }
@@ -673,7 +740,7 @@ public class BrowserActivity extends SherlockListActivity
 
                     setIcon(R.drawable.video_x_generic);
                     setName(video);
-                    setChecked(isChecked(mPosition));
+                    setSelected(isSelected(mPosition));
                 }
 
                 @Override
@@ -687,7 +754,7 @@ public class BrowserActivity extends SherlockListActivity
 
                     setIcon(determineFileIcon(file));
                     setName(file);
-                    setChecked(isChecked(mPosition));
+                    setSelected(isSelected(mPosition));
                 }
 
                 @Override
@@ -700,7 +767,7 @@ public class BrowserActivity extends SherlockListActivity
 
                     setIcon(R.drawable.folder);
                     setName(folder);
-                    setChecked(isChecked(mPosition));
+                    setSelected(isSelected(mPosition));
                 }
 
                 @Override
@@ -712,7 +779,7 @@ public class BrowserActivity extends SherlockListActivity
                     }
                     setIcon(R.drawable.folder_image);
                     setName(album);
-                    setChecked(isChecked(mPosition));
+                    setSelected(isSelected(mPosition));
                 }
 
                 @Override
@@ -725,7 +792,7 @@ public class BrowserActivity extends SherlockListActivity
 
                     setIcon(R.drawable.audio_x_generic);
                     setName(audio);
-                    setChecked(isChecked(mPosition));
+                    setSelected(isSelected(mPosition));
                 }
 
                 @Override
@@ -741,11 +808,11 @@ public class BrowserActivity extends SherlockListActivity
 
                     setIcon(R.drawable.image_x_generic);
                     setName(photo);
-                    setChecked(isChecked(mPosition));
+                    setSelected(isSelected(mPosition));
+
 
                     if (!setThumbnailFromCacheIfExists(view, photo))
                     {
-                        Log.i(Constants.LOGTAG, "Thumb loaded from web for image " + photo.getName());
                         mClient.downloadAsync(photo.getId() + "/picture?type=thumbnail", new LiveDownloadOperationListener()
                         {
                             @Override
@@ -759,49 +826,132 @@ public class BrowserActivity extends SherlockListActivity
                             public void onDownloadFailed(LiveOperationException exception,
                                                          LiveDownloadOperation operation)
                             {
-
+                                Log.i(Constants.LOGTAG, "Thumb download failed for " + photo.getName()
+                                        + ". " + exception.getMessage());
+                                setIcon(R.drawable.image_x_generic);
                             }
 
                             @Override
                             public void onDownloadCompleted(LiveDownloadOperation operation)
                             {
-                                Bitmap bm = BitmapFactory.decodeStream(operation.getStream());
-
-                                File cacheFolder = new File(Environment.getExternalStorageDirectory()
-                                        + "/Android/data/com.killerud.skydrive/thumbs/");
-
-                                if (!cacheFolder.exists())
+                                Log.i(Constants.LOGTAG, "Thumb loaded from web for image " + photo.getName());
+                                if (Build.VERSION.SDK_INT >= 11)
                                 {
-                                    cacheFolder.mkdirs();
-                                    /*
-                                    VERY important that this is mkdirS, not mkdir,
-                                    or just the last folder will be created, which won't
-                                    work with the other folders absent...
-                                    */
+                                    try
+                                    {
+                                        AsyncTask task = new AsyncTask<Object, Void, Bitmap>()
+                                        {
+
+                                            @Override
+                                            protected Bitmap doInBackground(Object... inputStreams)
+                                            {
+                                                Bitmap bm = null;
+
+                                                try
+                                                {
+                                                    bm = BitmapFactory.decodeStream(
+                                                            ((LiveDownloadOperation) inputStreams[0]).getStream());
+                                                } catch (Exception e)
+                                                {
+                                                    Log.i(Constants.LOGTAG, "doInBackground failed for "
+                                                            + photo.getName() + ". " + e.getMessage());
+                                                }
+
+                                                return bm;
+                                            }
+
+                                            protected void onPostExecute(Bitmap bm)
+                                            {
+                                                File cacheFolder = new File(Environment.getExternalStorageDirectory()
+                                                        + "/Android/data/com.killerud.skydrive/thumbs/");
+
+                                                if (!cacheFolder.exists())
+                                                {
+                                                    cacheFolder.mkdirs();
+                                                    /*
+                                                    VERY important that this is mkdirS, not mkdir,
+                                                    or just the last folder will be created, which won't
+                                                    work with the other folders absent...
+                                                    */
+                                                }
+
+                                                File thumb = new File(cacheFolder, photo.getName());
+                                                OutputStream out;
+                                                try
+                                                {
+                                                    out = new BufferedOutputStream(new FileOutputStream(thumb));
+                                                    bm.compress(Bitmap.CompressFormat.PNG, 85, out);
+                                                    out.flush();
+                                                    out.close();
+                                                    Log.i(Constants.LOGTAG, "Thumb cached for image " + photo.getName());
+                                                } catch (Exception e)
+                                                {
+                                                    /* Couldn't save thumbnail. No biggie.
+                                                   * Exception here rather than IOException
+                                                   * doe to rare cases of crashes when activity
+                                                   * loses focus during load.
+                                                   * */
+                                                    Log.e(Constants.LOGTAG, "Could not cache thumbnail for " + photo.getName()
+                                                            + ". " + e.toString());
+                                                }
+
+                                                ImageView imgView = (ImageView) view.findViewById(R.id.skyDriveItemIcon);
+                                                imgView.setImageBitmap(bm);
+                                            }
+
+                                        };
+
+                                        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, operation);
+                                    } catch (Exception e)
+                                    {
+                                        Log.i(Constants.LOGTAG, "OnDownloadCompleted failed for "
+                                                + photo.getName() + ". " + e.getMessage());
+
+                                        setIcon(R.drawable.image_x_generic);
+
+                                    }
+
+                                }else{
+                                    Bitmap bm = BitmapFactory.decodeStream(operation.getStream());
+
+                                    File cacheFolder = new File(Environment.getExternalStorageDirectory()
+                                            + "/Android/data/com.killerud.skydrive/thumbs/");
+
+                                    if (!cacheFolder.exists())
+                                    {
+                                        cacheFolder.mkdirs();
+                                        /*
+                                        VERY important that this is mkdirS, not mkdir,
+                                        or just the last folder will be created, which won't
+                                        work with the other folders absent...
+                                        */
+                                    }
+
+                                    File thumb = new File(cacheFolder, photo.getName());
+                                    try
+                                    {
+                                        FileOutputStream fileOut = new FileOutputStream(thumb);
+                                        bm.compress(Bitmap.CompressFormat.PNG, 85, fileOut);
+                                        fileOut.flush();
+                                        fileOut.close();
+                                        Log.i(Constants.LOGTAG, "Thumb cached for image " + photo.getName());
+                                    } catch (Exception e)
+                                    {
+                                        /* Couldn't save thumbnail. No biggie.
+                                       * Exception here rather than IOException
+                                       * doe to rare cases of crashes when activity
+                                       * loses focus during load.
+                                       * */
+                                        Log.e(Constants.LOGTAG, "Could not cache thumbnail for " + photo.getName()
+                                                + ". " + e.getMessage());
+                                    }
+
+                                    ImageView imgView = (ImageView) view.findViewById(R.id.skyDriveItemIcon);
+                                    imgView.setImageBitmap(bm);
                                 }
 
-                                File thumb = new File(cacheFolder, photo.getName());
-                                try
-                                {
-                                    FileOutputStream fileOut = new FileOutputStream(thumb);
-                                    bm.compress(Bitmap.CompressFormat.PNG, 85, fileOut);
-                                    fileOut.flush();
-                                    fileOut.close();
-                                    Log.i(Constants.LOGTAG, "Thumb cached for image " + photo.getName());
-                                } catch (Exception e)
-                                {
-                                    /* Couldn't save thumbnail. No biggie.
-                                    * Exception here rather than IOException
-                                    * doe to rare cases of crashes when activity
-                                    * loses focus during load.
-                                    * */
-                                    Log.e(Constants.LOGTAG, "Could not cache thumbnail for " + photo.getName()
-                                            + ". " + e.getMessage());
-                                }
-
-                                ImageView imgView = (ImageView) view.findViewById(R.id.skyDriveItemIcon);
-                                imgView.setImageBitmap(bm);
                             }
+
                         });
                     }
                 }
@@ -824,7 +974,7 @@ public class BrowserActivity extends SherlockListActivity
                     img.setImageResource(iconResId);
                 }
 
-                private void setChecked(boolean checked)
+                private void setSelected(boolean checked)
                 {
                     if (checked)
                     {
@@ -982,7 +1132,6 @@ public class BrowserActivity extends SherlockListActivity
 
             });
 
-
             return mView;
         }
     }
@@ -993,6 +1142,13 @@ public class BrowserActivity extends SherlockListActivity
         @Override
         public boolean onCreateActionMode(com.actionbarsherlock.view.ActionMode mode, Menu menu)
         {
+            /* Lock the orientation while the action mode is active.
+
+             * The actionmode as well as the selected items should be
+             * saved in onSaveInstanceState, this is a pretty ugly hack.
+             * */
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+
             menu.add(ContextItems.MENU_TITLE_DOWNLOAD)
                     .setIcon(android.R.drawable.ic_menu_save)
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
@@ -1009,8 +1165,7 @@ public class BrowserActivity extends SherlockListActivity
                     .setIcon(android.R.drawable.ic_menu_delete)
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             menu.add(ContextItems.MENU_TITLE_SELECT_ALL)
-                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT
-                            | MenuItem.SHOW_AS_ACTION_NEVER);
+                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
             return true;
         }
 
@@ -1131,6 +1286,12 @@ public class BrowserActivity extends SherlockListActivity
         @Override
         public void onDestroyActionMode(com.actionbarsherlock.view.ActionMode mode)
         {
+            /* Releases the orientation.
+
+             * The actionmode as well as the selected items should be
+             * saved in onSaveInstanceState, this is a pretty ugly hack.
+             * */
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
             mPhotoAdapter.clearChecked();
             mActionMode = null;
             mCurrentlySelectedFiles.clear();

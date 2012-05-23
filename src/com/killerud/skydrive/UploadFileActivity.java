@@ -409,11 +409,9 @@ public class UploadFileActivity extends SherlockListActivity
         public boolean onCreateActionMode(com.actionbarsherlock.view.ActionMode mode, Menu menu)
         {
             menu.add(ContextItems.MENU_TITLE_SELECT_ALL)
-                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT
-                            | MenuItem.SHOW_AS_ACTION_NEVER);
+                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
             menu.add(ContextItems.MENU_TITLE_UPLOAD)
-                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT
-                            | MenuItem.SHOW_AS_ACTION_ALWAYS);
+                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
             return true;
         }
 

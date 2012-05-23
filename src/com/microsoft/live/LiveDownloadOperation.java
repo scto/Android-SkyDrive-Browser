@@ -6,9 +6,9 @@
 
 package com.microsoft.live;
 
-import android.text.TextUtils;
-
 import java.io.InputStream;
+
+import android.text.TextUtils;
 
 public class LiveDownloadOperation {
 

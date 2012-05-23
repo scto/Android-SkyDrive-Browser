@@ -6,9 +6,10 @@
 
 package com.microsoft.live;
 
-import com.microsoft.live.OAuth.ErrorType;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.microsoft.live.OAuth.ErrorType;
 
 /**
  * OAuthErrorResponse represents the an Error Response from the OAuth server.

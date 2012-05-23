@@ -6,11 +6,11 @@
 
 package com.microsoft.live;
 
+import java.io.UnsupportedEncodingException;
+
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HTTP;
 import org.json.JSONObject;
-
-import java.io.UnsupportedEncodingException;
 
 /**
  * JsonEntity is an Entity that contains a Json body
@@ -24,7 +24,7 @@ class JsonEntity extends StringEntity {
      * Constructs a new JsonEntity.
      *
      * @param body
-     * @throws java.io.UnsupportedEncodingException
+     * @throws UnsupportedEncodingException
      */
     JsonEntity(JSONObject body) throws UnsupportedEncodingException {
         super(body.toString(), HTTP.UTF_8);

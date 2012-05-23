@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
+import com.actionbarsherlock.app.SherlockActivity;
 import com.killerud.skydrive.BrowserForSkyDriveApplication;
 import com.killerud.skydrive.R;
 import com.killerud.skydrive.XLoader;
@@ -25,7 +26,8 @@ import java.util.Map;
  * Date: 10.05.12
  * Time: 23:22
  */
-public class RenameDialog extends Activity{
+public class RenameDialog extends SherlockActivity
+{
     public static final String EXTRAS_FILE_IDS = "fileIds";
     public static final String EXTRAS_FILE_NAMES = "fileNames";
 

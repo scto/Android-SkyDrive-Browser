@@ -6,11 +6,11 @@
 
 package com.microsoft.live;
 
+import java.io.InputStream;
+
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
-
-import java.io.InputStream;
 
 class DownloadRequest extends ApiRequest<InputStream> {
 
