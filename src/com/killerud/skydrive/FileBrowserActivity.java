@@ -34,7 +34,7 @@ public class FileBrowserActivity extends SherlockListActivity
 
     private File mCurrentFolder;
     private Stack<File> mPreviousFolders;
-    private BrowserListAdapter mAdapter;
+    private FileBrowserListAdapter mAdapter;
     private ActionMode mActionMode;
 
 
@@ -50,7 +50,7 @@ public class FileBrowserActivity extends SherlockListActivity
 
         mCurrentlySelectedFiles = new ArrayList<String>();
         mPreviousFolders = new Stack<File>();
-        mAdapter = new BrowserListAdapter(getApplicationContext());
+        mAdapter = new FileBrowserListAdapter(getApplicationContext());
         setListAdapter(mAdapter);
 
         ListView lv = getListView();
@@ -79,7 +79,7 @@ public class FileBrowserActivity extends SherlockListActivity
                 }else{
                     mAdapter.setChecked(position, true);
                     mCurrentlySelectedFiles.add(
-                            ((BrowserListAdapter) getListAdapter()).getItem(position).getPath());
+                            ((FileBrowserListAdapter) getListAdapter()).getItem(position).getPath());
                 }
             }
         });
@@ -93,7 +93,7 @@ public class FileBrowserActivity extends SherlockListActivity
                     mActionMode = startActionMode(new BrowserActionMode());
                     mAdapter.setChecked(position, true);
                     mCurrentlySelectedFiles.add(
-                            ((BrowserListAdapter) getListAdapter()).getItem(position).getPath());
+                            ((FileBrowserListAdapter) getListAdapter()).getItem(position).getPath());
                 }
                 return true;
             }
@@ -310,7 +310,7 @@ public class FileBrowserActivity extends SherlockListActivity
         return R.drawable.text_x_preview;
     }
 
-    private class BrowserListAdapter extends BaseAdapter
+    private class FileBrowserListAdapter extends BaseAdapter
     {
         private final LayoutInflater mInflater;
         private final ArrayList<File> mFiles;
@@ -318,7 +318,7 @@ public class FileBrowserActivity extends SherlockListActivity
         private SparseBooleanArray mCheckedPositions;
         private int mPosition;
 
-        public BrowserListAdapter(Context context)
+        public FileBrowserListAdapter(Context context)
         {
             mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             mFiles = new ArrayList<File>();
@@ -465,13 +465,16 @@ public class FileBrowserActivity extends SherlockListActivity
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i)
                     {
+                        ArrayList<File> files =  ((FileBrowserListAdapter) getListAdapter()).getFiles();
                         for(int j=0;j<mCurrentlySelectedFiles.size();j++){
                             File file = new File(mCurrentlySelectedFiles.get(j));
                             if(file.exists()){
+                                files.remove(file);
                                 file.delete();
                             }
                         }
-                        ((BrowserListAdapter) getListAdapter()).notifyDataSetChanged();
+
+                        ((FileBrowserListAdapter) getListAdapter()).notifyDataSetChanged();
                         mode.finish();
                     }
                 });
@@ -500,7 +503,7 @@ public class FileBrowserActivity extends SherlockListActivity
             mAdapter.clearChecked();
             mActionMode = null;
             mCurrentlySelectedFiles.clear();
-            ((BrowserListAdapter) getListAdapter()).notifyDataSetChanged();
+            ((FileBrowserListAdapter) getListAdapter()).notifyDataSetChanged();
             supportInvalidateOptionsMenu();
         }
     }

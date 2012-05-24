@@ -63,8 +63,6 @@ public class NewFolderDialog extends SherlockActivity
                 folder.put(JsonKeys.NAME, name.getText().toString());
                 folder.put(JsonKeys.DESCRIPTION, description.getText().toString());
 
-
-
                 /* Attempts to create the folder */
                 mClient.postAsync(mCurrentFolderId,
                         new JSONObject(folder),
@@ -81,15 +79,11 @@ public class NewFolderDialog extends SherlockActivity
                             */
                             @Override
                             public void onComplete(LiveOperation operation) {
-                                //progressDialog.dismiss();
-
                                 JSONObject result = operation.getResult();
                                 if (result.has(JsonKeys.ERROR)) {
-                                    JSONObject error = result.optJSONObject(JsonKeys.ERROR);
-                                    String message = error.optString(JsonKeys.MESSAGE);
-                                    String code = error.optString(JsonKeys.CODE);
-                                    Toast.makeText(getApplicationContext(), code + ":" + message, Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getApplicationContext(), R.string.errorFolderCouldNotBeCreated, Toast.LENGTH_SHORT).show();
                                 } else {
+                                    ((BrowserForSkyDriveApplication)getApplication()).getCurrentBrowser().reloadFolder();
                                     finish();
                                 }
                             }

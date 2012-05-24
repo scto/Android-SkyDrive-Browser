@@ -142,7 +142,7 @@ public class BrowserActivity extends SherlockListActivity
 
         if (savedInstanceState != null && savedInstanceState.containsKey(Constants.STATE_CURRENT_FOLDER))
         {
-            mCurrentFolderId = savedInstanceState.getString(Constants.STATE_CURRENT_FOLDER, HOME_FOLDER);
+            mCurrentFolderId = savedInstanceState.getString(Constants.STATE_CURRENT_FOLDER);
         }
         if (savedInstanceState != null && savedInstanceState.containsKey(Constants.STATE_CURRENT_HIERARCHY))
         {
@@ -290,6 +290,7 @@ public class BrowserActivity extends SherlockListActivity
         }
 
         loadFolder(mPreviousFolderIds.pop());
+
         if (!mFolderHierarchy.isEmpty())
         {
             mFolderHierarchy.pop();
@@ -512,6 +513,7 @@ public class BrowserActivity extends SherlockListActivity
         {
             mActionBar.setDisplayHomeAsUpEnabled(true);
         }
+
         mCurrentFolderId = folderId;
 
         if (mCurrentlySelectedFiles != null) mCurrentlySelectedFiles.clear();
@@ -542,15 +544,7 @@ public class BrowserActivity extends SherlockListActivity
                 for (int i = 0; i < data.length(); i++)
                 {
                     SkyDriveObject skyDriveObj = SkyDriveObject.create(data.optJSONObject(i));
-                    if (mUploadDialog && (skyDriveObj.getType().equalsIgnoreCase(SkyDriveFolder.TYPE)
-                            || skyDriveObj.getType().equalsIgnoreCase(SkyDriveAlbum.TYPE)))
-                    {
-                        skyDriveObjs.add(skyDriveObj);
-                    }
-                    else if (!mUploadDialog)
-                    {
-                        skyDriveObjs.add(skyDriveObj);
-                    }
+                    skyDriveObjs.add(skyDriveObj);
                 }
 
                 mPhotoAdapter.notifyDataSetChanged();

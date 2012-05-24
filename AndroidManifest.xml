@@ -46,12 +46,10 @@
 
         <activity android:name=".UploadFileActivity"
                   android:label="@string/uploadFile"
-                android:theme ="@style/LightTheme"
                 />
 
         <activity android:name=".FileBrowserActivity"
                   android:label="@string/savedFiles"
-                  android:theme ="@style/LightTheme"
                 />
 
         <activity android:name=".dialogs.NewFolderDialog"
