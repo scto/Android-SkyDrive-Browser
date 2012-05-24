@@ -10,3 +10,32 @@ Supports batch uploading and downloading, renaming, deleting, copying and moving
 Play audio and view images in-app and download everything else to open in a supported installed app with a click of the notification.
 
 App icon by Tom Emery
+
+
+Changelog
+---------
+
+2.0
+- ActionBarSherlock! Action bar goodness for Android 2.
+- Checkboxes are gone. In accordance with design guidelines longclick selects files.
+- Contextual Action bar!
+- Clickable home icon for navigation
+- Upload multiple files at once using share!
+- Thumbnails and icons now have a static size
+- Thumbnails now load from a local cache after first download
+- Thumbnail download and display now work for all supported versions, including ICS
+- File browser view for checking and deleting saved files
+- Uploading now has its own activity
+- Image scaling improved, JPGs are now shown
+- Select/deselect all in SkyDrive browser
+- SkyDrive permissions restricted
+	+ Access information at all times is used for auto-login after the user has signed in once
+	+ SkyDrive is used for obvious reasons
+- You can now upload files from the whole phone, not just the SD card
+- Browser is organized alphabetically with folders first
+- File icons added for many file types
+- Sign-out button added
+- Many, many bug fixes
+
+
+

@@ -890,12 +890,13 @@ containing a value of this type.
         public static final int reload=0x7f04004a;
         public static final int renameButton=0x7f04003f;
         public static final int saveButton=0x7f04002d;
-        public static final int savedFiles=0x7f04004c;
+        public static final int savedFiles=0x7f04004d;
+        public static final int selectDeselectAll=0x7f04004c;
         public static final int showCustom=0x7f040008;
         public static final int showHome=0x7f040005;
         public static final int showTitle=0x7f040007;
         public static final int signInButton=0x7f040041;
-        public static final int signOut=0x7f04004d;
+        public static final int signOut=0x7f04004e;
         public static final int skyDriveItemIcon=0x7f040044;
         public static final int tabMode=0x7f040003;
         public static final int title=0x7f040037;
