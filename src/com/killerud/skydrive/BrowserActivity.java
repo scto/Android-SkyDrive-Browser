@@ -610,21 +610,6 @@ public class BrowserActivity extends SherlockListActivity
                 setSupportProgressBarIndeterminateVisibility(true);
                 mXloader.pasteFiles(mClient, mCopyCutFiles, mCurrentFolderId, mCutNotPaste);
                 return true;
-            case R.id.selectDeselectAll:
-                String title = item.getTitle().toString();
-                if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_SELECT_ALL))
-                {
-                    ((SkyDriveListAdapter) getListAdapter()).checkAll();
-                    item.setTitle(ContextItems.MENU_TITLE_DESELECT_ALL);
-                    return true;
-                }
-                else if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_DESELECT_ALL))
-                {
-                    ((SkyDriveListAdapter) getListAdapter()).clearChecked();
-                    item.setTitle(ContextItems.MENU_TITLE_SELECT_ALL);
-                    return true;
-                }
-                return true;
             case R.id.savedFiles:
                 startActivity(new Intent(getApplicationContext(), FileBrowserActivity.class));
                 return true;
@@ -1275,6 +1260,7 @@ public class BrowserActivity extends SherlockListActivity
             else if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_SELECT_ALL))
             {
                 mPhotoAdapter.checkAll();
+
                 item.setTitle(ContextItems.MENU_TITLE_DESELECT_ALL);
                 return true;
             }

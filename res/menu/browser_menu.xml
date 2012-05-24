@@ -29,9 +29,6 @@
           android:visible="false"
           />
 
-    <item   android:id="@+id/selectDeselectAll"
-            android:showAsAction="withText|never"
-            android:title="@string/selectAll" />
 
     <item   android:id="@+id/savedFiles"
             android:showAsAction="withText|never"

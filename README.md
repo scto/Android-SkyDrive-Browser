@@ -20,6 +20,7 @@ Changelog
 - Checkboxes are gone. In accordance with design guidelines longclick selects files.
 - Contextual Action bar!
 - Clickable home icon for navigation
+- Confirmation dialog on delete
 - Upload multiple files at once using share!
 - Thumbnails and icons now have a static size
 - Thumbnails now load from a local cache after first download
