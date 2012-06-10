@@ -285,6 +285,7 @@ public class BrowserActivity extends SherlockListActivity
                 mActionBar.setDisplayHomeAsUpEnabled(false);
             }
 
+            /* Do not navigate back, as the stack is empty */
             return false;
         }
 
@@ -503,9 +504,11 @@ public class BrowserActivity extends SherlockListActivity
 
         setSupportProgressBarIndeterminateVisibility(true);
 
-        if (mActionBar != null && !folderId.equalsIgnoreCase(HOME_FOLDER))
+        if (mActionBar != null && !mPreviousFolderIds.empty())
         {
             mActionBar.setDisplayHomeAsUpEnabled(true);
+        }else{
+            mActionBar.setDisplayHomeAsUpEnabled(false);
         }
 
         mCurrentFolderId = folderId;

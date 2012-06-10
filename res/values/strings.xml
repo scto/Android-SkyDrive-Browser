@@ -3,9 +3,9 @@
     <!-- Sign in -->
     <string name="appName">Android SkyDrive Explorer</string>
     <string name="initializing">Connecting the app to your Windows Live account...</string>
-    <string name="firstWelcome">Welcome to Android SkyDrive Browser!\n\nAndroid SkyDrive Browser lets you sign in with your
-        Windows Live account to access files in your Microsoft SkyDrive. It also lets you easily upload files to your
-        SkyDrive, making it that much easier to share your files between computers and friends!\n\nSign in with your Windows Live account to get started!</string>
+    <string name="firstWelcome">Welcome to Android SkyDrive Browser!\n\nSign in with your
+        Windows Live account and access your Microsoft SkyDrive. Easily upload files to your
+        SkyDrive and share your files between computers and friends!\n\nSign in with your Windows Live account to get started!</string>
     <string name="signIn">Sign in to Windows Live</string>
     <string name="mySkyDrive">My SkyDrive</string>
     <string name="automaticSignInError">Could not connect automatically to Windows Live. Please try logging in manually.</string>
