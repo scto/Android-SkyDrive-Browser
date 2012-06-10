@@ -29,8 +29,8 @@ public class XLoader {
     private NotificationManager mNotificationManager;
     private Notification mNotificationProgress;
     private RemoteViews mNotificationView;
-    private int mNotificationProgressId = 2;
-    private int mNotificationXLoadId = 1;
+    public static int NOTIFICATION_PROGRESS_ID = 2;
+    public static int NOTIFICATION_XLOADED_ID = 1;
     private BrowserActivity mContext;
 
     private IOUtil mIOUtil;
@@ -108,14 +108,14 @@ public class XLoader {
                                     lastPercent = newPercent;
                                     mNotificationProgress.contentView.setProgressBar(R.id.progressBar, 100,
                                             lastPercent, false);
-                                    mNotificationManager.notify(mNotificationProgressId,mNotificationProgress);
+                                    mNotificationManager.notify(NOTIFICATION_PROGRESS_ID,mNotificationProgress);
                                 }
                             }
 
                             @Override
                             public void onUploadFailed(LiveOperationException exception,
                                                        LiveOperation operation) {
-                                mNotificationManager.cancel(mNotificationProgressId);
+                                mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
                                 Toast.makeText(mContext, mContext.getString(R.string.uploadError), Toast.LENGTH_SHORT).show();
 
                                 localFilePaths.remove(localFilePaths.size()-1);
@@ -125,7 +125,7 @@ public class XLoader {
 
                             @Override
                             public void onUploadCompleted(LiveOperation operation) {
-                                mNotificationManager.cancel(mNotificationProgressId);
+                                mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
                                 JSONObject result = operation.getResult();
                                 if (result.has(JsonKeys.ERROR)) {
                                     JSONObject error = result.optJSONObject(JsonKeys.ERROR);
@@ -171,14 +171,14 @@ public class XLoader {
                                     lastPercent = newPercent;
                                     mNotificationProgress.contentView.setProgressBar(R.id.progressBar, 100,
                                             lastPercent, false);
-                                    mNotificationManager.notify(mNotificationProgressId,mNotificationProgress);
+                                    mNotificationManager.notify(NOTIFICATION_PROGRESS_ID,mNotificationProgress);
                                 }
                             }
 
                             @Override
                             public void onDownloadFailed(LiveOperationException exception,
                                                          LiveDownloadOperation operation) {
-                                mNotificationManager.cancel(mNotificationProgressId);
+                                mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
                                 Log.e("ASE", exception.getMessage());
                                 Toast.makeText(mContext, mContext.getString(R.string.downloadError),
                                         Toast.LENGTH_SHORT).show();
@@ -186,7 +186,7 @@ public class XLoader {
 
                             @Override
                             public void onDownloadCompleted(LiveDownloadOperation operation) {
-                                mNotificationManager.cancel(mNotificationProgressId);
+                                mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
                             }
                         });
     }
@@ -226,14 +226,14 @@ public class XLoader {
                                     lastPercent = newPercent;
                                     mNotificationProgress.contentView.setProgressBar(R.id.progressBar, 100,
                                             lastPercent, false);
-                                    mNotificationManager.notify(mNotificationProgressId,mNotificationProgress);
+                                    mNotificationManager.notify(NOTIFICATION_PROGRESS_ID,mNotificationProgress);
                                 }
                             }
 
                             @Override
                             public void onDownloadFailed(LiveOperationException exception,
                                                          LiveDownloadOperation operation) {
-                                mNotificationManager.cancel(mNotificationProgressId);
+                                mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
                                 Log.e("ASE", exception.getMessage());
 
                                 Toast.makeText(mContext, mContext.getString(R.string.downloadError),
@@ -246,7 +246,7 @@ public class XLoader {
 
                             @Override
                             public void onDownloadCompleted(LiveDownloadOperation operation) {
-                                mNotificationManager.cancel(mNotificationProgressId);
+                                mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
                                 showFileXloadedNotification(fileToCreateLocally, true);
 
                                 fileIds.remove(fileIds.size()-1);
@@ -438,7 +438,7 @@ public class XLoader {
                 mContext, 0 , cancelOperation, 0);
         mNotificationProgress.contentView = mNotificationView;
 
-        mNotificationManager.notify(mNotificationProgressId, mNotificationProgress);
+        mNotificationManager.notify(NOTIFICATION_PROGRESS_ID, mNotificationProgress);
     }
 
 
@@ -514,7 +514,7 @@ public class XLoader {
 
         notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
 
-        mNotificationManager.notify(mNotificationXLoadId, notification);
+        mNotificationManager.notify(NOTIFICATION_XLOADED_ID, notification);
     }
 
 
@@ -538,7 +538,7 @@ public class XLoader {
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
         notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
 
-        mNotificationManager.notify(mNotificationXLoadId, notification);
+        mNotificationManager.notify(NOTIFICATION_XLOADED_ID, notification);
     }
 
 }

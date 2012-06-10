@@ -66,5 +66,10 @@
         <activity android:name=".dialogs.RenameDialog"
                   android:theme="@style/LightThemeDialog" />
 
+        <service android:name=".CameraImageAutoUploadService"
+                 android:exported="false"
+                 android:label="@string/label_service"
+                 android:permission="android.permission.INTERNET" />
+
     </application>
 </manifest> 

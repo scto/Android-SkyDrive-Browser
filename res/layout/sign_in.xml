@@ -17,10 +17,10 @@
             android:layout_width="fill_parent"
             android:text="@string/signIn" />
 
-    <ImageView android:src="@drawable/ms_skydrive"
-               android:contentDescription="@string/mySkyDrive"
+    <TextView  android:layout_width="fill_parent"
+               android:id="@+id/noAccountText"
                android:layout_height="wrap_content"
-               android:layout_width="fill_parent"
-            />
+               android:text="@string/noAccount"
+               android:layout_marginBottom="20dip" />
 </LinearLayout>
 

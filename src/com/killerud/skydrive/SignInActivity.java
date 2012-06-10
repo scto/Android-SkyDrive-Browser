@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.util.Linkify;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -43,6 +44,10 @@ public class SignInActivity extends Activity {
 
         mSignInButton = (Button) findViewById(R.id.signInButton);
         mIntroText = (TextView) findViewById(R.id.introTextView);
+
+        final TextView noAccountText = (TextView) findViewById(R.id.noAccountText);
+        noAccountText.setText(getString(R.string.noAccount));
+        Linkify.addLinks(noAccountText, Linkify.ALL);
 
         mSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override

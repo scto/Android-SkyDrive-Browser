@@ -39,4 +39,19 @@ Changelog
 - Many, many bug fixes
 
 
+1.5.2
+- Image thumbnails (actual fix from 1.5.1. Thumbnail loading still a bit slow.)
+- New icon by Tom Emery
+
+1.5
+- Copy/Cut and paste file(s)
+- Delete file(s)
+- Rename file(s)
+- Batch download
+- Batch upload
+- Clicking notification on download opens the file (if supported app for reading is installed)
+- No more progress dialog spam. Notifications and toolbar do the job instead.
+- Photo dialog scales images
+- Updated icons
+
 

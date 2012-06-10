@@ -10,6 +10,7 @@
     <string name="mySkyDrive">My SkyDrive</string>
     <string name="automaticSignInError">Could not connect automatically to Windows Live. Please try logging in manually.</string>
     <string name="manualSignInError">Could not connect Windows Live. Please make sure you are connected to the internet and try again.</string>
+    <string name="noAccount">No Live account? Go to live.com and register for free!</string>
 
     <!-- Browser -->
     <string name="iconDescription">Icon</string>
@@ -21,6 +22,9 @@
     <string name="imageDisplayError">Could not show the image</string>
     <string name="copyCutSelectedFiles">Selected files ready to paste</string>
     <string name="imageLoading">Image is loading. Please wait.</string>
+
+    <!-- Service and settings -->
+    <string name="label_service">SkyDrive Camera AutoUploader</string>
 
     <!-- Download file dialog -->
     <string name="download">Download</string>

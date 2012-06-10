@@ -1,6 +1,8 @@
 package com.killerud.skydrive;
 
 import android.app.AlertDialog;
+import android.app.NotificationManager;
+import android.app.Service;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -164,6 +166,8 @@ public class BrowserActivity extends SherlockListActivity
                 mPreviousFolderIds.push(folderIds[i]);
             }
         }
+
+        startService(new Intent(this, CameraImageAutoUploadService.class));
 
         loadFolder(mCurrentFolderId);
     }
@@ -403,24 +407,14 @@ public class BrowserActivity extends SherlockListActivity
     protected void onResume()
     {
         super.onResume();
-        /* Checks to see if the progress notification was clicked and started the activity
+        /* Checks to see if the progress notification was clicked and started the activity */
         if(mXloader != null){
             //No XLoader means no operations
             Intent intentThatStartedMe = getIntent();
-            if(intentThatStartedMe.getAction() != null &&
-                intentThatStartedMe.getAction().equals(Constants.ACTION_CANCEL_DOWN)){
-
-                mXloader.cancelCurrentDownloadOperation();
-            }
-
-            if(intentThatStartedMe.getAction() != null &&
-                    intentThatStartedMe.getAction().equals(Constants.ACTION_CANCEL_UP)){
-
-                mXloader.cancelCurrentUploadOperation();
-            }
-
+            assert intentThatStartedMe.getAction() != null;
+            ((NotificationManager) getSystemService(Service.NOTIFICATION_SERVICE))
+                        .cancel(XLoader.NOTIFICATION_PROGRESS_ID);
         }
-        */
     }
 
 

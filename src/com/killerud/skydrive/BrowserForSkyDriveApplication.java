@@ -25,6 +25,9 @@ public class BrowserForSkyDriveApplication extends Application {
     }
 
     public BrowserActivity getCurrentBrowser(){
+        if(mCurrentBrowser==null){
+            return new BrowserActivity();
+        }
         return this.mCurrentBrowser;
     }
 
