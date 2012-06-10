@@ -60,6 +60,9 @@
         <activity android:name=".dialogs.PlayAudioDialog"
                   android:theme="@style/LightThemeDialog" />
 
+        <activity android:name=".dialogs.PlayVideoDialog"
+                  android:theme="@style/LightTheme" />
+
         <activity android:name=".dialogs.ViewPhotoDialog"
                   android:theme="@style/LightThemeDialog" />
 

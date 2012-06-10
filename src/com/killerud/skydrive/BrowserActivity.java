@@ -27,10 +27,7 @@ import com.actionbarsherlock.view.*;
 import com.killerud.skydrive.constants.Constants;
 import com.killerud.skydrive.constants.ContextItems;
 import com.killerud.skydrive.constants.SortCriteria;
-import com.killerud.skydrive.dialogs.NewFolderDialog;
-import com.killerud.skydrive.dialogs.PlayAudioDialog;
-import com.killerud.skydrive.dialogs.RenameDialog;
-import com.killerud.skydrive.dialogs.ViewPhotoDialog;
+import com.killerud.skydrive.dialogs.*;
 import com.killerud.skydrive.objects.*;
 import com.killerud.skydrive.util.JsonKeys;
 import com.microsoft.live.*;
@@ -166,8 +163,6 @@ public class BrowserActivity extends SherlockListActivity
                 mPreviousFolderIds.push(folderIds[i]);
             }
         }
-
-        startService(new Intent(this, CameraImageAutoUploadService.class));
 
         loadFolder(mCurrentFolderId);
     }
@@ -368,10 +363,9 @@ public class BrowserActivity extends SherlockListActivity
             public void visit(SkyDriveVideo video)
             {
                 if (mUploadDialog) return;
-                ArrayList<SkyDriveObject> toDownload = new ArrayList<SkyDriveObject>();
-                toDownload.add(video);
-                toDownload.trimToSize();
-                mXloader.downloadFiles(mClient, toDownload);
+                ((BrowserForSkyDriveApplication) getApplication()).setCurrentVideo(video);
+                Intent startVideoDialog = new Intent(getApplicationContext(), PlayVideoDialog.class);
+                startActivity(startVideoDialog);
             }
 
             @Override
@@ -407,7 +401,13 @@ public class BrowserActivity extends SherlockListActivity
     protected void onResume()
     {
         super.onResume();
+
+        startService(new Intent(this, CameraImageAutoUploadService.class));
+
+
         /* Checks to see if the progress notification was clicked and started the activity */
+
+
         if(mXloader != null){
             //No XLoader means no operations
             Intent intentThatStartedMe = getIntent();

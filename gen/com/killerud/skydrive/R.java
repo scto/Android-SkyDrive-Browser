@@ -866,12 +866,12 @@ containing a value of this type.
         public static final int browser_header_layout=0x7f040045;
         public static final int buttonLayout=0x7f04002b;
         public static final int cancelButton=0x7f04002c;
-        public static final int copy=0x7f040052;
-        public static final int copyItems=0x7f040055;
-        public static final int cut=0x7f040053;
-        public static final int cutItems=0x7f040056;
-        public static final int delete=0x7f040054;
-        public static final int deleteItems=0x7f040057;
+        public static final int copy=0x7f040053;
+        public static final int copyItems=0x7f040056;
+        public static final int cut=0x7f040054;
+        public static final int cutItems=0x7f040057;
+        public static final int delete=0x7f040055;
+        public static final int deleteItems=0x7f040058;
         public static final int descriptionEditText=0x7f04002a;
         public static final int descriptionLabel=0x7f040029;
         public static final int disableHome=0x7f040009;
@@ -890,30 +890,31 @@ containing a value of this type.
         public static final int nameEditText=0x7f040028;
         public static final int nameLabel=0x7f040027;
         public static final int nameTextView=0x7f04002e;
-        public static final int newFolder=0x7f04004a;
+        public static final int newFolder=0x7f04004b;
         public static final int noAccountText=0x7f040044;
         public static final int normal=0x7f040001;
-        public static final int paste=0x7f04004d;
+        public static final int paste=0x7f04004e;
         public static final int photo_dialog=0x7f04003b;
         public static final int progressBar=0x7f04003a;
-        public static final int reload=0x7f04004c;
-        public static final int rename=0x7f040051;
+        public static final int reload=0x7f04004d;
+        public static final int rename=0x7f040052;
         public static final int renameButton=0x7f040041;
         public static final int saveButton=0x7f04002d;
-        public static final int savedFiles=0x7f04004e;
-        public static final int share=0x7f040050;
+        public static final int savedFiles=0x7f04004f;
+        public static final int share=0x7f040051;
         public static final int showCustom=0x7f040008;
         public static final int showHome=0x7f040005;
         public static final int showTitle=0x7f040007;
         public static final int signInButton=0x7f040043;
-        public static final int signOut=0x7f04004f;
+        public static final int signOut=0x7f040050;
         public static final int skyDriveItemIcon=0x7f040047;
         public static final int tabMode=0x7f040003;
         public static final int title=0x7f040039;
         public static final int typeTextView=0x7f04002f;
-        public static final int uploadFile=0x7f04004b;
+        public static final int uploadFile=0x7f04004c;
         public static final int uploadToThisFolder=0x7f040049;
         public static final int useLogo=0x7f040004;
+        public static final int videoView=0x7f04004a;
         public static final int wrap_content=0x7f040000;
     }
     public static final class integer {
@@ -954,6 +955,7 @@ containing a value of this type.
         public static final int skydrive=0x7f03001f;
         public static final int skydrive_list_item=0x7f030020;
         public static final int skydrive_upload_picker=0x7f030021;
+        public static final int video_activity=0x7f030022;
     }
     public static final class menu {
         public static final int browser_menu=0x7f0b0000;

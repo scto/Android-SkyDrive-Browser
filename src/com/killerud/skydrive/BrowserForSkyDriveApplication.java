@@ -2,6 +2,7 @@ package com.killerud.skydrive;
 
 import android.app.Application;
 import com.killerud.skydrive.objects.SkyDriveAudio;
+import com.killerud.skydrive.objects.SkyDriveVideo;
 import com.microsoft.live.LiveAuthClient;
 import com.microsoft.live.LiveConnectClient;
 import com.microsoft.live.LiveConnectSession;
@@ -16,6 +17,7 @@ public class BrowserForSkyDriveApplication extends Application {
     private LiveConnectClient mConnectClient;
     private LiveConnectSession mSession;
     private SkyDriveAudio mCurrentMusic;
+    private SkyDriveVideo mCurrentVideo;
     private String mFirstName;
     private BrowserActivity mCurrentBrowser;
 
@@ -70,5 +72,15 @@ public class BrowserForSkyDriveApplication extends Application {
     public SkyDriveAudio getCurrentMusic(){
         return this.mCurrentMusic;
     }
+
+    public void setCurrentVideo(SkyDriveVideo video){
+        this.mCurrentVideo = video;
+    }
+
+    public SkyDriveVideo getCurrentVideo(){
+        return this.mCurrentVideo;
+    }
+
+
 
 }
