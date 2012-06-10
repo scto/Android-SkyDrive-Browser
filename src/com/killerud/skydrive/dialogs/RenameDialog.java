@@ -45,6 +45,8 @@ public class RenameDialog extends SherlockActivity
         final LiveConnectClient client = app.getConnectClient();
 
         final EditText name = (EditText) findViewById(R.id.nameEditText);
+        name.setText(fileNames.get(0));
+
         final EditText description = (EditText) findViewById(R.id.descriptionEditText);
         final XLoader loader = new XLoader(app.getCurrentBrowser());
 

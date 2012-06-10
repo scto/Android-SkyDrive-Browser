@@ -49,6 +49,7 @@ public class ViewPhotoDialog extends SherlockActivity {
         Intent photoDetails = getIntent();
         String photoId = photoDetails.getStringExtra("killerud.skydrive.PHOTO_ID");
         String photoName = photoDetails.getStringExtra("killerud.skydrive.PHOTO_NAME");
+        setTitle(photoName);
 
         BrowserForSkyDriveApplication app = (BrowserForSkyDriveApplication) getApplication();
         LiveConnectClient client = app.getConnectClient();

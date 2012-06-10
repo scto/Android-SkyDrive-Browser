@@ -419,6 +419,8 @@ public class XLoader {
                 (downloading ? "Downloading " : "Uploading ") + fileName,
                 System.currentTimeMillis());
 
+
+        mNotificationProgress.flags |= Notification.FLAG_AUTO_CANCEL;
         mNotificationProgress.flags |= Notification.FLAG_ONGOING_EVENT;
 
         mNotificationView = new RemoteViews(mContext.getPackageName(), R.layout.notification_xload);
@@ -494,6 +496,7 @@ public class XLoader {
         long when = System.currentTimeMillis();
 
         Notification notification = new Notification(icon, tickerText, when);
+        notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
         Context context = mContext;
         CharSequence contentTitle = mContext.getString(R.string.appName);
@@ -505,7 +508,7 @@ public class XLoader {
             Uri path = Uri.fromFile(file);
             notificationIntent = new Intent(Intent.ACTION_VIEW);
             notificationIntent.setDataAndType(path, mIOUtil.findMimeTypeOfFile(file));
-            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Notification.FLAG_AUTO_CANCEL);
+            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         }else{
             notificationIntent = new Intent(context, XLoader.class);
         }
