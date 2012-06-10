@@ -27,7 +27,7 @@ final public class Constants {
     public static final String STATE_CURRENT_HIERARCHY = "currentFolderHierarchyState";
     public static final String STATE_PREVIOUS_FOLDERS = "previousFolderIdsState";
     public static final String STATE_CURRENTLY_SELECTED  = "currentlySelectedFiles";
-
+    public static final String STATE_ACTION_MODE_CURRENTLY_ON = "actionModeOn";
 
     /* Bytes */
     public static final long THUMBS_MAX_SIZE = 10485760; //10MB

@@ -6,7 +6,6 @@ import android.app.Service;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -54,7 +53,7 @@ public class BrowserActivity extends SherlockListActivity
     private XLoader mXloader;
 
     /* Directory navigation */
-    private SkyDriveListAdapter mPhotoAdapter;
+    private SkyDriveListAdapter mSkyDriveListAdapter;
     private static final String HOME_FOLDER = "me/skydrive";
     private String mCurrentFolderId;
     private Stack<String> mPreviousFolderIds;
@@ -106,8 +105,8 @@ public class BrowserActivity extends SherlockListActivity
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
         mXloader = new XLoader(this);
-        mPhotoAdapter = new SkyDriveListAdapter(this);
-        setListAdapter(mPhotoAdapter);
+        mSkyDriveListAdapter = new SkyDriveListAdapter(this);
+        setListAdapter(mSkyDriveListAdapter);
 
         BrowserForSkyDriveApplication app = (BrowserForSkyDriveApplication) getApplication();
         mClient = app.getConnectClient();
@@ -139,11 +138,23 @@ public class BrowserActivity extends SherlockListActivity
 
         mActionBar = getSupportActionBar();
 
-        if (savedInstanceState != null && savedInstanceState.containsKey(Constants.STATE_CURRENT_FOLDER))
+        if(savedInstanceState != null){
+            restoreSavedInstanceState(savedInstanceState);
+        }
+
+        loadFolder(mCurrentFolderId);
+    }
+
+    private void restoreSavedInstanceState(Bundle savedInstanceState)
+    {
+        assert savedInstanceState != null;
+
+        if (savedInstanceState.containsKey(Constants.STATE_CURRENT_FOLDER))
         {
             mCurrentFolderId = savedInstanceState.getString(Constants.STATE_CURRENT_FOLDER);
         }
-        if (savedInstanceState != null && savedInstanceState.containsKey(Constants.STATE_CURRENT_HIERARCHY))
+
+        if (savedInstanceState.containsKey(Constants.STATE_CURRENT_HIERARCHY))
         {
             mFolderHierarchy = new Stack<String>();
             String[] hierarchy = savedInstanceState.getStringArray(Constants.STATE_CURRENT_HIERARCHY);
@@ -152,9 +163,9 @@ public class BrowserActivity extends SherlockListActivity
                 mFolderHierarchy.push(hierarchy[i]);
             }
             updateFolderHierarchy(null);
-
         }
-        if (savedInstanceState != null && savedInstanceState.containsKey(Constants.STATE_PREVIOUS_FOLDERS))
+
+        if (savedInstanceState.containsKey(Constants.STATE_PREVIOUS_FOLDERS))
         {
             mPreviousFolderIds = new Stack<String>();
             String[] folderIds = savedInstanceState.getStringArray(Constants.STATE_PREVIOUS_FOLDERS);
@@ -164,7 +175,19 @@ public class BrowserActivity extends SherlockListActivity
             }
         }
 
-        loadFolder(mCurrentFolderId);
+        if(savedInstanceState.containsKey(Constants.STATE_ACTION_MODE_CURRENTLY_ON))
+        {
+            if(savedInstanceState.getBoolean(Constants.STATE_ACTION_MODE_CURRENTLY_ON))
+            {
+                mActionMode = startActionMode(new SkyDriveActionMode());
+            }
+        }
+
+
+
+        ((SkyDriveListAdapter) getListAdapter()).setCheckedPositions(((BrowserForSkyDriveApplication) getApplication())
+                .getCurrentlyCheckedPositions());
+
     }
 
     /**
@@ -182,7 +205,7 @@ public class BrowserActivity extends SherlockListActivity
             {
                 if (mActionMode != null)
                 {
-                    boolean rowIsChecked = mPhotoAdapter.isSelected(position);
+                    boolean rowIsChecked = mSkyDriveListAdapter.isSelected(position);
                     if (rowIsChecked)
                     {
                         /* It's checked. Time to make it not! */
@@ -194,7 +217,7 @@ public class BrowserActivity extends SherlockListActivity
                         mCurrentlySelectedFiles.add(
                                 ((SkyDriveListAdapter) getListAdapter()).getItem(position));
                     }
-                    mPhotoAdapter.setChecked(position, !rowIsChecked);
+                    mSkyDriveListAdapter.setChecked(position, !rowIsChecked);
                 }
                 else
                 {
@@ -213,7 +236,7 @@ public class BrowserActivity extends SherlockListActivity
                 if (mActionMode == null)
                 {
                     mActionMode = startActionMode(new SkyDriveActionMode());
-                    mPhotoAdapter.setChecked(position, true);
+                    mSkyDriveListAdapter.setChecked(position, true);
                     mCurrentlySelectedFiles.add(
                             ((SkyDriveListAdapter) getListAdapter()).getItem(position));
                 }
@@ -441,14 +464,15 @@ public class BrowserActivity extends SherlockListActivity
         savedInstanceState.putStringArray(Constants.STATE_CURRENT_HIERARCHY, hierarcy);
         savedInstanceState.putStringArray(Constants.STATE_PREVIOUS_FOLDERS, previous);
 
-    }
+        if(mActionMode != null)
+        {
+            savedInstanceState.putBoolean(Constants.STATE_ACTION_MODE_CURRENTLY_ON, true);
+        }
 
-    @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState)
-    {
-        super.onRestoreInstanceState(savedInstanceState);
-//---retrieve the information persisted earlier---
-        String ID = savedInstanceState.getString("ID");
+        ((BrowserForSkyDriveApplication) getApplication())
+                .setCurrentlyCheckedPositions(
+                        ((SkyDriveListAdapter) getListAdapter())
+                                .getCheckedPositions());
     }
 
     private void updateFolderHierarchy(SkyDriveObject folder)
@@ -514,7 +538,13 @@ public class BrowserActivity extends SherlockListActivity
         mCurrentFolderId = folderId;
 
         if (mCurrentlySelectedFiles != null) mCurrentlySelectedFiles.clear();
-        ((SkyDriveListAdapter) getListAdapter()).clearChecked();
+
+        if(mActionMode == null)
+        {
+            /* If there is an action mode, we are currently selecting files and the state has just changed.
+             * No actual navigation has taken place, so we don't want to clear selected. */
+            ((SkyDriveListAdapter) getListAdapter()).clearChecked();
+        }
 
         if (mClient != null) mClient.getAsync(folderId + "/files?sort_by=" +
                 SortCriteria.NAME + "&sort_order=" + SortCriteria.ASCENDING, new LiveOperationListener()
@@ -534,7 +564,7 @@ public class BrowserActivity extends SherlockListActivity
                     return;
                 }
 
-                ArrayList<SkyDriveObject> skyDriveObjs = mPhotoAdapter.getSkyDriveObjects();
+                ArrayList<SkyDriveObject> skyDriveObjs = mSkyDriveListAdapter.getSkyDriveObjects();
                 skyDriveObjs.clear();
 
                 JSONArray data = result.optJSONArray(JsonKeys.DATA);
@@ -544,8 +574,17 @@ public class BrowserActivity extends SherlockListActivity
                     skyDriveObjs.add(skyDriveObj);
                 }
 
-                mPhotoAdapter.notifyDataSetChanged();
+                mSkyDriveListAdapter.notifyDataSetChanged();
+
+                SparseBooleanArray checkedPositions = mSkyDriveListAdapter.getCheckedPositions();
+                for(int i=0;i<checkedPositions.size();i++)
+                {
+                    int adapterPosition = checkedPositions.keyAt(i);
+                    SkyDriveObject objectSelected = mSkyDriveListAdapter.getItem(adapterPosition);
+                    mCurrentlySelectedFiles.add(objectSelected);
+                }
             }
+
 
             @Override
             public void onError(LiveOperationException exception, LiveOperation operation)
@@ -683,6 +722,29 @@ public class BrowserActivity extends SherlockListActivity
         {
             mCheckedPositions.put(pos, checked);
             notifyDataSetChanged();
+        }
+
+        public void setChecked(String skyDriveFileId, boolean checked)
+        {
+            for(int i=0;i<mSkyDriveObjs.size();i++)
+            {
+                if(mSkyDriveObjs.get(i).getId().equals(skyDriveFileId))
+                {
+                    setChecked(i, checked);
+                    if(checked) mCurrentlySelectedFiles.add(mSkyDriveObjs.get(i));
+                }
+            }
+        }
+
+        public void setCheckedPositions(SparseBooleanArray checkedPositions)
+        {
+            this.mCheckedPositions = checkedPositions;
+            notifyDataSetChanged();
+        }
+
+        public SparseBooleanArray getCheckedPositions()
+        {
+            return this.mCheckedPositions;
         }
 
         public void clearChecked()
@@ -1133,12 +1195,6 @@ public class BrowserActivity extends SherlockListActivity
         @Override
         public boolean onCreateActionMode(com.actionbarsherlock.view.ActionMode mode, Menu menu)
         {
-            /* Lock the orientation while the action mode is active.
-
-             * The actionmode as well as the selected items should be
-             * saved in onSaveInstanceState, this is a pretty ugly hack.
-             * */
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
 
             menu.add(ContextItems.MENU_TITLE_DOWNLOAD)
                     .setIcon(android.R.drawable.ic_menu_save)
@@ -1176,6 +1232,9 @@ public class BrowserActivity extends SherlockListActivity
                 *  Create a clone so selected aren't cleared logically.
                 */
                 mXloader.downloadFiles(mClient, (ArrayList<SkyDriveObject>) mCurrentlySelectedFiles.clone());
+
+                ((SkyDriveListAdapter) getListAdapter()).clearChecked();
+                mCurrentlySelectedFiles.clear();
                 mode.finish();
                 return true;
             }
@@ -1185,6 +1244,9 @@ public class BrowserActivity extends SherlockListActivity
                 mCutNotPaste = false;
 
                 Toast.makeText(getApplicationContext(), R.string.copyCutSelectedFiles, Toast.LENGTH_SHORT).show();
+
+                ((SkyDriveListAdapter) getListAdapter()).clearChecked();
+                mCurrentlySelectedFiles.clear();
                 mode.finish();
                 return true;
             }
@@ -1194,6 +1256,9 @@ public class BrowserActivity extends SherlockListActivity
                 mCutNotPaste = true;
 
                 Toast.makeText(getApplicationContext(), R.string.copyCutSelectedFiles, Toast.LENGTH_SHORT).show();
+
+                ((SkyDriveListAdapter) getListAdapter()).clearChecked();
+                mCurrentlySelectedFiles.clear();
                 mode.finish();
                 return true;
             }
@@ -1251,19 +1316,20 @@ public class BrowserActivity extends SherlockListActivity
                 startActivity(startRenameDialog);
 
                 ((SkyDriveListAdapter) getListAdapter()).clearChecked();
+                mCurrentlySelectedFiles.clear();
                 mode.finish();
                 return true;
             }
             else if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_SELECT_ALL))
             {
-                mPhotoAdapter.checkAll();
-
+                ((SkyDriveListAdapter) getListAdapter()).checkAll();
                 item.setTitle(ContextItems.MENU_TITLE_DESELECT_ALL);
                 return true;
             }
             else if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_DESELECT_ALL))
             {
-                mPhotoAdapter.clearChecked();
+                ((SkyDriveListAdapter) getListAdapter()).clearChecked();
+                mCurrentlySelectedFiles.clear();
                 item.setTitle(ContextItems.MENU_TITLE_SELECT_ALL);
                 return true;
             }
@@ -1271,22 +1337,13 @@ public class BrowserActivity extends SherlockListActivity
             {
                 return false;
             }
-
         }
 
 
         @Override
         public void onDestroyActionMode(com.actionbarsherlock.view.ActionMode mode)
         {
-            /* Releases the orientation.
-
-             * The actionmode as well as the selected items should be
-             * saved in onSaveInstanceState, this is a pretty ugly hack.
-             * */
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-            mPhotoAdapter.clearChecked();
             mActionMode = null;
-            mCurrentlySelectedFiles.clear();
             supportInvalidateOptionsMenu();
         }
     }

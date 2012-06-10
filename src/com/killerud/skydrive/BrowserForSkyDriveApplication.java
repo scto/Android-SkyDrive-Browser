@@ -1,6 +1,7 @@
 package com.killerud.skydrive;
 
 import android.app.Application;
+import android.util.SparseBooleanArray;
 import com.killerud.skydrive.objects.SkyDriveAudio;
 import com.killerud.skydrive.objects.SkyDriveVideo;
 import com.microsoft.live.LiveAuthClient;
@@ -12,7 +13,8 @@ import com.microsoft.live.LiveConnectSession;
  * Date: 25.04.12
  * Time: 14:29
  */
-public class BrowserForSkyDriveApplication extends Application {
+public class BrowserForSkyDriveApplication extends Application
+{
     private LiveAuthClient mAuthClient;
     private LiveConnectClient mConnectClient;
     private LiveConnectSession mSession;
@@ -20,67 +22,96 @@ public class BrowserForSkyDriveApplication extends Application {
     private SkyDriveVideo mCurrentVideo;
     private String mFirstName;
     private BrowserActivity mCurrentBrowser;
+    private SparseBooleanArray mCheckedPositions;
 
 
-    public void setCurrentBrowser(BrowserActivity browser){
+    public void setCurrentBrowser(BrowserActivity browser)
+    {
         this.mCurrentBrowser = browser;
     }
 
-    public BrowserActivity getCurrentBrowser(){
-        if(mCurrentBrowser==null){
+    public BrowserActivity getCurrentBrowser()
+    {
+        if (mCurrentBrowser == null)
+        {
             return new BrowserActivity();
         }
         return this.mCurrentBrowser;
     }
 
-    public LiveAuthClient getAuthClient() {
+    public LiveAuthClient getAuthClient()
+    {
         return mAuthClient;
     }
 
-    public LiveConnectClient getConnectClient() {
+    public LiveConnectClient getConnectClient()
+    {
         return mConnectClient;
     }
 
-    public LiveConnectSession getSession() {
+    public LiveConnectSession getSession()
+    {
         return mSession;
     }
 
-    public void setAuthClient(LiveAuthClient authClient) {
+    public void setAuthClient(LiveAuthClient authClient)
+    {
         mAuthClient = authClient;
     }
 
-    public void setConnectClient(LiveConnectClient connectClient) {
+    public void setConnectClient(LiveConnectClient connectClient)
+    {
         mConnectClient = connectClient;
     }
 
-    public void setSession(LiveConnectSession session) {
+    public void setSession(LiveConnectSession session)
+    {
         mSession = session;
     }
 
-    public void setUserFirstName(String name){
+    public void setUserFirstName(String name)
+    {
         mFirstName = name;
     }
 
-    public String getUserFirstName(){
+    public String getUserFirstName()
+    {
         return mFirstName;
     }
 
-    public void setCurrentMusic(SkyDriveAudio audio){
+    public void setCurrentMusic(SkyDriveAudio audio)
+    {
         this.mCurrentMusic = audio;
     }
 
-    public SkyDriveAudio getCurrentMusic(){
+    public SkyDriveAudio getCurrentMusic()
+    {
         return this.mCurrentMusic;
     }
 
-    public void setCurrentVideo(SkyDriveVideo video){
+    public void setCurrentVideo(SkyDriveVideo video)
+    {
         this.mCurrentVideo = video;
     }
 
-    public SkyDriveVideo getCurrentVideo(){
+    public SkyDriveVideo getCurrentVideo()
+    {
         return this.mCurrentVideo;
     }
 
+    public SparseBooleanArray getCurrentlyCheckedPositions()
+    {
+        if (mCheckedPositions != null)
+        {
+            return mCheckedPositions;
+        }
 
+        return new SparseBooleanArray();
+    }
+
+    public void setCurrentlyCheckedPositions(SparseBooleanArray checkedPositions)
+    {
+        this.mCheckedPositions = checkedPositions;
+    }
 
 }
