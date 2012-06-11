@@ -386,9 +386,18 @@ public class XLoader
 
                 public void onComplete(LiveOperation operation)
                 {
-                    fileIds.remove(fileIds.size() - 1);
-                    fileIds.trimToSize();
-                    pasteFiles(client, fileIds, currentFolder, cutNotCopy);
+                    try{
+                        fileIds.remove(fileIds.size() - 1);
+                        fileIds.trimToSize();
+                        pasteFiles(client, fileIds, currentFolder, cutNotCopy);
+                    }catch (IndexOutOfBoundsException e){
+                        Toast.makeText(mContext,
+                                "Something happened while moving. Some files may not have been moved.",
+                                Toast.LENGTH_SHORT).show();
+                        mContext.reloadFolder();
+                        return;
+                    }
+
                 }
             });
         }

@@ -15,6 +15,17 @@ App icon by Tom Emery
 Changelog
 ---------
 
+2.1
+- Automatic camera image uploads option
+- Selected files and current folder properly saved during orientation change for all browsers
+- Icons updated and are now color and style consistent across Android versions
+- Video streaming window with media controls (file type support varies from phone to phone)
+- Fixed home caret issue
+- Rename dialog now has the original file name initially
+- Download and upload notifications dissapear when clicked
+- The issue with users experiencing crashes on Sign out should be resolved
+- Crashes on file paste should now be fixed
+
 2.0
 - ActionBarSherlock! Action bar goodness for Android 2.
 - Checkboxes are gone. In accordance with design guidelines longclick selects files.

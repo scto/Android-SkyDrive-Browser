@@ -390,7 +390,7 @@ public class BrowserActivity extends SherlockListActivity
             {
                 if (mUploadDialog) return;
                 ((BrowserForSkyDriveApplication) getApplication()).setCurrentVideo(video);
-                Intent startVideoDialog = new Intent(getApplicationContext(), PlayVideoDialog.class);
+                Intent startVideoDialog = new Intent(getApplicationContext(), PlayVideoActivity.class);
                 startActivity(startVideoDialog);
             }
 
@@ -409,17 +409,22 @@ public class BrowserActivity extends SherlockListActivity
     protected void onStart()
     {
         super.onStart();
-        /* Checks to see if the Sharing activity started the browser. If yes, some changes are made. */
+
         Intent intentThatStartedMe = getIntent();
         if (intentThatStartedMe.getAction() != null &&
                 intentThatStartedMe.getAction().equalsIgnoreCase("killerud.skydrive.SHARE_UPLOAD"))
         {
-            if (intentThatStartedMe.getExtras().getString(UploadFileActivity.EXTRA_FILES_LIST) != null)
-            {
-                mXloader.uploadFile(mClient,
-                        intentThatStartedMe.getStringArrayListExtra(UploadFileActivity.EXTRA_FILES_LIST),
-                        mCurrentFolderId);
-            }
+            uploadFilesSentThroughShareButton(intentThatStartedMe);
+        }
+    }
+
+    private void uploadFilesSentThroughShareButton(Intent intentThatStartedMe)
+    {
+        if (intentThatStartedMe.getExtras().getString(UploadFileActivity.EXTRA_FILES_LIST) != null)
+        {
+            mXloader.uploadFile(mClient,
+                    intentThatStartedMe.getStringArrayListExtra(UploadFileActivity.EXTRA_FILES_LIST),
+                    mCurrentFolderId);
         }
     }
 
@@ -436,18 +441,6 @@ public class BrowserActivity extends SherlockListActivity
         else
         {
             stopService(new Intent(this, CameraImageAutoUploadService.class));
-        }
-
-        /* Checks to see if the progress notification was clicked and started the activity */
-
-
-        if (mXloader != null)
-        {
-            //No XLoader means no operations
-            Intent intentThatStartedMe = getIntent();
-            assert intentThatStartedMe.getAction() != null;
-            ((NotificationManager) getSystemService(Service.NOTIFICATION_SERVICE))
-                    .cancel(XLoader.NOTIFICATION_PROGRESS_ID);
         }
     }
 
@@ -492,21 +485,12 @@ public class BrowserActivity extends SherlockListActivity
 
         if (folder == null)
         {
-            if (!mFolderHierarchy.isEmpty())
-            {
-                setTitle(mFolderHierarchy.peek());
-            }
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < mFolderHierarchy.size(); i++)
-            {
-                builder.append(mFolderHierarchy.get(i));
-                builder.append(">");
-            }
-            newText = builder.toString();
+            newText = updateFolderHierarchyWhenFolderIsNull();
         }
         else
         {
-            if (!mFolderHierarchy.peek().equals(folder.getName()))
+            if (!mFolderHierarchy.empty() &&
+                    !mFolderHierarchy.peek().equals(folder.getName()))
             {
                 mFolderHierarchy.push(folder.getName());
                 newText = currentText + ">" + mFolderHierarchy.peek();
@@ -517,8 +501,25 @@ public class BrowserActivity extends SherlockListActivity
                 newText = currentText;
             }
         }
-
         mFolderHierarchyView.setText(newText);
+    }
+
+    private String updateFolderHierarchyWhenFolderIsNull()
+    {
+        if (!mFolderHierarchy.isEmpty())
+        {
+            setTitle(mFolderHierarchy.peek());
+        }
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < mFolderHierarchy.size(); i++)
+        {
+            builder.append(mFolderHierarchy.get(i));
+            if(i>0) //If not "Home"
+            {
+                builder.append(">");
+            }
+        }
+        return builder.toString();
     }
 
     public void reloadFolder()

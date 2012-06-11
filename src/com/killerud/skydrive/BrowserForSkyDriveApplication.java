@@ -2,6 +2,7 @@ package com.killerud.skydrive;
 
 import android.app.Application;
 import android.util.SparseBooleanArray;
+import com.killerud.skydrive.constants.Constants;
 import com.killerud.skydrive.objects.SkyDriveAudio;
 import com.killerud.skydrive.objects.SkyDriveVideo;
 import com.microsoft.live.LiveAuthClient;
@@ -41,6 +42,10 @@ public class BrowserForSkyDriveApplication extends Application
 
     public LiveAuthClient getAuthClient()
     {
+        if(mAuthClient == null)
+        {
+            return new LiveAuthClient(getApplicationContext(), Constants.APP_CLIENT_ID);
+        }
         return mAuthClient;
     }
 
