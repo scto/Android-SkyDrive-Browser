@@ -36,6 +36,7 @@ public class XLoader
     public static int NOTIFICATION_PROGRESS_ID = 2;
     public static int NOTIFICATION_XLOADED_ID = 1;
     private BrowserActivity mContext;
+    private boolean mNotificationAvailable;
 
     private IOUtil mIOUtil;
 
@@ -49,7 +50,12 @@ public class XLoader
     public XLoader(BrowserActivity browserActivity)
     {
         mContext = browserActivity;
-        mNotificationManager = (NotificationManager) mContext.getSystemService(Service.NOTIFICATION_SERVICE);
+        try{
+            mNotificationManager = (NotificationManager) mContext.getSystemService(Service.NOTIFICATION_SERVICE);
+            mNotificationAvailable = true;
+        }catch (IllegalStateException e){
+            mNotificationAvailable = false;
+        }
         mIOUtil = new IOUtil();
     }
 
@@ -118,7 +124,7 @@ public class XLoader
                                 /* This is done to limit the amount of updates to the notification
                                  * Restrictionles updating makes the system crash, so beware!
                                  */
-                                if (newPercent > lastPercent + 5)
+                                if (newPercent > lastPercent + 5 && mNotificationAvailable)
                                 {
                                     lastPercent = newPercent;
                                     mNotificationProgress.contentView.setProgressBar(R.id.progressBar, 100,
@@ -131,7 +137,7 @@ public class XLoader
                             public void onUploadFailed(LiveOperationException exception,
                                                        LiveOperation operation)
                             {
-                                mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
+                                if(mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
                                 Toast.makeText(mContext, mContext.getString(R.string.uploadError), Toast.LENGTH_SHORT).show();
 
                                 localFilePaths.remove(localFilePaths.size() - 1);
@@ -142,7 +148,7 @@ public class XLoader
                             @Override
                             public void onUploadCompleted(LiveOperation operation)
                             {
-                                mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
+                                if(mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
                                 JSONObject result = operation.getResult();
                                 if (result.has(JsonKeys.ERROR))
                                 {
@@ -188,7 +194,7 @@ public class XLoader
                                                            LiveDownloadOperation operation)
                             {
                                 int newPercent = computePercentCompleted(totalBytes, bytesRemaining);
-                                if (newPercent > lastPercent + 5)
+                                if (newPercent > lastPercent + 5 && mNotificationAvailable)
                                 {
                                     lastPercent = newPercent;
                                     mNotificationProgress.contentView.setProgressBar(R.id.progressBar, 100,
@@ -201,7 +207,7 @@ public class XLoader
                             public void onDownloadFailed(LiveOperationException exception,
                                                          LiveDownloadOperation operation)
                             {
-                                mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
+                                if(mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
                                 Log.e("ASE", exception.getMessage());
                                 Toast.makeText(mContext, mContext.getString(R.string.downloadError),
                                         Toast.LENGTH_SHORT).show();
@@ -210,7 +216,7 @@ public class XLoader
                             @Override
                             public void onDownloadCompleted(LiveDownloadOperation operation)
                             {
-                                mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
+                                if(mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
                             }
                         });
     }
@@ -250,7 +256,7 @@ public class XLoader
                                                            LiveDownloadOperation operation)
                             {
                                 int newPercent = computePercentCompleted(totalBytes, bytesRemaining);
-                                if (newPercent > lastPercent + 5)
+                                if (newPercent > lastPercent + 5 && mNotificationAvailable)
                                 {
                                     lastPercent = newPercent;
                                     mNotificationProgress.contentView.setProgressBar(R.id.progressBar, 100,
@@ -263,7 +269,7 @@ public class XLoader
                             public void onDownloadFailed(LiveOperationException exception,
                                                          LiveDownloadOperation operation)
                             {
-                                mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
+                                if(mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
                                 Log.e("ASE", exception.getMessage());
 
                                 Toast.makeText(mContext, mContext.getString(R.string.downloadError),
@@ -277,7 +283,7 @@ public class XLoader
                             @Override
                             public void onDownloadCompleted(LiveDownloadOperation operation)
                             {
-                                mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
+                                if(mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
                                 showFileXloadedNotification(fileToCreateLocally, true);
 
                                 fileIds.remove(fileIds.size() - 1);
@@ -484,6 +490,8 @@ public class XLoader
      */
     private void createProgressNotification(String fileName, boolean downloading)
     {
+        if(!mNotificationAvailable) return;
+
         mNotificationProgress = new Notification(R.drawable.notification_icon,
                 (downloading ? "Downloading " : "Uploading ") + fileName,
                 System.currentTimeMillis());
@@ -572,6 +580,7 @@ public class XLoader
      */
     public void showFileXloadedNotification(File file, boolean download)
     {
+        if(!mNotificationAvailable) return;
         int icon = R.drawable.notification_icon;
         CharSequence tickerText = file.getName() + " saved " + (download ? "from" : "to") + "SkyDrive!";
         long when = System.currentTimeMillis();
@@ -612,6 +621,8 @@ public class XLoader
      */
     private void fileNotSupportedBySkyDriveNotification(File file)
     {
+        if(mNotificationAvailable) return;
+
         int icon = R.drawable.notification_icon;
         CharSequence tickerText = file.getName() + " cannot be uploaded to SkyDrive by third-party apps and has been skipped...";
         long when = System.currentTimeMillis();

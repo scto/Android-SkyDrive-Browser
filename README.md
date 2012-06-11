@@ -14,6 +14,8 @@ App icon by Tom Emery
 
 Changelog
 ---------
+2.1.1
+- Service crash hotfix
 
 2.1
 - Automatic camera image uploads option
