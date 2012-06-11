@@ -18,7 +18,8 @@ import com.microsoft.live.*;
 import java.io.File;
 import java.util.Arrays;
 
-public class SignInActivity extends Activity {
+public class SignInActivity extends Activity
+{
     BrowserForSkyDriveApplication mApp;
     TextView mResultTextView;
     LiveAuthClient mAuthClient;
@@ -30,7 +31,8 @@ public class SignInActivity extends Activity {
      * Called when the activity is first created.
      */
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.sign_in);
 
@@ -49,27 +51,37 @@ public class SignInActivity extends Activity {
         noAccountText.setText(getString(R.string.noAccount));
         Linkify.addLinks(noAccountText, Linkify.ALL);
 
-        mSignInButton.setOnClickListener(new View.OnClickListener() {
+        mSignInButton.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View view) {
-                try{
-                mAuthClient.login(SignInActivity.this, Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener() {
-                    @Override
-                    public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState) {
-                        if (status == LiveStatus.CONNECTED) {
-                            startBrowserActivity(session);
-                        } else {
-                            Toast.makeText(getApplicationContext(), R.string.manualSignInError, Toast.LENGTH_SHORT);
-                            Log.e(Constants.LOGTAG, "Login did not connect. Status is " + status + ".");
+            public void onClick(View view)
+            {
+                try
+                {
+                    mAuthClient.login(SignInActivity.this, Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener()
+                    {
+                        @Override
+                        public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState)
+                        {
+                            if (status == LiveStatus.CONNECTED)
+                            {
+                                startBrowserActivity(session);
+                            }
+                            else
+                            {
+                                Toast.makeText(getApplicationContext(), R.string.manualSignInError, Toast.LENGTH_SHORT);
+                                Log.e(Constants.LOGTAG, "Login did not connect. Status is " + status + ".");
+                            }
                         }
-                    }
 
-                    @Override
-                    public void onAuthError(LiveAuthException exception, Object userState) {
-                        Log.e(Constants.LOGTAG, exception.getMessage());
-                    }
-                });
-                }catch (IllegalStateException e){
+                        @Override
+                        public void onAuthError(LiveAuthException exception, Object userState)
+                        {
+                            Log.e(Constants.LOGTAG, exception.getMessage());
+                        }
+                    });
+                } catch (IllegalStateException e)
+                {
                     /* Already logged in , or login in progress*/
                     Log.e("ASE", e.getMessage());
                 }
@@ -81,28 +93,37 @@ public class SignInActivity extends Activity {
     }
 
     @Override
-    protected void onStart() {
+    protected void onStart()
+    {
         super.onStart();
-        try{
-            mAuthClient.initialize(Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener() {
+        try
+        {
+            mAuthClient.initialize(Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener()
+            {
                 @Override
-                public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState) {
+                public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState)
+                {
                     mInitializeDialog.dismiss();
-                    if (status == LiveStatus.CONNECTED) {
+                    if (status == LiveStatus.CONNECTED)
+                    {
                         startBrowserActivity(session);
-                    } else {
+                    }
+                    else
+                    {
                         Toast.makeText(getApplicationContext(), R.string.automaticSignInError, Toast.LENGTH_SHORT);
                         Log.e(Constants.LOGTAG, "Initialize did not connect. Status is " + status + ".");
                     }
                 }
 
                 @Override
-                public void onAuthError(LiveAuthException exception, Object userState) {
+                public void onAuthError(LiveAuthException exception, Object userState)
+                {
                     mInitializeDialog.dismiss();
                     Log.e(Constants.LOGTAG, exception.getMessage());
                 }
             });
-        }catch (IllegalStateException e){
+        } catch (IllegalStateException e)
+        {
             /* Already logged in, or login in progress */
             Log.e("ASE", e.getMessage());
             startActivity(new Intent(getApplicationContext(), BrowserActivity.class));
@@ -235,8 +256,10 @@ public class SignInActivity extends Activity {
     {
         if (keyCode == KeyEvent.KEYCODE_BACK)
         {
-            if(mAuthClient != null){
-                try{
+            if (mAuthClient != null)
+            {
+                try
+                {
                     mAuthClient.logout(new LiveAuthListener()
                     {
                         @Override
@@ -251,12 +274,14 @@ public class SignInActivity extends Activity {
 
                         }
                     });
-                }catch (IllegalStateException e){
-                    Toast.makeText(getApplicationContext(),"Error during login", Toast.LENGTH_SHORT).show();
+                } catch (IllegalStateException e)
+                {
+                    Toast.makeText(getApplicationContext(), "Error during login", Toast.LENGTH_SHORT).show();
                     finish();
                 }
             }
-            if(mInitializeDialog != null){
+            if (mInitializeDialog != null)
+            {
                 mInitializeDialog.dismiss();
             }
 
@@ -268,7 +293,8 @@ public class SignInActivity extends Activity {
         }
     }
 
-    private void startBrowserActivity(LiveConnectSession session) {
+    private void startBrowserActivity(LiveConnectSession session)
+    {
         assert session != null;
         mApp.setSession(session);
         mApp.setConnectClient(new LiveConnectClient(session));

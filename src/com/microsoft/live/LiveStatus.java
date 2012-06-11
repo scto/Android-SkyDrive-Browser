@@ -6,7 +6,8 @@
 
 package com.microsoft.live;
 
-public enum LiveStatus {
+public enum LiveStatus
+{
     UNKNOWN,
     CONNECTED,
     NOT_CONNECTED;

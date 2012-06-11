@@ -6,24 +6,16 @@ package com.killerud.skydrive.dialogs;
  * Time: 21:11
  */
 
-import android.app.*;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.*;
 import com.actionbarsherlock.app.SherlockActivity;
-import com.killerud.skydrive.BrowserActivity;
 import com.killerud.skydrive.BrowserForSkyDriveApplication;
 import com.killerud.skydrive.R;
 import com.killerud.skydrive.XLoader;
-import com.killerud.skydrive.objects.SkyDrivePhoto;
-import com.killerud.skydrive.util.IOUtil;
 import com.microsoft.live.LiveConnectClient;
 import com.microsoft.live.LiveDownloadOperation;
 import com.microsoft.live.LiveDownloadOperationListener;
@@ -31,16 +23,19 @@ import com.microsoft.live.LiveOperationException;
 
 import java.io.File;
 
-/** The photo dialog. Downloads and displays an image, but does not save the
+/**
+ * The photo dialog. Downloads and displays an image, but does not save the
  * image unless the user presses the save button (i.e. acts as a cache)
  */
-public class ViewPhotoDialog extends SherlockActivity {
+public class ViewPhotoDialog extends SherlockActivity
+{
     private boolean mSavePhoto;
     private File mFile;
     private XLoader mXLoader;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photo_dialog);
 
@@ -59,9 +54,11 @@ public class ViewPhotoDialog extends SherlockActivity {
         final ImageView imageView = (ImageView) layout.findViewById(R.id.imageDialogImage);
 
         final ImageButton saveButton = (ImageButton) layout.findViewById(R.id.imageSave);
-        saveButton.setOnClickListener(new View.OnClickListener() {
+        saveButton.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view)
+            {
                 mSavePhoto = true;
                 mXLoader.showFileXloadedNotification(mFile, true);
                 finish();
@@ -69,9 +66,11 @@ public class ViewPhotoDialog extends SherlockActivity {
         });
 
         final ImageButton cancel = (ImageButton) layout.findViewById(R.id.imageCancel);
-        cancel.setOnClickListener(new View.OnClickListener() {
+        cancel.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view)
+            {
                 mSavePhoto = false;
                 finish();
             }
@@ -80,29 +79,36 @@ public class ViewPhotoDialog extends SherlockActivity {
 
         mFile = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/", photoName);
 
-        if(mFile.exists()){
+        if (mFile.exists())
+        {
             imageView.setImageBitmap(BitmapFactory.decodeFile(mFile.getPath()));
             layout.removeView(textView);
-        }else{
+        }
+        else
+        {
             final LiveDownloadOperation operation =
                     client.downloadAsync(photoId + "/content",
                             mFile,
-                            new LiveDownloadOperationListener() {
+                            new LiveDownloadOperationListener()
+                            {
                                 @Override
                                 public void onDownloadProgress(int totalBytes,
                                                                int bytesRemaining,
-                                                               LiveDownloadOperation operation) {
+                                                               LiveDownloadOperation operation)
+                                {
 
                                 }
 
                                 @Override
                                 public void onDownloadFailed(LiveOperationException exception,
-                                                             LiveDownloadOperation operation) {
-                                    Toast.makeText(getApplicationContext(),getString(R.string.downloadError), Toast.LENGTH_SHORT).show();
+                                                             LiveDownloadOperation operation)
+                                {
+                                    Toast.makeText(getApplicationContext(), getString(R.string.downloadError), Toast.LENGTH_SHORT).show();
                                 }
 
                                 @Override
-                                public void onDownloadCompleted(LiveDownloadOperation operation) {
+                                public void onDownloadCompleted(LiveDownloadOperation operation)
+                                {
                                     /* JPG was not supported right off the bat. Options fix that. */
                                     BitmapFactory.Options options = new BitmapFactory.Options();
                                     options.inSampleSize = 2;
@@ -121,12 +127,16 @@ public class ViewPhotoDialog extends SherlockActivity {
     * surprised to see the file saved later on.
     */
     @Override
-    protected void onStop(){
+    protected void onStop()
+    {
         super.onStop();
-        if(mSavePhoto){
+        if (mSavePhoto)
+        {
             mXLoader.showFileXloadedNotification(mFile, true);
-        }else{
-            if(mFile != null) mFile.delete();
+        }
+        else
+        {
+            if (mFile != null) mFile.delete();
         }
     }
 }

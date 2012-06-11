@@ -10,7 +10,8 @@ package com.microsoft.live;
  * QueryParameters is a non-instantiable utility class that holds query parameter constants
  * used by the API service.
  */
-final class QueryParameters {
+final class QueryParameters
+{
 
     public static final String PRETTY = "pretty";
     public static final String CALLBACK = "callback";
@@ -20,8 +21,11 @@ final class QueryParameters {
     public static final String OVERWRITE = "overwrite";
     public static final String RETURN_SSL_RESOURCES = "return_ssl_resources";
 
-    /** Private to present instantiation. */
-    private QueryParameters() {
+    /**
+     * Private to present instantiation.
+     */
+    private QueryParameters()
+    {
         throw new AssertionError(ErrorMessages.NON_INSTANTIABLE_CLASS);
     }
 }

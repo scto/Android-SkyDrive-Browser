@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-sdk android:minSdkVersion="8"
-            android:targetSdkVersion="14"/>
+              android:targetSdkVersion="14"/>
 
     <application
             android:label="@string/appName"
@@ -30,17 +30,18 @@
         </activity>
 
         <activity android:name=".SharingReceiverActivity"
-            android:label="@string/mySkyDrive">
+                  android:label="@string/mySkyDrive">
 
             <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <action android:name="android.intent.action.SEND_MULTIPLE" />
-                <data android:mimeType="image/*" />
-                <data android:mimeType="text/*" />
-                <data android:mimeType="video/*" />
-                <data android:mimeType="application/pdf" /> <!-- Sadly most file types here are not allowed by MS. PDF one of the few. -->
-                <data android:mimeType="audio/*" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="android.intent.action.SEND"/>
+                <action android:name="android.intent.action.SEND_MULTIPLE"/>
+                <data android:mimeType="image/*"/>
+                <data android:mimeType="text/*"/>
+                <data android:mimeType="video/*"/>
+                <data android:mimeType="application/pdf"/>
+                <!-- Sadly most file types here are not allowed by MS. PDF one of the few. -->
+                <data android:mimeType="audio/*"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
 
@@ -55,27 +56,27 @@
         <activity android:name=".dialogs.NewFolderDialog"
                   android:label="@string/createFolder"
                   android:theme="@style/LightThemeDialog"
-                  />
+                />
 
         <activity android:name=".dialogs.PlayAudioDialog"
-                  android:theme="@style/LightThemeDialog" />
+                  android:theme="@style/LightThemeDialog"/>
 
         <activity android:name=".dialogs.PlayVideoDialog"
-                  android:theme="@style/LightTheme" />
+                  android:theme="@style/LightTheme"/>
 
         <activity android:name=".dialogs.ViewPhotoDialog"
-                  android:theme="@style/LightThemeDialog" />
+                  android:theme="@style/LightThemeDialog"/>
 
         <activity android:name=".dialogs.RenameDialog"
-                  android:theme="@style/LightThemeDialog" />
+                  android:theme="@style/LightThemeDialog"/>
 
         <activity android:name=".SettingsActivity"
-                  android:theme="@style/LightTheme" />
+                  android:theme="@style/LightTheme"/>
 
         <service android:name=".CameraImageAutoUploadService"
                  android:exported="false"
                  android:label="@string/label_service"
-                 android:permission="android.permission.INTERNET" />
+                 android:permission="android.permission.INTERNET"/>
 
     </application>
 </manifest> 

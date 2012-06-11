@@ -14,7 +14,8 @@ import org.json.JSONObject;
 /**
  * GetRequest is a subclass of an ApiRequest and performs a GET request.
  */
-class GetRequest extends ApiRequest<JSONObject> {
+class GetRequest extends ApiRequest<JSONObject>
+{
 
     public static final String METHOD = HttpGet.METHOD_NAME;
 
@@ -22,18 +23,22 @@ class GetRequest extends ApiRequest<JSONObject> {
      * Constructs a new GetRequest and initializes its member variables.
      *
      * @param session with the access_token
-     * @param client to perform Http requests on
-     * @param path of the request
+     * @param client  to perform Http requests on
+     * @param path    of the request
      */
     public GetRequest(LiveConnectSession session,
                       HttpClient client,
-                      String path) {
+                      String path)
+    {
         super(session, client, JsonResponseHandler.INSTANCE, path);
     }
 
-    /** @return the string "GET" */
+    /**
+     * @return the string "GET"
+     */
     @Override
-    public String getMethod() {
+    public String getMethod()
+    {
         return METHOD;
     }
 
@@ -43,7 +48,8 @@ class GetRequest extends ApiRequest<JSONObject> {
      * @return a HttpGet request
      */
     @Override
-    protected HttpUriRequest createHttpRequest() {
+    protected HttpUriRequest createHttpRequest()
+    {
         return new HttpGet(this.requestUri.toString());
     }
 }

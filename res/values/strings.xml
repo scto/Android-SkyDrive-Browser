@@ -5,11 +5,17 @@
     <string name="initializing">Connecting the app to your Windows Live account...</string>
     <string name="firstWelcome">Welcome to Android SkyDrive Browser!\n\nSign in with your
         Windows Live account and access your Microsoft SkyDrive. Easily upload files to your
-        SkyDrive and share your files between computers and friends!\n\nSign in with your Windows Live account to get started!</string>
+        SkyDrive and share your files between computers and friends!\n\nSign in with your Windows Live account to get
+        started!
+    </string>
     <string name="signIn">Sign in to Windows Live</string>
     <string name="mySkyDrive">My SkyDrive</string>
-    <string name="automaticSignInError">Could not connect automatically to Windows Live. Please try logging in manually.</string>
-    <string name="manualSignInError">Could not connect Windows Live. Please make sure you are connected to the internet and try again.</string>
+    <string name="automaticSignInError">Could not connect automatically to Windows Live. Please try logging in
+        manually.
+    </string>
+    <string name="manualSignInError">Could not connect Windows Live. Please make sure you are connected to the internet
+        and try again.
+    </string>
     <string name="noAccount">No Live account? Go to live.com and register for free!</string>
 
     <!-- Browser -->
@@ -39,7 +45,9 @@
     <string name="fileSaved">File saved</string>
     <string name="downloadError">Something went wrong while downloading. The file was not saved on your phone.</string>
     <string name="fileAlreadySaved">File already saved</string>
-    <string name="fileAlreadySavedMessage">That file has already been saved, but it might have changed since last time. Download again?</string>
+    <string name="fileAlreadySavedMessage">That file has already been saved, but it might have changed since last time.
+        Download again?
+    </string>
 
 
     <!-- New folder dialog -->

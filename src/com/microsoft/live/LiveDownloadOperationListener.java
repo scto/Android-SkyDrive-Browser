@@ -6,7 +6,8 @@
 
 package com.microsoft.live;
 
-public interface LiveDownloadOperationListener {
+public interface LiveDownloadOperationListener
+{
 
     public void onDownloadCompleted(LiveDownloadOperation operation);
 

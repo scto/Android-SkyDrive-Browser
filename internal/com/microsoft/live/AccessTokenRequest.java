@@ -6,15 +6,13 @@
 
 package com.microsoft.live;
 
-import java.util.List;
-
+import android.text.TextUtils;
+import com.microsoft.live.OAuth.GrantType;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
-import android.text.TextUtils;
-
-import com.microsoft.live.OAuth.GrantType;
+import java.util.List;
 
 /**
  * AccessTokenRequest represents a request for an Access Token.
@@ -22,7 +20,8 @@ import com.microsoft.live.OAuth.GrantType;
  * This class adds the proper parameters for the access token request via the
  * constructBody() hook.
  */
-class AccessTokenRequest extends TokenRequest {
+class AccessTokenRequest extends TokenRequest
+{
 
     /**
      * REQUIRED.  The authorization code received from the
@@ -30,7 +29,9 @@ class AccessTokenRequest extends TokenRequest {
      */
     private final String code;
 
-    /** REQUIRED.  Value MUST be set to "authorization_code". */
+    /**
+     * REQUIRED.  Value MUST be set to "authorization_code".
+     */
     private final GrantType grantType;
 
     /**
@@ -43,15 +44,16 @@ class AccessTokenRequest extends TokenRequest {
     /**
      * Constructs a new AccessTokenRequest, and initializes its member variables
      *
-     * @param client the HttpClient to make HTTP requests on
-     * @param clientId the client_id of the calling application
+     * @param client      the HttpClient to make HTTP requests on
+     * @param clientId    the client_id of the calling application
      * @param redirectUri the redirect_uri to be called back
-     * @param code the authorization code received from the AuthorizationRequest
+     * @param code        the authorization code received from the AuthorizationRequest
      */
     public AccessTokenRequest(HttpClient client,
                               String clientId,
                               String redirectUri,
-                              String code) {
+                              String code)
+    {
         super(client, clientId);
 
         assert !TextUtils.isEmpty(redirectUri);
@@ -68,10 +70,11 @@ class AccessTokenRequest extends TokenRequest {
      * @param body the list of NameValuePairs to be placed in the body of the HTTP request
      */
     @Override
-    protected void constructBody(List<NameValuePair> body) {
+    protected void constructBody(List<NameValuePair> body)
+    {
         body.add(new BasicNameValuePair(OAuth.CODE, this.code));
         body.add(new BasicNameValuePair(OAuth.REDIRECT_URI, this.redirectUri));
         body.add(new BasicNameValuePair(OAuth.GRANT_TYPE,
-                                        this.grantType.toString().toLowerCase()));
+                this.grantType.toString().toLowerCase()));
     }
 }

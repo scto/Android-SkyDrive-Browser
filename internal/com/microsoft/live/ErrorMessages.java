@@ -10,7 +10,8 @@ package com.microsoft.live;
  * ErrorMessages is a non-instantiable class that contains all the String constants
  * used in for errors and exceptions.
  */
-final class ErrorMessages {
+final class ErrorMessages
+{
 
     public static final String ABSOLUTE_PARAMETER =
             "Input parameter '%1$s' is invalid. '%1$s' cannot be absolute.";
@@ -30,8 +31,11 @@ final class ErrorMessages {
             "Input parameter '%1$s' is invalid. '%1$s' cannot be null.";
     public static final String SERVER_ERROR =
             "An error occured while communicating with the server during the operation. " +
-            "Please try again later.";
+                    "Please try again later.";
     public static final String SIGNIN_CANCEL = "The user cancelled the login operation.";
 
-    private ErrorMessages() { throw new AssertionError(NON_INSTANTIABLE_CLASS); }
+    private ErrorMessages()
+    {
+        throw new AssertionError(NON_INSTANTIABLE_CLASS);
+    }
 }

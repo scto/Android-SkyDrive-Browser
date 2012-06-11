@@ -15,7 +15,8 @@ import org.json.JSONObject;
 /**
  * PutRequest is a subclass of a BodyEnclosingApiRequest and performs a Put request.
  */
-class PutRequest extends EntityEnclosingApiRequest<JSONObject> {
+class PutRequest extends EntityEnclosingApiRequest<JSONObject>
+{
 
     public static final String METHOD = HttpPut.METHOD_NAME;
 
@@ -23,20 +24,24 @@ class PutRequest extends EntityEnclosingApiRequest<JSONObject> {
      * Constructs a new PutRequest and initializes its member variables.
      *
      * @param session with the access_token
-     * @param client to make Http requests on
-     * @param path of the request
-     * @param entity body of the request
+     * @param client  to make Http requests on
+     * @param path    of the request
+     * @param entity  body of the request
      */
     public PutRequest(LiveConnectSession session,
                       HttpClient client,
                       String path,
-                      HttpEntity entity) {
+                      HttpEntity entity)
+    {
         super(session, client, JsonResponseHandler.INSTANCE, path, entity);
     }
 
-    /** @return the string "PUT" */
+    /**
+     * @return the string "PUT"
+     */
     @Override
-    public String getMethod() {
+    public String getMethod()
+    {
         return METHOD;
     }
 
@@ -46,7 +51,8 @@ class PutRequest extends EntityEnclosingApiRequest<JSONObject> {
      * @return a HttpPut with the properly body added to it.
      */
     @Override
-    protected HttpUriRequest createHttpRequest() throws LiveOperationException {
+    protected HttpUriRequest createHttpRequest() throws LiveOperationException
+    {
         final HttpPut request = new HttpPut(this.requestUri.toString());
 
         request.setEntity(this.entity);

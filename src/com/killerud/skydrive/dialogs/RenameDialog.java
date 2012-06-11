@@ -1,25 +1,15 @@
 package com.killerud.skydrive.dialogs;
 
-import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.killerud.skydrive.BrowserForSkyDriveApplication;
 import com.killerud.skydrive.R;
 import com.killerud.skydrive.XLoader;
-import com.killerud.skydrive.util.JsonKeys;
 import com.microsoft.live.LiveConnectClient;
-import com.microsoft.live.LiveOperation;
-import com.microsoft.live.LiveOperationException;
-import com.microsoft.live.LiveOperationListener;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * User: William
@@ -32,7 +22,8 @@ public class RenameDialog extends SherlockActivity
     public static final String EXTRAS_FILE_NAMES = "fileNames";
 
     @Override
-    public void onCreate(Bundle savedInstanceState){
+    public void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.rename_file);
         setTitle(R.string.renameTitle);
@@ -50,20 +41,24 @@ public class RenameDialog extends SherlockActivity
         final EditText description = (EditText) findViewById(R.id.descriptionEditText);
         final XLoader loader = new XLoader(app.getCurrentBrowser());
 
-        findViewById(R.id.renameButton).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.renameButton).setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View v) {
-                ((BrowserForSkyDriveApplication)getApplication()).getCurrentBrowser().setSupportProgressBarIndeterminateVisibility(true);
-                loader.renameFiles(client,fileIds, fileNames,
+            public void onClick(View v)
+            {
+                ((BrowserForSkyDriveApplication) getApplication()).getCurrentBrowser().setSupportProgressBarIndeterminateVisibility(true);
+                loader.renameFiles(client, fileIds, fileNames,
                         name.getText().toString(),
                         description.getText().toString());
                 finish();
             }
         });
 
-        findViewById(R.id.cancelButton).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.cancelButton).setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View v) {
+            public void onClick(View v)
+            {
                 finish();
             }
         });

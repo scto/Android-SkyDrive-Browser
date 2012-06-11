@@ -140,7 +140,8 @@ public class BrowserActivity extends SherlockListActivity
 
         mActionBar = getSupportActionBar();
 
-        if(savedInstanceState != null){
+        if (savedInstanceState != null)
+        {
             restoreSavedInstanceState(savedInstanceState);
         }
 
@@ -177,14 +178,13 @@ public class BrowserActivity extends SherlockListActivity
             }
         }
 
-        if(savedInstanceState.containsKey(Constants.STATE_ACTION_MODE_CURRENTLY_ON))
+        if (savedInstanceState.containsKey(Constants.STATE_ACTION_MODE_CURRENTLY_ON))
         {
-            if(savedInstanceState.getBoolean(Constants.STATE_ACTION_MODE_CURRENTLY_ON))
+            if (savedInstanceState.getBoolean(Constants.STATE_ACTION_MODE_CURRENTLY_ON))
             {
                 mActionMode = startActionMode(new SkyDriveActionMode());
             }
         }
-
 
 
         ((SkyDriveListAdapter) getListAdapter()).setCheckedPositions(((BrowserForSkyDriveApplication) getApplication())
@@ -429,22 +429,25 @@ public class BrowserActivity extends SherlockListActivity
         super.onResume();
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if(preferences.getBoolean("automatic_camera_upload", false))
+        if (preferences.getBoolean("automatic_camera_upload", false))
         {
             startService(new Intent(this, CameraImageAutoUploadService.class));
-        }else{
+        }
+        else
+        {
             stopService(new Intent(this, CameraImageAutoUploadService.class));
         }
 
         /* Checks to see if the progress notification was clicked and started the activity */
 
 
-        if(mXloader != null){
+        if (mXloader != null)
+        {
             //No XLoader means no operations
             Intent intentThatStartedMe = getIntent();
             assert intentThatStartedMe.getAction() != null;
             ((NotificationManager) getSystemService(Service.NOTIFICATION_SERVICE))
-                        .cancel(XLoader.NOTIFICATION_PROGRESS_ID);
+                    .cancel(XLoader.NOTIFICATION_PROGRESS_ID);
         }
     }
 
@@ -471,7 +474,7 @@ public class BrowserActivity extends SherlockListActivity
         savedInstanceState.putStringArray(Constants.STATE_CURRENT_HIERARCHY, hierarcy);
         savedInstanceState.putStringArray(Constants.STATE_PREVIOUS_FOLDERS, previous);
 
-        if(mActionMode != null)
+        if (mActionMode != null)
         {
             savedInstanceState.putBoolean(Constants.STATE_ACTION_MODE_CURRENTLY_ON, true);
         }
@@ -538,7 +541,9 @@ public class BrowserActivity extends SherlockListActivity
         if (mActionBar != null && !mPreviousFolderIds.empty())
         {
             mActionBar.setDisplayHomeAsUpEnabled(true);
-        }else{
+        }
+        else
+        {
             mActionBar.setDisplayHomeAsUpEnabled(false);
         }
 
@@ -546,7 +551,7 @@ public class BrowserActivity extends SherlockListActivity
 
         if (mCurrentlySelectedFiles != null) mCurrentlySelectedFiles.clear();
 
-        if(mActionMode == null)
+        if (mActionMode == null)
         {
             /* If there is an action mode, we are currently selecting files and the state has just changed.
              * No actual navigation has taken place, so we don't want to clear selected. */
@@ -584,7 +589,7 @@ public class BrowserActivity extends SherlockListActivity
                 mSkyDriveListAdapter.notifyDataSetChanged();
 
                 SparseBooleanArray checkedPositions = mSkyDriveListAdapter.getCheckedPositions();
-                for(int i=0;i<checkedPositions.size();i++)
+                for (int i = 0; i < checkedPositions.size(); i++)
                 {
                     int adapterPosition = checkedPositions.keyAt(i);
                     SkyDriveObject objectSelected = mSkyDriveListAdapter.getItem(adapterPosition);
@@ -736,12 +741,12 @@ public class BrowserActivity extends SherlockListActivity
 
         public void setChecked(String skyDriveFileId, boolean checked)
         {
-            for(int i=0;i<mSkyDriveObjs.size();i++)
+            for (int i = 0; i < mSkyDriveObjs.size(); i++)
             {
-                if(mSkyDriveObjs.get(i).getId().equals(skyDriveFileId))
+                if (mSkyDriveObjs.get(i).getId().equals(skyDriveFileId))
                 {
                     setChecked(i, checked);
-                    if(checked) mCurrentlySelectedFiles.add(mSkyDriveObjs.get(i));
+                    if (checked) mCurrentlySelectedFiles.add(mSkyDriveObjs.get(i));
                 }
             }
         }
@@ -974,7 +979,9 @@ public class BrowserActivity extends SherlockListActivity
 
                                     }
 
-                                }else{
+                                }
+                                else
+                                {
                                     Bitmap bm = BitmapFactory.decodeStream(operation.getStream());
 
                                     File cacheFolder = new File(Environment.getExternalStorageDirectory()
@@ -1207,7 +1214,7 @@ public class BrowserActivity extends SherlockListActivity
         {
 
             menu.add(ContextItems.MENU_TITLE_DOWNLOAD)
-                    .setIcon(android.R.drawable.ic_menu_save)
+                    .setIcon(R.drawable.ic_menu_save)
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             menu.add(ContextItems.MENU_TITLE_COPY)
                     .setIcon(R.drawable.ic_menu_copy_holo_light)
@@ -1216,10 +1223,10 @@ public class BrowserActivity extends SherlockListActivity
                     .setIcon(R.drawable.ic_menu_cut_holo_light)
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             menu.add(ContextItems.MENU_TITLE_RENAME)
-                    .setIcon(android.R.drawable.ic_menu_edit)
+                    .setIcon(R.drawable.ic_menu_edit)
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             menu.add(ContextItems.MENU_TITLE_DELETE)
-                    .setIcon(android.R.drawable.ic_menu_delete)
+                    .setIcon(R.drawable.ic_menu_delete)
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             menu.add(ContextItems.MENU_TITLE_SELECT_ALL)
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);

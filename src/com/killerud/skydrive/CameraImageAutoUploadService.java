@@ -1,18 +1,11 @@
 package com.killerud.skydrive;
 
-import android.app.ProgressDialog;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.FileObserver;
 import android.os.IBinder;
-import android.util.Log;
-import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
-import com.killerud.skydrive.constants.*;
-import com.killerud.skydrive.constants.Constants;
 import com.microsoft.live.*;
 
 import java.util.ArrayList;
@@ -26,6 +19,7 @@ import java.util.Arrays;
 public class CameraImageAutoUploadService extends Service
 {
     private final IBinder mBinder = new AutoUploadServiceBinder();
+
     public class AutoUploadServiceBinder extends Binder
     {
         public CameraImageAutoUploadService getService()
@@ -33,6 +27,7 @@ public class CameraImageAutoUploadService extends Service
             return CameraImageAutoUploadService.this;
         }
     }
+
     @Override
     public IBinder onBind(Intent intent)
     {
@@ -83,14 +78,15 @@ public class CameraImageAutoUploadService extends Service
             public void onEvent(int eventCode, String fileName)
             {
                 /* The file .probe is created every time the camera is launched */
-                if(eventCode == FileObserver.CREATE && !fileName.equals(".probe")){
-                    if(mConnectedToSkyDrive)
+                if (eventCode == FileObserver.CREATE && !fileName.equals(".probe"))
+                {
+                    if (mConnectedToSkyDrive)
                     {
                         ArrayList fileNameContainer = new ArrayList<String>();
                         fileNameContainer.add(cameraFilePath + fileName);
                         skyDriveFileLoader.uploadFile(browserForSkyDriveApplication.getConnectClient(),
                                 fileNameContainer
-                                , "me/skydrive");
+                                , "me/skydrive/camera_roll");
                     }
                 }
             }

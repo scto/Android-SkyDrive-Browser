@@ -6,15 +6,15 @@ package com.killerud.skydrive.dialogs;
  * Time: 16:59
  */
 
-import android.app.*;
-import android.content.DialogInterface;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.killerud.skydrive.BrowserForSkyDriveApplication;
 import com.killerud.skydrive.R;
@@ -27,15 +27,18 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-/** The Audio dialog. Automatically starts buffering and playing a song,
+/**
+ * The Audio dialog. Automatically starts buffering and playing a song,
  * and allows the user to pause, play, stop, and save the song, or
  * dismiss the dialog
  */
-public class PlayAudioDialog extends SherlockActivity {
+public class PlayAudioDialog extends SherlockActivity
+{
     private MediaPlayer mPlayer;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         mPlayer = new MediaPlayer();
 
@@ -55,33 +58,46 @@ public class PlayAudioDialog extends SherlockActivity {
         final File file = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/", audio.getName());
 
 
-
         final ImageButton playPauseButton = (ImageButton) buttonLayout.findViewById(R.id.audioPlayPause);
-        playPauseButton.setOnClickListener(new View.OnClickListener() {
+        playPauseButton.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View view) {
-                if (mPlayer.isPlaying()) {
+            public void onClick(View view)
+            {
+                if (mPlayer.isPlaying())
+                {
                     mPlayer.pause();
                     playPauseButton.setImageResource(R.drawable.ic_media_play);
                     playerStatus.setText(getString(R.string.paused) + " " + audio.getName());
-                } else if (!mPlayer.isPlaying()) {
+                }
+                else if (!mPlayer.isPlaying())
+                {
                     mPlayer.start();
                     playPauseButton.setImageResource(R.drawable.ic_media_pause);
                     playerStatus.setText(getString(R.string.playing) + " " + audio.getName());
-                }else{
-                    try {
-                        if(file.exists()){
+                }
+                else
+                {
+                    try
+                    {
+                        if (file.exists())
+                        {
                             mPlayer.setDataSource(file.getPath());
-                        }else{
+                        }
+                        else
+                        {
                             mPlayer.setDataSource(audio.getSource());
                         }
                         mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                         mPlayer.prepareAsync();
-                    } catch (IllegalArgumentException e) {
+                    } catch (IllegalArgumentException e)
+                    {
                         showToast(e.getMessage());
-                    } catch (IllegalStateException e) {
+                    } catch (IllegalStateException e)
+                    {
                         showToast(e.getMessage());
-                    } catch (IOException e) {
+                    } catch (IOException e)
+                    {
                         showToast(e.getMessage());
                     }
                 }
@@ -89,9 +105,11 @@ public class PlayAudioDialog extends SherlockActivity {
         });
 
         final ImageButton stopButton = (ImageButton) buttonLayout.findViewById(R.id.audioStop);
-        stopButton.setOnClickListener(new View.OnClickListener() {
+        stopButton.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view)
+            {
                 mPlayer.stop();
                 playerStatus.setText(getString(R.string.stopped) + " " + audio.getName());
             }
@@ -99,9 +117,11 @@ public class PlayAudioDialog extends SherlockActivity {
 
 
         final ImageButton saveButton = (ImageButton) buttonLayout.findViewById(R.id.audioSave);
-        saveButton.setOnClickListener(new View.OnClickListener() {
+        saveButton.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view)
+            {
                 ArrayList<SkyDriveObject> file = new ArrayList<SkyDriveObject>();
                 file.add(audio);
                 loader.downloadFiles(client, file);
@@ -109,45 +129,57 @@ public class PlayAudioDialog extends SherlockActivity {
         });
 
         ImageButton cancel = (ImageButton) buttonLayout.findViewById(R.id.audioCancel);
-        cancel.setOnClickListener(new View.OnClickListener() {
+        cancel.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view)
+            {
                 mPlayer.stop();
                 finish();
             }
         });
 
-        mPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+        mPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener()
+        {
             @Override
-            public void onPrepared(MediaPlayer mp) {
+            public void onPrepared(MediaPlayer mp)
+            {
                 playerStatus.setText(getString(R.string.playing) + " " + audio.getName());
                 playPauseButton.setImageResource(R.drawable.ic_media_pause);
                 mPlayer.start();
             }
         });
 
-        mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+        mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
+        {
             @Override
-            public void onCompletion(MediaPlayer mp) {
+            public void onCompletion(MediaPlayer mp)
+            {
                 playerStatus.setText(getString(R.string.stopped) + " " + audio.getName());
             }
         });
 
 
-
-        try {
-            if(file.exists()){
+        try
+        {
+            if (file.exists())
+            {
                 mPlayer.setDataSource(file.getPath());
-            }else{
+            }
+            else
+            {
                 mPlayer.setDataSource(audio.getSource());
             }
             mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mPlayer.prepareAsync();
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e)
+        {
             showToast(e.getMessage());
-        } catch (IllegalStateException e) {
+        } catch (IllegalStateException e)
+        {
             showToast(e.getMessage());
-        } catch (IOException e) {
+        } catch (IOException e)
+        {
             showToast(e.getMessage());
         }
 
@@ -161,20 +193,26 @@ public class PlayAudioDialog extends SherlockActivity {
     * there's no playlist!
     */
     @Override
-    protected void onStop() {
+    protected void onStop()
+    {
         super.onStop();
-        if(mPlayer !=null){
-            try{
+        if (mPlayer != null)
+        {
+            try
+            {
                 mPlayer.stop();
-            }catch (IllegalStateException e){
-            }finally {
+            } catch (IllegalStateException e)
+            {
+            } finally
+            {
                 mPlayer.release();
                 mPlayer = null;
             }
         }
     }
 
-    private void showToast(String message) {
+    private void showToast(String message)
+    {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 

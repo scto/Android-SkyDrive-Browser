@@ -5,7 +5,8 @@ package com.killerud.skydrive.constants;
  * Date: 13.05.12
  * Time: 17:18
  */
-public class SortCriteria{
+public class SortCriteria
+{
     public static final String NAME = "name";
     public static final String UPDATED = "updated";
     public static final String SIZE = "size";

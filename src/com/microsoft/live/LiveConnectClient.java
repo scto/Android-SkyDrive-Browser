@@ -6,26 +6,8 @@
 
 package com.microsoft.live;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
-
+import android.os.AsyncTask;
+import android.text.TextUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -48,38 +30,50 @@ import org.apache.http.protocol.HTTP;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.os.AsyncTask;
-import android.text.TextUtils;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * {@code LiveConnectClient} is a class that is responsible for making requests over to the
  * Live Connect REST API. In order to perform requests, a {@link LiveConnectSession} is required.
  * A {@link LiveConnectSession} can be created from a {@link LiveAuthClient}.
- *
+ * <p/>
  * {@code LiveConnectClient} provides methods to perform both synchronous and asynchronous calls
  * on the Live Connect REST API. A synchronous method's corresponding asynchronous method is
  * suffixed with "Async" (e.g., the synchronous method, get, has a corresponding asynchronous
  * method called, getAsync). Asynchronous methods require a call back listener that will be called
  * back on the main/UI thread on completion, error, or progress.
  */
-public class LiveConnectClient {
+public class LiveConnectClient
+{
 
-    /** Gets the ContentLength when a request finishes and sets it in the given operation. */
-    private static class ContentLengthObserver implements ApiRequest.Observer {
+    /**
+     * Gets the ContentLength when a request finishes and sets it in the given operation.
+     */
+    private static class ContentLengthObserver implements ApiRequest.Observer
+    {
         private final LiveDownloadOperation operation;
 
-        public ContentLengthObserver(LiveDownloadOperation operation) {
+        public ContentLengthObserver(LiveDownloadOperation operation)
+        {
             assert operation != null;
 
             this.operation = operation;
         }
 
         @Override
-        public void onComplete(HttpResponse response) {
+        public void onComplete(HttpResponse response)
+        {
             Header header = response.getFirstHeader(HTTP.CONTENT_LEN);
 
             // Sometimes this header is not included in the response.
-            if (header == null) {
+            if (header == null)
+            {
                 return;
             }
 
@@ -93,12 +87,14 @@ public class LiveConnectClient {
      * Listens to an {@link ApiRequestAsync} for onComplete and onError events and calls the proper
      * method on the given {@link LiveDownloadOperationListener} on a given event.
      */
-    private static class DownloadObserver implements ApiRequestAsync.Observer<InputStream> {
+    private static class DownloadObserver implements ApiRequestAsync.Observer<InputStream>
+    {
         private final LiveDownloadOperationListener listener;
         private final LiveDownloadOperation operation;
 
         public DownloadObserver(LiveDownloadOperation operation,
-                                LiveDownloadOperationListener listener) {
+                                LiveDownloadOperationListener listener)
+        {
             assert operation != null;
             assert listener != null;
 
@@ -107,13 +103,15 @@ public class LiveConnectClient {
         }
 
         @Override
-        public void onComplete(InputStream result) {
+        public void onComplete(InputStream result)
+        {
             this.operation.setStream(result);
             this.listener.onDownloadCompleted(this.operation);
         }
 
         @Override
-        public void onError(LiveOperationException e) {
+        public void onError(LiveOperationException e)
+        {
             this.listener.onDownloadFailed(e, this.operation);
         }
     }
@@ -124,16 +122,20 @@ public class LiveConnectClient {
      * is complete this writes the results to a file, and publishes progress updates.
      */
     private static class FileDownloadObserver extends AsyncTask<InputStream, Integer, Runnable>
-                                              implements ApiRequestAsync.Observer<InputStream> {
-        private class OnErrorRunnable implements Runnable {
+            implements ApiRequestAsync.Observer<InputStream>
+    {
+        private class OnErrorRunnable implements Runnable
+        {
             private final LiveOperationException exception;
 
-            public OnErrorRunnable(LiveOperationException exception) {
+            public OnErrorRunnable(LiveOperationException exception)
+            {
                 this.exception = exception;
             }
 
             @Override
-            public void run() {
+            public void run()
+            {
                 listener.onDownloadFailed(exception, operation);
             }
         }
@@ -144,7 +146,8 @@ public class LiveConnectClient {
 
         public FileDownloadObserver(LiveDownloadOperation operation,
                                     LiveDownloadOperationListener listener,
-                                    File file) {
+                                    File file)
+        {
             assert operation != null;
             assert listener != null;
             assert file != null;
@@ -155,55 +158,66 @@ public class LiveConnectClient {
         }
 
         @Override
-        protected Runnable doInBackground(InputStream... params) {
+        protected Runnable doInBackground(InputStream... params)
+        {
             InputStream is = params[0];
 
             byte[] buffer = new byte[BUFFER_SIZE];
 
             OutputStream out;
-            try {
+            try
+            {
                 out = new BufferedOutputStream(new FileOutputStream(file));
-            } catch (FileNotFoundException e) {
+            } catch (FileNotFoundException e)
+            {
                 LiveOperationException exception =
                         new LiveOperationException(ErrorMessages.CLIENT_ERROR, e);
                 return new OnErrorRunnable(exception);
             }
 
-            try {
+            try
+            {
                 int totalBytes = operation.getContentLength();
                 int bytesRemaining = totalBytes;
 
                 int bytesRead;
-                while ((bytesRead = is.read(buffer)) != -1) {
+                while ((bytesRead = is.read(buffer)) != -1)
+                {
                     out.write(buffer, 0, bytesRead);
 
                     bytesRemaining -= bytesRead;
                     publishProgress(totalBytes, bytesRemaining);
                 }
-            } catch (IOException e) {
+            } catch (IOException e)
+            {
                 LiveOperationException exception =
                         new LiveOperationException(ErrorMessages.CLIENT_ERROR, e);
                 return new OnErrorRunnable(exception);
-            } finally {
+            } finally
+            {
                 closeSilently(out);
                 closeSilently(is);
             }
 
-            return new Runnable() {
+            return new Runnable()
+            {
                 @Override
-                public void run() {
+                public void run()
+                {
                     listener.onDownloadCompleted(operation);
                 }
             };
         }
 
         @Override
-        protected void onPostExecute(Runnable result) {
+        protected void onPostExecute(Runnable result)
+        {
             result.run();
         }
 
         @Override
-        protected void onProgressUpdate(Integer... values) {
+        protected void onProgressUpdate(Integer... values)
+        {
             int totalBytes = values[0];
             int bytesRemaining = values[1];
 
@@ -215,12 +229,14 @@ public class LiveConnectClient {
         }
 
         @Override
-        public void onComplete(InputStream result) {
+        public void onComplete(InputStream result)
+        {
             this.execute(result);
         }
 
         @Override
-        public void onError(LiveOperationException e) {
+        public void onError(LiveOperationException e)
+        {
             this.listener.onDownloadFailed(e, this.operation);
         }
     }
@@ -229,13 +245,15 @@ public class LiveConnectClient {
      * Listens to an {@link ApiRequestAsync} for onComplete and onError events and calls the proper
      * method on the given {@link LiveOperationListener} on a given event.
      */
-    private static class OperationObserver implements ApiRequestAsync.Observer<JSONObject> {
+    private static class OperationObserver implements ApiRequestAsync.Observer<JSONObject>
+    {
 
         private final LiveOperationListener listener;
         private final LiveOperation operation;
 
         public OperationObserver(LiveOperation operation,
-                                 LiveOperationListener listener) {
+                                 LiveOperationListener listener)
+        {
             assert operation != null;
             assert listener != null;
 
@@ -244,19 +262,24 @@ public class LiveConnectClient {
         }
 
         @Override
-        public void onComplete(JSONObject result) {
+        public void onComplete(JSONObject result)
+        {
             this.operation.setResult(result);
             this.listener.onComplete(this.operation);
         }
 
         @Override
-        public void onError(LiveOperationException e) {
+        public void onError(LiveOperationException e)
+        {
             this.listener.onError(e, this.operation);
         }
     }
 
-    /** non-instantiable class that contains static constants for parameter names. */
-    private static final class ParamNames {
+    /**
+     * non-instantiable class that contains static constants for parameter names.
+     */
+    private static final class ParamNames
+    {
         public static final String ACCESS_TOKEN = "session.getAccessToken()";
         public static final String BODY = "body";
         public static final String DESTINATION = "destination";
@@ -265,22 +288,30 @@ public class LiveConnectClient {
         public static final String PATH = "path";
         public static final String SESSION = "session";
 
-        private ParamNames() { throw new AssertionError(ErrorMessages.NON_INSTANTIABLE_CLASS); }
+        private ParamNames()
+        {
+            throw new AssertionError(ErrorMessages.NON_INSTANTIABLE_CLASS);
+        }
     }
 
-    private enum SessionState {
-        LOGGED_IN {
-            @Override
-            public void check() {
-                // nothing. valid state.
-            }
-        },
-        LOGGED_OUT {
-            @Override
-            public void check() {
-                throw new IllegalStateException(ErrorMessages.LOGGED_OUT);
-            }
-        };
+    private enum SessionState
+    {
+        LOGGED_IN
+                {
+                    @Override
+                    public void check()
+                    {
+                        // nothing. valid state.
+                    }
+                },
+        LOGGED_OUT
+                {
+                    @Override
+                    public void check()
+                    {
+                        throw new IllegalStateException(ErrorMessages.LOGGED_OUT);
+                    }
+                };
 
         public abstract void check();
     }
@@ -291,13 +322,15 @@ public class LiveConnectClient {
      * proper {@link LiveUploadOperationListener} on such events.
      */
     private static class UploadRequestListener implements ApiRequestAsync.Observer<JSONObject>,
-                                                          ApiRequestAsync.ProgressObserver {
+            ApiRequestAsync.ProgressObserver
+    {
 
         private final LiveUploadOperationListener listener;
         private final LiveOperation operation;
 
         public UploadRequestListener(LiveOperation operation,
-                                     LiveUploadOperationListener listener) {
+                                     LiveUploadOperationListener listener)
+        {
             assert operation != null;
             assert listener != null;
 
@@ -306,20 +339,23 @@ public class LiveConnectClient {
         }
 
         @Override
-        public void onComplete(JSONObject result) {
+        public void onComplete(JSONObject result)
+        {
             this.operation.setResult(result);
             this.listener.onUploadCompleted(this.operation);
         }
 
         @Override
-        public void onError(LiveOperationException e) {
+        public void onError(LiveOperationException e)
+        {
             assert e != null;
 
             this.listener.onUploadFailed(e, this.operation);
         }
 
         @Override
-        public void onProgress(Long... values) {
+        public void onProgress(Long... values)
+        {
             long totalBytes = values[0].longValue();
             long numBytesWritten = values[1].longValue();
 
@@ -328,7 +364,7 @@ public class LiveConnectClient {
             assert numBytesWritten <= totalBytes;
 
             long bytesRemaining = totalBytes - numBytesWritten;
-            this.listener.onUploadProgress((int)totalBytes, (int)bytesRemaining, this.operation);
+            this.listener.onUploadProgress((int) totalBytes, (int) bytesRemaining, this.operation);
         }
     }
 
@@ -336,7 +372,9 @@ public class LiveConnectClient {
     private static int BUFFER_SIZE = 1 << 10;
     private static int CONNECT_TIMEOUT_IN_MS = 30 * 1000;
 
-    /** The key used for HTTP MOVE and HTTP COPY requests. */
+    /**
+     * The key used for HTTP MOVE and HTTP COPY requests.
+     */
     private static final String DESTINATION_KEY = "destination";
 
     /**
@@ -363,16 +401,20 @@ public class LiveConnectClient {
 
     private static int SOCKET_TIMEOUT_IN_MS = 30 * 1000;
 
-    static {
-        NULL_DOWNLOAD_OPERATION_LISTENER = new LiveDownloadOperationListener() {
+    static
+    {
+        NULL_DOWNLOAD_OPERATION_LISTENER = new LiveDownloadOperationListener()
+        {
             @Override
-            public void onDownloadCompleted(LiveDownloadOperation operation) {
+            public void onDownloadCompleted(LiveDownloadOperation operation)
+            {
                 assert operation != null;
             }
 
             @Override
             public void onDownloadFailed(LiveOperationException exception,
-                                         LiveDownloadOperation operation) {
+                                         LiveDownloadOperation operation)
+            {
                 assert exception != null;
                 assert operation != null;
             }
@@ -380,7 +422,8 @@ public class LiveConnectClient {
             @Override
             public void onDownloadProgress(int totalBytes,
                                            int bytesRemaining,
-                                           LiveDownloadOperation operation) {
+                                           LiveDownloadOperation operation)
+            {
                 assert totalBytes >= 0;
                 assert bytesRemaining >= 0;
                 assert totalBytes >= bytesRemaining;
@@ -388,28 +431,34 @@ public class LiveConnectClient {
             }
         };
 
-        NULL_OPERATION_LISTENER = new LiveOperationListener() {
+        NULL_OPERATION_LISTENER = new LiveOperationListener()
+        {
             @Override
-            public void onComplete(LiveOperation operation) {
+            public void onComplete(LiveOperation operation)
+            {
                 assert operation != null;
             }
 
             @Override
-            public void onError(LiveOperationException exception, LiveOperation operation) {
+            public void onError(LiveOperationException exception, LiveOperation operation)
+            {
                 assert exception != null;
                 assert operation != null;
             }
         };
 
-        NULL_UPLOAD_OPERATION_LISTENER = new LiveUploadOperationListener() {
+        NULL_UPLOAD_OPERATION_LISTENER = new LiveUploadOperationListener()
+        {
             @Override
-            public void onUploadCompleted(LiveOperation operation) {
+            public void onUploadCompleted(LiveOperation operation)
+            {
                 assert operation != null;
             }
 
             @Override
             public void onUploadFailed(LiveOperationException exception,
-                                       LiveOperation operation) {
+                                       LiveOperation operation)
+            {
                 assert exception != null;
                 assert operation != null;
             }
@@ -417,7 +466,8 @@ public class LiveConnectClient {
             @Override
             public void onUploadProgress(int totalBytes,
                                          int bytesRemaining,
-                                         LiveOperation operation) {
+                                         LiveOperation operation)
+            {
                 assert totalBytes >= 0;
                 assert bytesRemaining >= 0;
                 assert totalBytes >= bytesRemaining;
@@ -432,10 +482,13 @@ public class LiveConnectClient {
      * @param path to check.
      * @return the valid URI object.
      */
-    private static URI assertIsUri(String path) {
-        try {
+    private static URI assertIsUri(String path)
+    {
+        try
+        {
             return new URI(path);
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException e)
+        {
             String message = String.format(ErrorMessages.INVALID_URI, ParamNames.PATH);
             throw new IllegalArgumentException(message);
         }
@@ -443,23 +496,27 @@ public class LiveConnectClient {
 
     /**
      * Checks to see if the path is null, empty, or a valid uri.
-     *
+     * <p/>
      * This method will be used for Download and Upload requests.
      * This method will NOT be used for Copy, Delete, Get, Move, Post and Put requests.
      *
      * @param path object_id to check.
      * @throws IllegalArgumentException if the path is empty or an invalid uri.
-     * @throws NullPointerException if the path is null.
+     * @throws NullPointerException     if the path is null.
      */
-    private static void assertValidPath(String path) {
+    private static void assertValidPath(String path)
+    {
         LiveConnectUtils.assertNotNullOrEmpty(path, ParamNames.PATH);
         assertIsUri(path);
     }
 
-    private static void closeSilently(Closeable c) {
-        try {
+    private static void closeSilently(Closeable c)
+    {
+        try
+        {
             c.close();
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             // Silently...ssshh
         }
     }
@@ -467,18 +524,20 @@ public class LiveConnectClient {
     /**
      * Checks to see if the path is null, empty, or is an absolute uri and throws
      * the proper exception if it is.
-     *
+     * <p/>
      * This method will be used for Copy, Delete, Get, Move, Post, and Put requests.
      * This method will NOT be used for Download and Upload requests.
      *
      * @param path object_id to check.
      * @throws IllegalArgumentException if the path is empty or an absolute uri.
-     * @throws NullPointerException if the path is null.
+     * @throws NullPointerException     if the path is null.
      */
-    private static void assertValidRelativePath(String path) {
+    private static void assertValidRelativePath(String path)
+    {
         LiveConnectUtils.assertNotNullOrEmpty(path, ParamNames.PATH);
 
-        if (path.toLowerCase().startsWith("http") || path.toLowerCase().startsWith("https")) {
+        if (path.toLowerCase().startsWith("http") || path.toLowerCase().startsWith("https"))
+        {
             String message = String.format(ErrorMessages.ABSOLUTE_PARAMETER, ParamNames.PATH);
             throw new IllegalArgumentException(message);
         }
@@ -486,19 +545,23 @@ public class LiveConnectClient {
 
     /**
      * Creates a new JSONObject body that has one key-value pair.
+     *
      * @param key
      * @param value
      * @return a new JSONObject body with one key-value pair.
      */
-    private static JSONObject createJsonBody(String key, String value) {
+    private static JSONObject createJsonBody(String key, String value)
+    {
         Map<String, String> tempBody = new HashMap<String, String>();
         tempBody.put(key, value);
         return new JSONObject(tempBody);
     }
 
-    private static HttpClient getHttpClient() {
+    private static HttpClient getHttpClient()
+    {
         // The LiveConnectClients can share one HttpClient with a ThreadSafeConnManager.
-        if (HTTP_CLIENT == null) {
+        if (HTTP_CLIENT == null)
+        {
             HttpParams params = new BasicHttpParams();
             HttpConnectionParams.setConnectionTimeout(params, CONNECT_TIMEOUT_IN_MS);
             HttpConnectionParams.setSoTimeout(params, SOCKET_TIMEOUT_IN_MS);
@@ -532,7 +595,8 @@ public class LiveConnectClient {
                                                  String path,
                                                  LiveOperationException e,
                                                  LiveOperationListener listener,
-                                                 Object userState) {
+                                                 Object userState)
+    {
         LiveOperation operation =
                 new LiveOperation.Builder(method, path).userState(userState).build();
         OperationObserver requestListener =
@@ -551,10 +615,11 @@ public class LiveConnectClient {
      * @return a new LiveOperation
      */
     private static LiveOperation handleException(String method,
-                                                    String path,
-                                                    LiveOperationException e,
-                                                    LiveUploadOperationListener listener,
-                                                    Object userState) {
+                                                 String path,
+                                                 LiveOperationException e,
+                                                 LiveUploadOperationListener listener,
+                                                 Object userState)
+    {
         LiveOperation operation =
                 new LiveOperation.Builder(method, path).userState(userState).build();
         UploadRequestListener requestListener = new UploadRequestListener(operation, listener);
@@ -570,18 +635,22 @@ public class LiveConnectClient {
      * @return a new {@code byte[]} from the InputStream.
      * @throws IOException if there was an error reading or closing the InputStream.
      */
-    private static byte[] toByteArray(InputStream is) throws IOException {
+    private static byte[] toByteArray(InputStream is) throws IOException
+    {
         ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
         OutputStream out = new BufferedOutputStream(byteOut);
         is = new BufferedInputStream(is);
         byte[] buffer = new byte[BUFFER_SIZE];
 
-        try {
+        try
+        {
             int bytesRead;
-            while ((bytesRead = is.read(buffer)) != -1) {
+            while ((bytesRead = is.read(buffer)) != -1)
+            {
                 out.write(buffer, 0, bytesRead);
             }
-        } finally {
+        } finally
+        {
             // we want to perform silent close operations
             closeSilently(is);
             closeSilently(out);
@@ -590,7 +659,9 @@ public class LiveConnectClient {
         return byteOut.toByteArray();
     }
 
-    /** Change this to mock the HTTP responses. */
+    /**
+     * Change this to mock the HTTP responses.
+     */
     private HttpClient httpClient;
 
     private final LiveConnectSession session;
@@ -600,10 +671,11 @@ public class LiveConnectClient {
      * Constructs a new {@code LiveConnectClient} instance and initializes it.
      *
      * @param session that will be used to authenticate calls over to the Live Connect REST API.
-     * @throws NullPointerException if session is null or if session.getAccessToken() is null.
+     * @throws NullPointerException     if session is null or if session.getAccessToken() is null.
      * @throws IllegalArgumentException if session.getAccessToken() is empty.
      */
-    public LiveConnectClient(LiveConnectSession session) {
+    public LiveConnectClient(LiveConnectSession session)
+    {
         LiveConnectUtils.assertNotNull(session, ParamNames.SESSION);
 
         String accessToken = session.getAccessToken();
@@ -614,14 +686,19 @@ public class LiveConnectClient {
 
         // set a listener for the accessToken. If it is set to null, then the session was logged
         // out.
-        this.session.addPropertyChangeListener("accessToken", new PropertyChangeListener() {
+        this.session.addPropertyChangeListener("accessToken", new PropertyChangeListener()
+        {
             @Override
-            public void propertyChange(PropertyChangeEvent event) {
-                String newValue = (String)event.getNewValue();
+            public void propertyChange(PropertyChangeEvent event)
+            {
+                String newValue = (String) event.getNewValue();
 
-                if (TextUtils.isEmpty(newValue)) {
+                if (TextUtils.isEmpty(newValue))
+                {
                     LiveConnectClient.this.sessionState = SessionState.LOGGED_OUT;
-                } else {
+                }
+                else
+                {
                     LiveConnectClient.this.sessionState = SessionState.LOGGED_IN;
                 }
             }
@@ -632,18 +709,19 @@ public class LiveConnectClient {
 
     /**
      * Performs a synchronous HTTP COPY on the Live Connect REST API.
-     *
+     * <p/>
      * A COPY duplicates a resource.
      *
-     * @param path object_id of the resource to copy.
+     * @param path        object_id of the resource to copy.
      * @param destination the folder_id where the resource will be copied to.
      * @return The LiveOperation that contains the JSON result.
-     * @throws LiveOperationException if there is an error during the execution of the request.
+     * @throws LiveOperationException   if there is an error during the execution of the request.
      * @throws IllegalArgumentException if the path or destination is empty or if the path is an
      *                                  absolute uri.
-     * @throws NullPointerException if either the path or destination parameters are null.
+     * @throws NullPointerException     if either the path or destination parameters are null.
      */
-    public LiveOperation copy(String path, String destination) throws LiveOperationException {
+    public LiveOperation copy(String path, String destination) throws LiveOperationException
+    {
         assertValidRelativePath(path);
         LiveConnectUtils.assertNotNullOrEmpty(destination, ParamNames.DESTINATION);
 
@@ -653,59 +731,64 @@ public class LiveConnectClient {
 
     /**
      * Performs an asynchronous HTTP COPY on the Live Connect REST API.
-     *
+     * <p/>
      * A COPY duplicates a resource.
-     *
+     * <p/>
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
      * be called. Both of these methods will be called on the main/UI thread.
      *
-     * @param path object_id of the resource to copy.
+     * @param path        object_id of the resource to copy.
      * @param destination the folder_id where the resource will be copied to.
-     * @param listener called on either completion or error during the copy request.
+     * @param listener    called on either completion or error during the copy request.
      * @return the LiveOperation associated with the request.
      * @throws IllegalArgumentException if the path or destination is empty or if the path is an
      *                                  absolute uri.
-     * @throws NullPointerException if either the path or destination parameters are null.
+     * @throws NullPointerException     if either the path or destination parameters are null.
      */
     public LiveOperation copyAsync(String path,
                                    String destination,
-                                   LiveOperationListener listener) {
+                                   LiveOperationListener listener)
+    {
         return this.copyAsync(path, destination, listener, null);
     }
 
     /**
      * Performs an asynchronous HTTP COPY on the Live Connect REST API.
-     *
+     * <p/>
      * A COPY duplicates a resource.
-     *
+     * <p/>
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
      * be called. Both of these methods will be called on the main/UI thread.
      *
-     * @param path object_id of the resource to copy.
+     * @param path        object_id of the resource to copy.
      * @param destination the folder_id where the resource will be copied to
-     * @param listener called on either completion or error during the copy request.
-     * @param userState arbitrary object that is used to determine the caller of the method.
+     * @param listener    called on either completion or error during the copy request.
+     * @param userState   arbitrary object that is used to determine the caller of the method.
      * @return the LiveOperation associated with the request.
      * @throws IllegalArgumentException if the path or destination is empty or if the path is an
      *                                  absolute uri.
-     * @throws NullPointerException if either the path or destination parameters are null.
+     * @throws NullPointerException     if either the path or destination parameters are null.
      */
     public LiveOperation copyAsync(String path,
                                    String destination,
                                    LiveOperationListener listener,
-                                   Object userState) {
+                                   Object userState)
+    {
         assertValidRelativePath(path);
         LiveConnectUtils.assertNotNullOrEmpty(destination, ParamNames.DESTINATION);
-        if (listener == null) {
+        if (listener == null)
+        {
             listener = NULL_OPERATION_LISTENER;
         }
 
         CopyRequest request;
-        try {
+        try
+        {
             request = this.createCopyRequest(path, destination);
-        } catch (LiveOperationException e) {
+        } catch (LiveOperationException e)
+        {
             return handleException(CopyRequest.METHOD, path, e, listener, userState);
         }
 
@@ -714,16 +797,17 @@ public class LiveConnectClient {
 
     /**
      * Performs a synchronous HTTP DELETE on the Live Connect REST API.
-     *
+     * <p/>
      * HTTP DELETE deletes a resource.
      *
      * @param path object_id of the resource to delete.
      * @return The LiveOperation that contains the delete response
-     * @throws LiveOperationException if there is an error during the execution of the request.
+     * @throws LiveOperationException   if there is an error during the execution of the request.
      * @throws IllegalArgumentException if the path is empty or an absolute uri.
-     * @throws NullPointerException if the path is null.
+     * @throws NullPointerException     if the path is null.
      */
-    public LiveOperation delete(String path) throws LiveOperationException {
+    public LiveOperation delete(String path) throws LiveOperationException
+    {
         assertValidRelativePath(path);
 
         DeleteRequest request = new DeleteRequest(this.session, this.httpClient, path);
@@ -733,44 +817,47 @@ public class LiveConnectClient {
 
     /**
      * Performs an asynchronous HTTP DELETE on the Live Connect REST API.
-     *
+     * <p/>
      * HTTP DELETE deletes a resource.
-     *
+     * <p/>
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
      * be called. Both of these methods will be called on the main/UI thread.
      *
-     * @param path object_id of the resource to delete.
+     * @param path     object_id of the resource to delete.
      * @param listener called on either completion or error during the delete request.
      * @return the LiveOperation associated with the request.
      * @throws IllegalArgumentException if the path is empty or an absolute uri.
-     * @throws NullPointerException if the path is null.
+     * @throws NullPointerException     if the path is null.
      */
-    public LiveOperation deleteAsync(String path, LiveOperationListener listener) {
+    public LiveOperation deleteAsync(String path, LiveOperationListener listener)
+    {
         return this.deleteAsync(path, listener, null);
     }
 
     /**
      * Performs an asynchronous HTTP DELETE on the Live Connect REST API.
-     *
+     * <p/>
      * HTTP DELETE deletes a resource.
-     *
+     * <p/>
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
      * be called. Both of these methods will be called on the main/UI thread.
      *
-     * @param path object_id of the resource to delete.
-     * @param listener called on either completion or error during the delete request.
+     * @param path      object_id of the resource to delete.
+     * @param listener  called on either completion or error during the delete request.
      * @param userState arbitrary object that is used to determine the caller of the method.
      * @return the LiveOperation associated with the request.
      * @throws IllegalArgumentException if the path is empty or an absolute uri.
-     * @throws NullPointerException if the path is null.
+     * @throws NullPointerException     if the path is null.
      */
     public LiveOperation deleteAsync(String path,
                                      LiveOperationListener listener,
-                                     Object userState) {
+                                     Object userState)
+    {
         assertValidRelativePath(path);
-        if (listener == null) {
+        if (listener == null)
+        {
             listener = NULL_OPERATION_LISTENER;
         }
 
@@ -785,11 +872,12 @@ public class LiveConnectClient {
      * returns the response as an {@link InputStream}.
      *
      * @param path object_id of the resource to download.
-     * @throws LiveOperationException if there is an error during the execution of the request.
+     * @throws LiveOperationException   if there is an error during the execution of the request.
      * @throws IllegalArgumentException if the path is empty or an invalid uri.
-     * @throws NullPointerException if the path is null.
+     * @throws NullPointerException     if the path is null.
      */
-    public LiveDownloadOperation download(String path) throws LiveOperationException {
+    public LiveDownloadOperation download(String path) throws LiveOperationException
+    {
         assertValidPath(path);
 
         DownloadRequest request = new DownloadRequest(this.session, this.httpClient, path);
@@ -808,7 +896,7 @@ public class LiveConnectClient {
     /**
      * Downloads a resource by performing an asynchronous HTTP GET on the Live Connect REST API that
      * returns the response as an {@link InputStream}.
-     *
+     * <p/>
      * {@link LiveDownloadOperationListener#onDownloadCompleted(LiveDownloadOperation)} will be
      * called on success.
      * On any download progress
@@ -819,21 +907,22 @@ public class LiveConnectClient {
      * LiveDownloadOperation)} will
      * be called. All of these methods will be called on the main/UI thread.
      *
-     * @param path object_id of the resource to download.
+     * @param path     object_id of the resource to download.
      * @param listener called on either completion or error during the download request.
      * @return the LiveOperation associated with the request.
      * @throws IllegalArgumentException if the path is empty or an invalid uri.
-     * @throws NullPointerException if the path is null.
+     * @throws NullPointerException     if the path is null.
      */
     public LiveDownloadOperation downloadAsync(String path,
-                                               LiveDownloadOperationListener listener) {
+                                               LiveDownloadOperationListener listener)
+    {
         return this.downloadAsync(path, listener, null);
     }
 
     /**
      * Downloads a resource by performing an asynchronous HTTP GET on the Live Connect REST API that
      * returns the response as an {@link InputStream}.
-     *
+     * <p/>
      * {@link LiveDownloadOperationListener#onDownloadCompleted(LiveDownloadOperation)} will be
      * called on success.
      * On any download progress
@@ -844,18 +933,20 @@ public class LiveConnectClient {
      * LiveDownloadOperation)} will
      * be called. All of these methods will be called on the main/UI thread.
      *
-     * @param path object_id of the resource to download.
-     * @param listener called on either completion or error during the download request.
+     * @param path      object_id of the resource to download.
+     * @param listener  called on either completion or error during the download request.
      * @param userState arbitrary object that is used to determine the caller of the method.
      * @return the LiveOperation associated with the request.
      * @throws IllegalArgumentException if the path is empty or an invalid uri.
-     * @throws NullPointerException if the path is null.
+     * @throws NullPointerException     if the path is null.
      */
     public LiveDownloadOperation downloadAsync(String path,
                                                LiveDownloadOperationListener listener,
-                                               Object userState) {
+                                               Object userState)
+    {
         assertValidPath(path);
-        if (listener == null) {
+        if (listener == null)
+        {
             listener = NULL_DOWNLOAD_OPERATION_LISTENER;
         }
 
@@ -865,16 +956,19 @@ public class LiveConnectClient {
 
     public LiveDownloadOperation downloadAsync(String path,
                                                File file,
-                                               LiveDownloadOperationListener listener) {
+                                               LiveDownloadOperationListener listener)
+    {
         return this.downloadAsync(path, file, listener, null);
     }
 
     public LiveDownloadOperation downloadAsync(String path,
                                                File file,
                                                LiveDownloadOperationListener listener,
-                                               Object userState) {
+                                               Object userState)
+    {
         assertValidPath(path);
-        if (listener == null) {
+        if (listener == null)
+        {
             listener = NULL_DOWNLOAD_OPERATION_LISTENER;
         }
 
@@ -883,9 +977,9 @@ public class LiveConnectClient {
 
         LiveDownloadOperation operation =
                 new LiveDownloadOperation.Builder(request.getMethod(), request.getPath())
-                                         .userState(userState)
-                                         .apiRequestAsync(asyncRequest)
-                                         .build();
+                        .userState(userState)
+                        .apiRequestAsync(asyncRequest)
+                        .build();
 
         request.addObserver(new ContentLengthObserver(operation));
         asyncRequest.addObserver(new FileDownloadObserver(operation, listener, file));
@@ -898,16 +992,17 @@ public class LiveConnectClient {
 
     /**
      * Performs a synchronous HTTP GET on the Live Connect REST API.
-     *
+     * <p/>
      * HTTP GET retrieves the representation of a resource.
      *
      * @param path object_id of the resource to retrieve.
      * @return The LiveOperation that contains the JSON result.
-     * @throws LiveOperationException if there is an error during the execution of the request.
+     * @throws LiveOperationException   if there is an error during the execution of the request.
      * @throws IllegalArgumentException if the path is empty or an absolute uri.
-     * @throws NullPointerException if the path is null.
+     * @throws NullPointerException     if the path is null.
      */
-    public LiveOperation get(String path) throws LiveOperationException {
+    public LiveOperation get(String path) throws LiveOperationException
+    {
         assertValidRelativePath(path);
 
         GetRequest request = new GetRequest(this.session, this.httpClient, path);
@@ -916,38 +1011,41 @@ public class LiveConnectClient {
 
     /**
      * Performs an asynchronous HTTP GET on the Live Connect REST API.
-     *
+     * <p/>
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
      * be called. Both of these methods will be called on the main/UI thread.
      *
-     * @param path of the resource to retrieve.
+     * @param path     of the resource to retrieve.
      * @param listener called on either completion or error during the get request.
      * @return the LiveOperation associated with the request.
      * @throws IllegalArgumentException if the path is empty or an absolute uri.
-     * @throws NullPointerException if the path is null.
+     * @throws NullPointerException     if the path is null.
      */
-    public LiveOperation getAsync(String path, LiveOperationListener listener) {
+    public LiveOperation getAsync(String path, LiveOperationListener listener)
+    {
         return this.getAsync(path, listener, null);
     }
 
     /**
      * Performs an asynchronous HTTP GET on the Live Connect REST API.
-     *
+     * <p/>
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
      * be called. Both of these methods will be called on the main/UI thread.
      *
-     * @param path object_id of the resource to retrieve.
-     * @param listener called on either completion or error during the get request.
+     * @param path      object_id of the resource to retrieve.
+     * @param listener  called on either completion or error during the get request.
      * @param userState arbitrary object that is used to determine the caller of the method.
      * @return the LiveOperation associated with the request.
      * @throws IllegalArgumentException if the path is empty or an absolute uri.
-     * @throws NullPointerException if the path is null.
+     * @throws NullPointerException     if the path is null.
      */
-    public LiveOperation getAsync(String path, LiveOperationListener listener, Object userState) {
+    public LiveOperation getAsync(String path, LiveOperationListener listener, Object userState)
+    {
         assertValidRelativePath(path);
-        if (listener == null) {
+        if (listener == null)
+        {
             listener = NULL_OPERATION_LISTENER;
         }
 
@@ -955,25 +1053,29 @@ public class LiveConnectClient {
         return executeAsync(request, listener, userState);
     }
 
-    /** @return the {@link LiveConnectSession} instance used by this {@code LiveConnectClient}. */
-    public LiveConnectSession getSession() {
+    /**
+     * @return the {@link LiveConnectSession} instance used by this {@code LiveConnectClient}.
+     */
+    public LiveConnectSession getSession()
+    {
         return this.session;
     }
 
     /**
      * Performs a synchronous HTTP MOVE on the Live Connect REST API.
-     *
+     * <p/>
      * A MOVE moves the location of a resource.
      *
-     * @param path object_id of the resource to move.
+     * @param path        object_id of the resource to move.
      * @param destination the folder_id to where the resource will be moved to.
      * @return The LiveOperation that contains the JSON result.
-     * @throws LiveOperationException if there is an error during the execution of the request.
+     * @throws LiveOperationException   if there is an error during the execution of the request.
      * @throws IllegalArgumentException if the path or destination is empty or if the path is an
      *                                  absolute uri.
-     * @throws NullPointerException if either the path or destination parameters are null.
+     * @throws NullPointerException     if either the path or destination parameters are null.
      */
-    public LiveOperation move(String path, String destination) throws LiveOperationException {
+    public LiveOperation move(String path, String destination) throws LiveOperationException
+    {
         assertValidRelativePath(path);
         LiveConnectUtils.assertNotNullOrEmpty(destination, ParamNames.DESTINATION);
 
@@ -983,59 +1085,64 @@ public class LiveConnectClient {
 
     /**
      * Performs an asynchronous HTTP MOVE on the Live Connect REST API.
-     *
+     * <p/>
      * A MOVE moves the location of a resource.
-     *
+     * <p/>
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
      * be called. Both of these methods will be called on the main/UI thread.
      *
-     * @param path object_id of the resource to move.
+     * @param path        object_id of the resource to move.
      * @param destination the folder_id to where the resource will be moved to.
-     * @param listener called on either completion or error during the copy request.
+     * @param listener    called on either completion or error during the copy request.
      * @return the LiveOperation associated with the request.
      * @throws IllegalArgumentException if the path or destination is empty or if the path is an
      *                                  absolute uri.
-     * @throws NullPointerException if either the path or destination parameters are null.
+     * @throws NullPointerException     if either the path or destination parameters are null.
      */
     public LiveOperation moveAsync(String path,
                                    String destination,
-                                   LiveOperationListener listener) {
+                                   LiveOperationListener listener)
+    {
         return this.moveAsync(path, destination, listener, null);
     }
 
     /**
      * Performs an asynchronous HTTP MOVE on the Live Connect REST API.
-     *
+     * <p/>
      * A MOVE moves the location of a resource.
-     *
+     * <p/>
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
      * be called. Both of these methods will be called on the main/UI thread.
      *
-     * @param path object_id of the resource to move.
+     * @param path        object_id of the resource to move.
      * @param destination the folder_id to where the resource will be moved to.
-     * @param listener called on either completion or error during the copy request.
-     * @param userState arbitrary object that is used to determine the caller of the method.
+     * @param listener    called on either completion or error during the copy request.
+     * @param userState   arbitrary object that is used to determine the caller of the method.
      * @return the LiveOperation associated with the request.
      * @throws IllegalArgumentException if the path or destination is empty or if the path is an
      *                                  absolute uri.
-     * @throws NullPointerException if either the path or destination parameters are null.
+     * @throws NullPointerException     if either the path or destination parameters are null.
      */
     public LiveOperation moveAsync(String path,
                                    String destination,
                                    LiveOperationListener listener,
-                                   Object userState) {
+                                   Object userState)
+    {
         assertValidRelativePath(path);
         LiveConnectUtils.assertNotNullOrEmpty(destination, ParamNames.DESTINATION);
-        if (listener == null) {
+        if (listener == null)
+        {
             listener = NULL_OPERATION_LISTENER;
         }
 
         MoveRequest request;
-        try {
+        try
+        {
             request = this.createMoveRequest(path, destination);
-        } catch (LiveOperationException e) {
+        } catch (LiveOperationException e)
+        {
             return handleException(MoveRequest.METHOD, path, e, listener, userState);
         }
 
@@ -1044,17 +1151,18 @@ public class LiveConnectClient {
 
     /**
      * Performs a synchronous HTTP POST on the Live Connect REST API.
-     *
+     * <p/>
      * A POST adds a new resource to a collection.
      *
      * @param path object_id of the post request.
      * @param body body of the post request.
      * @return a LiveOperation that contains the JSON result.
-     * @throws LiveOperationException if there is an error during the execution of the request.
+     * @throws LiveOperationException   if there is an error during the execution of the request.
      * @throws IllegalArgumentException if the path is empty or is an absolute uri.
-     * @throws NullPointerException if either the path or body parameters are null.
+     * @throws NullPointerException     if either the path or body parameters are null.
      */
-    public LiveOperation post(String path, JSONObject body) throws LiveOperationException {
+    public LiveOperation post(String path, JSONObject body) throws LiveOperationException
+    {
         assertValidRelativePath(path);
         LiveConnectUtils.assertNotNull(body, ParamNames.BODY);
 
@@ -1064,23 +1172,26 @@ public class LiveConnectClient {
 
     /**
      * Performs a synchronous HTTP POST on the Live Connect REST API.
-     *
+     * <p/>
      * A POST adds a new resource to a collection.
      *
      * @param path object_id of the post request.
      * @param body body of the post request.
      * @return a LiveOperation that contains the JSON result.
-     * @throws LiveOperationException if there is an error during the execution of the request.
+     * @throws LiveOperationException   if there is an error during the execution of the request.
      * @throws IllegalArgumentException if the path is empty or is an absolute uri.
-     * @throws NullPointerException if either the path or body parameters are null.
+     * @throws NullPointerException     if either the path or body parameters are null.
      */
-    public LiveOperation post(String path, String body) throws LiveOperationException {
+    public LiveOperation post(String path, String body) throws LiveOperationException
+    {
         LiveConnectUtils.assertNotNullOrEmpty(body, ParamNames.BODY);
 
         JSONObject jsonBody;
-        try {
+        try
+        {
             jsonBody = new JSONObject(body.toString());
-        } catch (JSONException e) {
+        } catch (JSONException e)
+        {
             throw new LiveOperationException(ErrorMessages.CLIENT_ERROR, e);
         }
 
@@ -1089,55 +1200,60 @@ public class LiveConnectClient {
 
     /**
      * Performs an asynchronous HTTP POST on the Live Connect REST API.
-     *
+     * <p/>
      * A POST adds a new resource to a collection.
-     *
+     * <p/>
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
      * be called. Both of these methods will be called on the main/UI thread.
      *
-     * @param path object_id of the post request.
-     * @param body body of the post request.
+     * @param path     object_id of the post request.
+     * @param body     body of the post request.
      * @param listener called on either completion or error during the copy request.
      * @return the LiveOperation associated with the request.
      * @throws IllegalArgumentException if the path is empty or is an absolute uri.
-     * @throws NullPointerException if either the path or body parameters are null.
+     * @throws NullPointerException     if either the path or body parameters are null.
      */
-    public LiveOperation postAsync(String path, JSONObject body, LiveOperationListener listener) {
+    public LiveOperation postAsync(String path, JSONObject body, LiveOperationListener listener)
+    {
         return this.postAsync(path, body, listener, null);
     }
 
     /**
      * Performs an asynchronous HTTP POST on the Live Connect REST API.
-     *
+     * <p/>
      * A POST adds a new resource to a collection.
-     *
+     * <p/>
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
      * be called. Both of these methods will be called on the main/UI thread.
      *
-     * @param path object_id of the post request.
-     * @param body body of the post request.
-     * @param listener called on either completion or error during the copy request.
+     * @param path      object_id of the post request.
+     * @param body      body of the post request.
+     * @param listener  called on either completion or error during the copy request.
      * @param userState arbitrary object that is used to determine the caller of the method.
      * @return the LiveOperation associated with the request.
      * @throws IllegalArgumentException if the path is empty or is an absolute uri.
-     * @throws NullPointerException if either the path or body parameters are null.
+     * @throws NullPointerException     if either the path or body parameters are null.
      */
     public LiveOperation postAsync(String path,
                                    JSONObject body,
                                    LiveOperationListener listener,
-                                   Object userState) {
+                                   Object userState)
+    {
         assertValidRelativePath(path);
         LiveConnectUtils.assertNotNull(body, ParamNames.BODY);
-        if (listener == null) {
+        if (listener == null)
+        {
             listener = NULL_OPERATION_LISTENER;
         }
 
         PostRequest request;
-        try {
+        try
+        {
             request = createPostRequest(path, body);
-        } catch (LiveOperationException e) {
+        } catch (LiveOperationException e)
+        {
             return handleException(PostRequest.METHOD, path, e, listener, userState);
         }
 
@@ -1146,56 +1262,60 @@ public class LiveConnectClient {
 
     /**
      * Performs an asynchronous HTTP POST on the Live Connect REST API.
-     *
+     * <p/>
      * A POST adds a new resource to a collection.
-     *
+     * <p/>
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
      * be called. Both of these methods will be called on the main/UI thread.
      *
-     * @param path object_id of the post request.
-     * @param body body of the post request.
+     * @param path     object_id of the post request.
+     * @param body     body of the post request.
      * @param listener called on either completion or error during the copy request.
      * @return the LiveOperation associated with the request.
      * @throws IllegalArgumentException if the path is empty or is an absolute uri.
-     * @throws NullPointerException if either the path or body parameters are null.
+     * @throws NullPointerException     if either the path or body parameters are null.
      */
-    public LiveOperation postAsync(String path, String body, LiveOperationListener listener) {
+    public LiveOperation postAsync(String path, String body, LiveOperationListener listener)
+    {
         return this.postAsync(path, body, listener, null);
     }
 
     /**
      * Performs an asynchronous HTTP POST on the Live Connect REST API.
-     *
+     * <p/>
      * A POST adds a new resource to a collection.
-     *
+     * <p/>
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
      * be called. Both of these methods will be called on the main/UI thread.
      *
-     * @param path object_id of the post request.
-     * @param body body of the post request.
-     * @param listener called on either completion or error during the copy request.
+     * @param path      object_id of the post request.
+     * @param body      body of the post request.
+     * @param listener  called on either completion or error during the copy request.
      * @param userState arbitrary object that is used to determine the caller of the method.
      * @return the LiveOperation associated with the request.
      * @throws IllegalArgumentException if the path is empty or is an absolute uri.
-     * @throws NullPointerException if either the path or body parameters are null.
+     * @throws NullPointerException     if either the path or body parameters are null.
      */
     public LiveOperation postAsync(String path,
                                    String body,
                                    LiveOperationListener listener,
-                                   Object userState) {
+                                   Object userState)
+    {
         LiveConnectUtils.assertNotNullOrEmpty(body, ParamNames.BODY);
 
         JSONObject jsonBody;
-        try {
+        try
+        {
             jsonBody = new JSONObject(body.toString());
-        } catch (JSONException e) {
+        } catch (JSONException e)
+        {
             return handleException(PostRequest.METHOD,
-                                   path,
-                                   new LiveOperationException(ErrorMessages.CLIENT_ERROR, e),
-                                   listener,
-                                   userState);
+                    path,
+                    new LiveOperationException(ErrorMessages.CLIENT_ERROR, e),
+                    listener,
+                    userState);
         }
 
         return this.postAsync(path, jsonBody, listener, userState);
@@ -1203,17 +1323,18 @@ public class LiveConnectClient {
 
     /**
      * Performs a synchronous HTTP PUT on the Live Connect REST API.
-     *
+     * <p/>
      * A PUT updates a resource or if it does not exist, it creates a one.
      *
      * @param path object_id of the put request.
      * @param body body of the put request.
      * @return a LiveOperation that contains the JSON result.
-     * @throws LiveOperationException if there is an error during the execution of the request.
+     * @throws LiveOperationException   if there is an error during the execution of the request.
      * @throws IllegalArgumentException if the path is empty or is an absolute uri.
-     * @throws NullPointerException if either the path or body parameters are null.
+     * @throws NullPointerException     if either the path or body parameters are null.
      */
-    public LiveOperation put(String path, JSONObject body) throws LiveOperationException {
+    public LiveOperation put(String path, JSONObject body) throws LiveOperationException
+    {
         assertValidRelativePath(path);
         LiveConnectUtils.assertNotNull(body, ParamNames.BODY);
 
@@ -1223,23 +1344,26 @@ public class LiveConnectClient {
 
     /**
      * Performs a synchronous HTTP PUT on the Live Connect REST API.
-     *
+     * <p/>
      * A PUT updates a resource or if it does not exist, it creates a one.
      *
      * @param path object_id of the put request.
      * @param body body of the put request.
      * @return a LiveOperation that contains the JSON result.
-     * @throws LiveOperationException if there is an error during the execution of the request.
+     * @throws LiveOperationException   if there is an error during the execution of the request.
      * @throws IllegalArgumentException if the path is empty or is an absolute uri.
-     * @throws NullPointerException if either the path or body parameters are null.
+     * @throws NullPointerException     if either the path or body parameters are null.
      */
-    public LiveOperation put(String path, String body) throws LiveOperationException {
+    public LiveOperation put(String path, String body) throws LiveOperationException
+    {
         LiveConnectUtils.assertNotNullOrEmpty(body, ParamNames.BODY);
 
         JSONObject jsonBody;
-        try {
+        try
+        {
             jsonBody = new JSONObject(body.toString());
-        } catch (JSONException e) {
+        } catch (JSONException e)
+        {
             throw new LiveOperationException(ErrorMessages.CLIENT_ERROR, e);
         }
 
@@ -1248,55 +1372,60 @@ public class LiveConnectClient {
 
     /**
      * Performs an asynchronous HTTP PUT on the Live Connect REST API.
-     *
+     * <p/>
      * A PUT updates a resource or if it does not exist, it creates a one.
-     *
+     * <p/>
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
      * be called. Both of these methods will be called on the main/UI thread.
      *
-     * @param path object_id of the put request.
-     * @param body body of the put request.
+     * @param path     object_id of the put request.
+     * @param body     body of the put request.
      * @param listener called on either completion or error during the put request.
      * @return the LiveOperation associated with the request.
      * @throws IllegalArgumentException if the path is empty or is an absolute uri.
-     * @throws NullPointerException if either the path or body parameters are null.
+     * @throws NullPointerException     if either the path or body parameters are null.
      */
-    public LiveOperation putAsync(String path, JSONObject body, LiveOperationListener listener) {
+    public LiveOperation putAsync(String path, JSONObject body, LiveOperationListener listener)
+    {
         return this.putAsync(path, body, listener, null);
     }
 
     /**
      * Performs an asynchronous HTTP PUT on the Live Connect REST API.
-     *
+     * <p/>
      * A PUT updates a resource or if it does not exist, it creates a one.
-     *
+     * <p/>
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
      * be called. Both of these methods will be called on the main/UI thread.
      *
-     * @param path of the put request.
-     * @param body of the put request.
-     * @param listener called on either completion or error during the put request.
+     * @param path      of the put request.
+     * @param body      of the put request.
+     * @param listener  called on either completion or error during the put request.
      * @param userState arbitrary object that is used to determine the caller of the method.
      * @return the LiveOperation associated with the request.
      * @throws IllegalArgumentException if the path is empty or is an absolute uri.
-     * @throws NullPointerException if either the path or body parameters are null.
+     * @throws NullPointerException     if either the path or body parameters are null.
      */
     public LiveOperation putAsync(String path,
                                   JSONObject body,
                                   LiveOperationListener listener,
-                                  Object userState) {
+                                  Object userState)
+    {
         assertValidRelativePath(path);
         LiveConnectUtils.assertNotNull(body, ParamNames.BODY);
-        if (listener == null) {
+        if (listener == null)
+        {
             listener = NULL_OPERATION_LISTENER;
         }
 
         PutRequest request;
-        try {
+        try
+        {
             request = createPutRequest(path, body);
-        } catch (LiveOperationException e) {
+        } catch (LiveOperationException e)
+        {
             return handleException(PutRequest.METHOD, path, e, listener, userState);
         }
 
@@ -1305,55 +1434,59 @@ public class LiveConnectClient {
 
     /**
      * Performs an asynchronous HTTP PUT on the Live Connect REST API.
-     *
+     * <p/>
      * A PUT updates a resource or if it does not exist, it creates a one.
-     *
+     * <p/>
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
      * be called. Both of these methods will be called on the main/UI thread.
      *
-     * @param path object_id of the put request.
-     * @param body body of the put request.
+     * @param path     object_id of the put request.
+     * @param body     body of the put request.
      * @param listener called on either completion or error during the put request.
      * @return the LiveOperation associated with the request.
      * @throws IllegalArgumentException if the path is empty or is an absolute uri.
-     * @throws NullPointerException if either the path or body parameters are null.
+     * @throws NullPointerException     if either the path or body parameters are null.
      */
-    public LiveOperation putAsync(String path, String body, LiveOperationListener listener) {
+    public LiveOperation putAsync(String path, String body, LiveOperationListener listener)
+    {
         return this.putAsync(path, body, listener, null);
     }
 
     /**
      * Performs an asynchronous HTTP PUT on the Live Connect REST API.
-     *
+     * <p/>
      * A PUT updates a resource or if it does not exist, it creates a one.
-     *
+     * <p/>
      * {@link LiveOperationListener#onComplete(LiveOperation)} will be called on success.
      * Otherwise, {@link LiveOperationListener#onError(LiveOperationException, LiveOperation)} will
      * be called. Both of these methods will be called on the main/UI thread.
      *
-     * @param path object_id of the put request.
-     * @param body body of the put request.
-     * @param listener called on either completion or error during the put request.
+     * @param path      object_id of the put request.
+     * @param body      body of the put request.
+     * @param listener  called on either completion or error during the put request.
      * @param userState arbitrary object that is used to determine the caller of the method.
      * @return the LiveOperation associated with the request.
      * @throws IllegalArgumentException if the path is empty or is an absolute uri.
-     * @throws NullPointerException if either the path or body parameters are null.
+     * @throws NullPointerException     if either the path or body parameters are null.
      */
     public LiveOperation putAsync(String path,
                                   String body,
                                   LiveOperationListener listener,
-                                  Object userState) {
+                                  Object userState)
+    {
         LiveConnectUtils.assertNotNullOrEmpty(body, ParamNames.BODY);
         JSONObject jsonBody;
-        try {
+        try
+        {
             jsonBody = new JSONObject(body.toString());
-        } catch (JSONException e) {
+        } catch (JSONException e)
+        {
             return handleException(PutRequest.METHOD,
-                                   path,
-                                   new LiveOperationException(ErrorMessages.CLIENT_ERROR, e),
-                                   listener,
-                                   userState);
+                    path,
+                    new LiveOperationException(ErrorMessages.CLIENT_ERROR, e),
+                    listener,
+                    userState);
         }
 
         return this.putAsync(path, jsonBody, listener, userState);
@@ -1363,15 +1496,16 @@ public class LiveConnectClient {
      * Uploads a resource by performing a synchronous HTTP PUT on the Live Connect REST API that
      * returns the response as an {@link InputStream}.
      *
-     * @param path location to upload to
+     * @param path     location to upload to
      * @param filename name of the new resource
-     * @param file contents of the upload
+     * @param file     contents of the upload
      * @return a LiveOperation that contains the JSON result.
      * @throws LiveOperationException if there is an error during the execution of the request.
      */
     public LiveOperation upload(String path,
                                 String filename,
-                                InputStream file) throws LiveOperationException {
+                                InputStream file) throws LiveOperationException
+    {
         return this.upload(path, filename, file, false);
     }
 
@@ -1379,9 +1513,9 @@ public class LiveConnectClient {
      * Uploads a resource by performing a synchronous HTTP PUT on the Live Connect REST API that
      * returns the response as an {@link InputStream}.
      *
-     * @param path location to upload to
-     * @param filename name of the new resource
-     * @param file contents of the upload
+     * @param path              location to upload to
+     * @param filename          name of the new resource
+     * @param file              contents of the upload
      * @param overwriteExisting overwrite the existing resource if true
      * @return a LiveOperation that contains the JSON result.
      * @throws LiveOperationException if there is an error during the execution of the request.
@@ -1389,7 +1523,8 @@ public class LiveConnectClient {
     public LiveOperation upload(String path,
                                 String filename,
                                 InputStream file,
-                                boolean overwriteExisting) throws LiveOperationException {
+                                boolean overwriteExisting) throws LiveOperationException
+    {
         assertValidPath(path);
         LiveConnectUtils.assertNotNullOrEmpty(filename, ParamNames.FILENAME);
         LiveConnectUtils.assertNotNull(file, ParamNames.FILE);
@@ -1398,54 +1533,60 @@ public class LiveConnectClient {
         // so we must know the length of the InputStream, before we send it.
         // Load the stream into memory to get the length.
         byte[] bytes;
-        try {
+        try
+        {
             bytes = LiveConnectClient.toByteArray(file);
-        } catch (IOException e) {
+        } catch (IOException e)
+        {
             throw new LiveOperationException(ErrorMessages.CLIENT_ERROR, e);
         }
 
         UploadRequest request = createUploadRequest(path,
-                                                    filename,
-                                                    new ByteArrayInputStream(bytes),
-                                                    bytes.length,
-                                                    overwriteExisting);
+                filename,
+                new ByteArrayInputStream(bytes),
+                bytes.length,
+                overwriteExisting);
         return execute(request);
     }
 
     public LiveOperation upload(String path,
                                 String filename,
-                                File file) throws LiveOperationException {
+                                File file) throws LiveOperationException
+    {
         return this.upload(path, filename, file, false);
     }
 
     public LiveOperation upload(String path,
                                 String filename,
                                 File file,
-                                boolean overwriteExisting) throws LiveOperationException {
+                                boolean overwriteExisting) throws LiveOperationException
+    {
         assertValidPath(path);
         LiveConnectUtils.assertNotNullOrEmpty(filename, ParamNames.FILENAME);
         LiveConnectUtils.assertNotNull(file, ParamNames.FILE);
 
         InputStream is = null;
-        try {
+        try
+        {
             is = new FileInputStream(file);
-        } catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e)
+        {
             throw new LiveOperationException(ErrorMessages.CLIENT_ERROR, e);
         }
 
         UploadRequest request;
-            request = createUploadRequest(path,
-                                          filename,
-                                          is,
-                                          file.length(),
-                                          overwriteExisting);
+        request = createUploadRequest(path,
+                filename,
+                is,
+                file.length(),
+                overwriteExisting);
         return execute(request);
     }
 
     /**
      * Uploads a resource by performing an asynchronous HTTP PUT on the Live Connect REST API that
      * returns the response as an {@link InputStream}.
-     *
+     * <p/>
      * {@link LiveUploadOperationListener#onUploadCompleted(LiveOperation)} will be called on
      * success.
      * {@link LiveUploadOperationListener#onUploadProgress(int, int, LiveOperation) will be called
@@ -1454,12 +1595,12 @@ public class LiveConnectClient {
      * {@link LiveUploadOperationListener#onUploadFailed(LiveOperationException, LiveOperation)}
      * will be called. This method will NOT be called on the main/UI thread.
      *
-     * @param path location to upload to
-     * @param filename name of the new resource
+     * @param path              location to upload to
+     * @param filename          name of the new resource
      * @param overwriteExisting overwrite the existing resource if true
-     * @param file contents of the upload
-     * @param listener called on completion, on progress, or on an error of the upload request.
-     * @param userState arbitrary object that is used to determine the caller of the method.
+     * @param file              contents of the upload
+     * @param listener          called on completion, on progress, or on an error of the upload request.
+     * @param userState         arbitrary object that is used to determine the caller of the method.
      * @return the LiveOperation associated with the request.
      */
     public LiveOperation uploadAsync(String path,
@@ -1467,11 +1608,13 @@ public class LiveConnectClient {
                                      InputStream file,
                                      boolean overwriteExisting,
                                      LiveUploadOperationListener listener,
-                                     Object userState) {
+                                     Object userState)
+    {
         assertValidPath(path);
         LiveConnectUtils.assertNotNullOrEmpty(filename, ParamNames.FILENAME);
         LiveConnectUtils.assertNotNull(file, ParamNames.FILE);
-        if (listener == null) {
+        if (listener == null)
+        {
             listener = NULL_UPLOAD_OPERATION_LISTENER;
         }
 
@@ -1479,31 +1622,35 @@ public class LiveConnectClient {
         // so we must know the length of the InputStream, before we send it.
         // Load the stream into memory to get the length.
         byte[] bytes;
-        try {
+        try
+        {
             bytes = LiveConnectClient.toByteArray(file);
-        } catch (IOException e) {
+        } catch (IOException e)
+        {
             LiveOperationException exception =
                     new LiveOperationException(ErrorMessages.CLIENT_ERROR, e);
             return handleException(UploadRequest.METHOD, path, exception, listener, userState);
         }
 
         UploadRequest request;
-        try {
+        try
+        {
             request = createUploadRequest(path,
-                                          filename,
-                                          new ByteArrayInputStream(bytes),
-                                          bytes.length,
-                                          overwriteExisting);
-        } catch (LiveOperationException e) {
+                    filename,
+                    new ByteArrayInputStream(bytes),
+                    bytes.length,
+                    overwriteExisting);
+        } catch (LiveOperationException e)
+        {
             return handleException(UploadRequest.METHOD, path, e, listener, userState);
         }
 
         ApiRequestAsync<JSONObject> asyncRequest = ApiRequestAsync.newInstance(request);
 
         LiveOperation operation = new LiveOperation.Builder(request.getMethod(), request.getPath())
-                                                   .userState(userState)
-                                                   .apiRequestAsync(asyncRequest)
-                                                   .build();
+                .userState(userState)
+                .apiRequestAsync(asyncRequest)
+                .build();
 
         UploadRequestListener operationListener = new UploadRequestListener(operation, listener);
 
@@ -1517,7 +1664,7 @@ public class LiveConnectClient {
     /**
      * Uploads a resource by performing an asynchronous HTTP PUT on the Live Connect REST API that
      * returns the response as an {@link InputStream}.
-     *
+     * <p/>
      * {@link LiveUploadOperationListener#onUploadCompleted(LiveOperation)} will be called on
      * success.
      * {@link LiveUploadOperationListener#onUploadProgress(int, int, LiveOperation) will be called
@@ -1526,24 +1673,25 @@ public class LiveConnectClient {
      * {@link LiveUploadOperationListener#onUploadFailed(LiveOperationException, LiveOperation)}
      * will be called. This method will NOT be called on the main/UI thread.
      *
-     * @param path location to upload to.
-     * @param filename name of the new resource.
+     * @param path              location to upload to.
+     * @param filename          name of the new resource.
      * @param overwriteExisting overwrite the existing resource if true.
-     * @param file contents of the upload.
-     * @param listener called on completion, on progress, or on an error of the upload request.
+     * @param file              contents of the upload.
+     * @param listener          called on completion, on progress, or on an error of the upload request.
      * @return the LiveOperation associated with the request.
      */
     public LiveOperation uploadAsync(String path,
                                      String filename,
                                      InputStream input,
-                                     LiveUploadOperationListener listener) {
+                                     LiveUploadOperationListener listener)
+    {
         return this.uploadAsync(path, filename, input, listener, null);
     }
 
     /**
      * Uploads a resource by performing an asynchronous HTTP PUT on the Live Connect REST API that
      * returns the response as an {@link InputStream}.
-     *
+     * <p/>
      * {@link LiveUploadOperationListener#onUploadCompleted(LiveOperation)} will be called on
      * success.
      * {@link LiveUploadOperationListener#onUploadProgress(int, int, LiveOperation) will be called
@@ -1552,26 +1700,28 @@ public class LiveConnectClient {
      * {@link LiveUploadOperationListener#onUploadFailed(LiveOperationException, LiveOperation)}
      * will be called. This method will NOT be called on the main/UI thread.
      *
-     * @param path location to upload to.
-     * @param filename name of the new resource.
+     * @param path              location to upload to.
+     * @param filename          name of the new resource.
      * @param overwriteExisting overwrite the existing resource if true.
-     * @param file contents of the upload.
-     * @param listener called on completion, on progress, or on an error of the upload request.
-     * @param userState arbitrary object that is used to determine the caller of the method.
+     * @param file              contents of the upload.
+     * @param listener          called on completion, on progress, or on an error of the upload request.
+     * @param userState         arbitrary object that is used to determine the caller of the method.
      * @return the LiveOperation associated with the request.
      */
     public LiveOperation uploadAsync(String path,
                                      String filename,
                                      InputStream input,
                                      LiveUploadOperationListener listener,
-                                     Object userState) {
+                                     Object userState)
+    {
         return this.uploadAsync(path, filename, input, false, listener, userState);
     }
 
     public LiveOperation uploadAsync(String path,
                                      String filename,
                                      File file,
-                                     LiveUploadOperationListener listener) {
+                                     LiveUploadOperationListener listener)
+    {
         return this.uploadAsync(path, filename, file, listener, null);
     }
 
@@ -1579,7 +1729,8 @@ public class LiveConnectClient {
                                      String filename,
                                      File file,
                                      LiveUploadOperationListener listener,
-                                     Object userState) {
+                                     Object userState)
+    {
         return this.uploadAsync(path, filename, file, false, listener, userState);
     }
 
@@ -1588,24 +1739,29 @@ public class LiveConnectClient {
                                      File file,
                                      boolean overwriteExisting,
                                      LiveUploadOperationListener listener,
-                                     Object userState) {
+                                     Object userState)
+    {
         assertValidPath(path);
         LiveConnectUtils.assertNotNullOrEmpty(filename, ParamNames.FILENAME);
         LiveConnectUtils.assertNotNull(file, ParamNames.FILE);
-        if (listener == null) {
+        if (listener == null)
+        {
             listener = NULL_UPLOAD_OPERATION_LISTENER;
         }
 
         UploadRequest request;
-        try {
+        try
+        {
             request = createUploadRequest(path,
-                                          filename,
-                                          new FileInputStream(file),
-                                          file.length(),
-                                          overwriteExisting);
-        } catch (LiveOperationException e) {
+                    filename,
+                    new FileInputStream(file),
+                    file.length(),
+                    overwriteExisting);
+        } catch (LiveOperationException e)
+        {
             return handleException(UploadRequest.METHOD, path, e, listener, userState);
-        } catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e)
+        {
             LiveOperationException exception =
                     new LiveOperationException(ErrorMessages.CLIENT_ERROR, e);
             return handleException(UploadRequest.METHOD, path, exception, listener, userState);
@@ -1614,9 +1770,9 @@ public class LiveConnectClient {
         ApiRequestAsync<JSONObject> asyncRequest = ApiRequestAsync.newInstance(request);
 
         LiveOperation operation = new LiveOperation.Builder(request.getMethod(), request.getPath())
-                                                   .userState(userState)
-                                                   .apiRequestAsync(asyncRequest)
-                                                   .build();
+                .userState(userState)
+                .apiRequestAsync(asyncRequest)
+                .build();
 
         UploadRequestListener operationListener = new UploadRequestListener(operation, listener);
 
@@ -1629,25 +1785,28 @@ public class LiveConnectClient {
 
     /**
      * Sets the HttpClient that is used in requests.
-     *
+     * <p/>
      * This is here to be able to mock the server for testing purposes.
      *
      * @param client
      */
-    void setHttpClient(HttpClient client) {
+    void setHttpClient(HttpClient client)
+    {
         assert client != null;
         this.httpClient = client;
     }
 
     /**
      * Creates a {@link CopyRequest} and its json body.
-     * @param path location of the request.
+     *
+     * @param path        location of the request.
      * @param destination value for the json body.
      * @return a new {@link CopyRequest}.
      * @throws LiveOperationException if there is an error creating the request.
      */
     private CopyRequest createCopyRequest(String path,
-                                          String destination) throws LiveOperationException {
+                                          String destination) throws LiveOperationException
+    {
         assert !TextUtils.isEmpty(path);
         assert !TextUtils.isEmpty(destination);
 
@@ -1656,18 +1815,22 @@ public class LiveConnectClient {
         return new CopyRequest(this.session, this.httpClient, path, entity);
     }
 
-    private JsonEntity createJsonEntity(JSONObject body) throws LiveOperationException {
+    private JsonEntity createJsonEntity(JSONObject body) throws LiveOperationException
+    {
         assert body != null;
 
-        try {
+        try
+        {
             return new JsonEntity(body);
-        } catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e)
+        {
             throw new LiveOperationException(ErrorMessages.CLIENT_ERROR, e);
         }
     }
 
     private MoveRequest createMoveRequest(String path,
-                                          String destination) throws LiveOperationException {
+                                          String destination) throws LiveOperationException
+    {
         assert !TextUtils.isEmpty(path);
         assert !TextUtils.isEmpty(destination);
 
@@ -1677,7 +1840,8 @@ public class LiveConnectClient {
     }
 
     private PostRequest createPostRequest(String path,
-                                          JSONObject body) throws LiveOperationException {
+                                          JSONObject body) throws LiveOperationException
+    {
         assert !TextUtils.isEmpty(path);
         assert body != null;
 
@@ -1686,7 +1850,8 @@ public class LiveConnectClient {
     }
 
     private PutRequest createPutRequest(String path,
-                                        JSONObject body) throws LiveOperationException {
+                                        JSONObject body) throws LiveOperationException
+    {
         assert !TextUtils.isEmpty(path);
         assert body != null;
 
@@ -1698,7 +1863,8 @@ public class LiveConnectClient {
                                               String filename,
                                               InputStream is,
                                               long length,
-                                              boolean overwrite) throws LiveOperationException {
+                                              boolean overwrite) throws LiveOperationException
+    {
         assert !TextUtils.isEmpty(path);
         assert !TextUtils.isEmpty(filename);
         assert is != null;
@@ -1716,7 +1882,8 @@ public class LiveConnectClient {
      * @param userState arbitrary object that is used to determine the caller of the method.
      * @return a new LiveOperation.
      */
-    private LiveOperation execute(ApiRequest<JSONObject> request) throws LiveOperationException {
+    private LiveOperation execute(ApiRequest<JSONObject> request) throws LiveOperationException
+    {
         this.sessionState.check();
 
         JSONObject result = request.execute();
@@ -1737,16 +1904,17 @@ public class LiveConnectClient {
      */
     private LiveDownloadOperation executeAsync(ApiRequest<InputStream> request,
                                                LiveDownloadOperationListener listener,
-                                               Object userState) {
+                                               Object userState)
+    {
         this.sessionState.check();
 
         ApiRequestAsync<InputStream> asyncRequest = ApiRequestAsync.newInstance(request);
 
         LiveDownloadOperation operation =
                 new LiveDownloadOperation.Builder(request.getMethod(), request.getPath())
-                                         .userState(userState)
-                                         .apiRequestAsync(asyncRequest)
-                                         .build();
+                        .userState(userState)
+                        .apiRequestAsync(asyncRequest)
+                        .build();
 
 
         request.addObserver(new ContentLengthObserver(operation));
@@ -1766,15 +1934,16 @@ public class LiveConnectClient {
      */
     private LiveOperation executeAsync(ApiRequest<JSONObject> request,
                                        LiveOperationListener listener,
-                                       Object userState) {
+                                       Object userState)
+    {
         this.sessionState.check();
 
         ApiRequestAsync<JSONObject> asyncRequest = ApiRequestAsync.newInstance(request);
 
         LiveOperation operation = new LiveOperation.Builder(request.getMethod(), request.getPath())
-                                                   .userState(userState)
-                                                   .apiRequestAsync(asyncRequest)
-                                                   .build();
+                .userState(userState)
+                .apiRequestAsync(asyncRequest)
+                .build();
 
         asyncRequest.addObserver(new OperationObserver(operation, listener));
         asyncRequest.execute();

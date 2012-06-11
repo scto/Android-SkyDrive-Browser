@@ -6,60 +6,74 @@ package com.killerud.skydrive.objects;
 
 import org.json.JSONObject;
 
-public class SkyDriveVideo extends SkyDriveObject {
+public class SkyDriveVideo extends SkyDriveObject
+{
 
     public static final String TYPE = "video";
 
-    public SkyDriveVideo(JSONObject object) {
+    public SkyDriveVideo(JSONObject object)
+    {
         super(object);
     }
 
     @Override
-    public void accept(Visitor visitor) {
+    public void accept(Visitor visitor)
+    {
         visitor.visit(this);
     }
 
-    public long getSize() {
+    public long getSize()
+    {
         return mObject.optLong("size");
     }
 
-    public int getCommentsCount() {
+    public int getCommentsCount()
+    {
         return mObject.optInt("comments_count");
     }
 
-    public boolean getCommentsEnabled() {
+    public boolean getCommentsEnabled()
+    {
         return mObject.optBoolean("comments_enabled");
     }
 
-    public String getSource() {
+    public String getSource()
+    {
         return mObject.optString("source");
     }
 
-    public int getTagsCount() {
+    public int getTagsCount()
+    {
         return mObject.optInt("tags_count");
     }
 
-    public boolean getTagsEnabled() {
+    public boolean getTagsEnabled()
+    {
         return mObject.optBoolean("tags_enabled");
     }
 
-    public String getPicture() {
+    public String getPicture()
+    {
         return mObject.optString("picture");
     }
 
-    public int getHeight() {
+    public int getHeight()
+    {
         return mObject.optInt("height");
     }
 
-    public int getWidth() {
+    public int getWidth()
+    {
         return mObject.optInt("width");
     }
 
-    public int getDuration() {
+    public int getDuration()
+    {
         return mObject.optInt("duration");
     }
 
-    public int getBitrate() {
+    public int getBitrate()
+    {
         return mObject.optInt("bitrate");
     }
 }

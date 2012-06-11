@@ -6,15 +6,18 @@
 
 package com.microsoft.live;
 
-public class LiveOperationException extends Exception {
+public class LiveOperationException extends Exception
+{
 
     private static final long serialVersionUID = 4630383031651156731L;
 
-    LiveOperationException(String message) {
+    LiveOperationException(String message)
+    {
         super(message);
     }
 
-    LiveOperationException(String message, Throwable e) {
+    LiveOperationException(String message, Throwable e)
+    {
         super(message, e);
     }
 }

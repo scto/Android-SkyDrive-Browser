@@ -6,7 +6,9 @@
 
 package com.microsoft.live;
 
-public interface LiveAuthListener {
+public interface LiveAuthListener
+{
     public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState);
+
     public void onAuthError(LiveAuthException exception, Object userState);
 }

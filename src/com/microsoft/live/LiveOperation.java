@@ -6,20 +6,22 @@
 
 package com.microsoft.live;
 
+import android.text.TextUtils;
 import org.json.JSONObject;
 
-import android.text.TextUtils;
+public class LiveOperation
+{
 
-public class LiveOperation {
-
-    static class Builder {
+    static class Builder
+    {
         private ApiRequestAsync<JSONObject> apiRequestAsync;
         private final String method;
         private final String path;
         private JSONObject result;
         private Object userState;
 
-        public Builder(String method, String path) {
+        public Builder(String method, String path)
+        {
             assert !TextUtils.isEmpty(method);
             assert !TextUtils.isEmpty(path);
 
@@ -33,24 +35,28 @@ public class LiveOperation {
          * @param apiRequestAsync
          * @return this Builder
          */
-        public Builder apiRequestAsync(ApiRequestAsync<JSONObject> apiRequestAsync) {
+        public Builder apiRequestAsync(ApiRequestAsync<JSONObject> apiRequestAsync)
+        {
             assert apiRequestAsync != null;
 
             this.apiRequestAsync = apiRequestAsync;
             return this;
         }
 
-        public LiveOperation build() {
+        public LiveOperation build()
+        {
             return new LiveOperation(this);
         }
 
-        public Builder result(JSONObject result) {
+        public Builder result(JSONObject result)
+        {
             assert result != null;
             this.result = result;
             return this;
         }
 
-        public Builder userState(Object userState) {
+        public Builder userState(Object userState)
+        {
             this.userState = userState;
             return this;
         }
@@ -62,7 +68,8 @@ public class LiveOperation {
     private JSONObject result;
     private final Object userState;
 
-    private LiveOperation(Builder builder) {
+    private LiveOperation(Builder builder)
+    {
         this.apiRequestAsync = builder.apiRequestAsync;
         this.method = builder.method;
         this.path = builder.path;
@@ -70,39 +77,48 @@ public class LiveOperation {
         this.userState = builder.userState;
     }
 
-    public void cancel() {
+    public void cancel()
+    {
         final boolean isCancelable = this.apiRequestAsync != null;
-        if (isCancelable) {
+        if (isCancelable)
+        {
             this.apiRequestAsync.cancel(true);
         }
     }
 
-    public String getMethod() {
+    public String getMethod()
+    {
         return this.method;
     }
 
-    public String getPath() {
+    public String getPath()
+    {
         return this.path;
     }
 
-    public String getRawResult() {
+    public String getRawResult()
+    {
         final JSONObject result = this.getResult();
-        if (result == null) {
+        if (result == null)
+        {
             return null;
         }
 
         return result.toString();
     }
 
-    public JSONObject getResult() {
+    public JSONObject getResult()
+    {
         return this.result;
     }
 
-    public Object getUserState() {
+    public Object getUserState()
+    {
         return this.userState;
     }
 
-    void setResult(JSONObject result) {
+    void setResult(JSONObject result)
+    {
         assert result != null;
 
         this.result = result;

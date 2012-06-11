@@ -4,41 +4,46 @@
 
 package com.killerud.skydrive.objects;
 
-import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
 import org.json.JSONObject;
 
-public class SkyDriveAudio extends SkyDriveObject{
+public class SkyDriveAudio extends SkyDriveObject
+{
 
     public static final String TYPE = "audio";
 
-    public SkyDriveAudio(JSONObject object) {
+    public SkyDriveAudio(JSONObject object)
+    {
         super(object);
     }
 
     @Override
-    public void accept(Visitor visitor) {
+    public void accept(Visitor visitor)
+    {
         visitor.visit(this);
     }
 
-    public long getSize() {
+    public long getSize()
+    {
         return mObject.optLong("size");
     }
 
-    public int getCommentsCount() {
+    public int getCommentsCount()
+    {
         return mObject.optInt("comments_count");
     }
 
-    public boolean getCommentsEnabled() {
+    public boolean getCommentsEnabled()
+    {
         return mObject.optBoolean("comments_enabled");
     }
 
-    public String getSource() {
+    public String getSource()
+    {
         return mObject.optString("source");
     }
 
-    public boolean getIsEmbeddable() {
+    public boolean getIsEmbeddable()
+    {
         return mObject.optBoolean("is_embeddable");
     }
 

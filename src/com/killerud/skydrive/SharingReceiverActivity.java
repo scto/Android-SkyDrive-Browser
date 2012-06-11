@@ -1,6 +1,7 @@
 package com.killerud.skydrive;
 
-import android.app.*;
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -22,7 +23,8 @@ import java.util.Arrays;
  * Date: 03.05.12
  * Time: 21:27
  */
-public class SharingReceiverActivity extends Activity {
+public class SharingReceiverActivity extends Activity
+{
     BrowserForSkyDriveApplication mApp;
     TextView mResultTextView;
     LiveAuthClient mAuthClient;
@@ -35,7 +37,8 @@ public class SharingReceiverActivity extends Activity {
      * Called when the activity is first created.
      */
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.sign_in);
         mApp = (BrowserForSkyDriveApplication) getApplication();
@@ -51,15 +54,22 @@ public class SharingReceiverActivity extends Activity {
         mIntroText.setVisibility(View.INVISIBLE);
         mSignInButton.setVisibility(View.INVISIBLE);
 
-        mSignInButton.setOnClickListener(new View.OnClickListener() {
+        mSignInButton.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View view) {
-                mAuthClient.login(SharingReceiverActivity.this, Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener() {
+            public void onClick(View view)
+            {
+                mAuthClient.login(SharingReceiverActivity.this, Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener()
+                {
                     @Override
-                    public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState) {
-                        if (status == LiveStatus.CONNECTED) {
+                    public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState)
+                    {
+                        if (status == LiveStatus.CONNECTED)
+                        {
                             startBrowserActivity(session);
-                        } else {
+                        }
+                        else
+                        {
                             Toast.makeText(getApplicationContext(), R.string.manualSignInError, Toast.LENGTH_SHORT);
                             mIntroText.setVisibility(View.VISIBLE);
                             mSignInButton.setVisibility(View.VISIBLE);
@@ -69,7 +79,8 @@ public class SharingReceiverActivity extends Activity {
                     }
 
                     @Override
-                    public void onAuthError(LiveAuthException exception, Object userState) {
+                    public void onAuthError(LiveAuthException exception, Object userState)
+                    {
                         Log.e(Constants.LOGTAG, exception.getMessage());
                         finish();
                     }
@@ -79,15 +90,21 @@ public class SharingReceiverActivity extends Activity {
     }
 
     @Override
-    protected void onStart() {
+    protected void onStart()
+    {
         super.onStart();
-        mAuthClient.initialize(Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener() {
+        mAuthClient.initialize(Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener()
+        {
             @Override
-            public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState) {
+            public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState)
+            {
                 mInitializeDialog.dismiss();
-                if (status == LiveStatus.CONNECTED) {
+                if (status == LiveStatus.CONNECTED)
+                {
                     startBrowserActivity(session);
-                } else {
+                }
+                else
+                {
                     Toast.makeText(getApplicationContext(), R.string.automaticSignInError, Toast.LENGTH_SHORT);
                     Log.e(Constants.LOGTAG, "Initialize did not connect. Status is " + status + ".");
                     finish();
@@ -95,7 +112,8 @@ public class SharingReceiverActivity extends Activity {
             }
 
             @Override
-            public void onAuthError(LiveAuthException exception, Object userState) {
+            public void onAuthError(LiveAuthException exception, Object userState)
+            {
                 mInitializeDialog.dismiss();
                 Log.e(Constants.LOGTAG, exception.getMessage());
                 finish();
@@ -103,14 +121,16 @@ public class SharingReceiverActivity extends Activity {
         });
     }
 
-    public String parseUriToFilePath(Uri uri) {
+    public String parseUriToFilePath(Uri uri)
+    {
         String selectedImagePath = null;
         String filemanagerPath = uri.getPath();
 
-        String[] projection = { MediaStore.Images.Media.DATA };
+        String[] projection = {MediaStore.Images.Media.DATA};
         Cursor cursor = managedQuery(uri, projection, null, null, null);
 
-        if (cursor != null) {
+        if (cursor != null)
+        {
             // Here you will get a null pointer if cursor is null
             // This can be if you used OI file manager for picking the media
             int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
@@ -118,16 +138,19 @@ public class SharingReceiverActivity extends Activity {
             selectedImagePath = cursor.getString(column_index);
         }
 
-        if (selectedImagePath != null) {
+        if (selectedImagePath != null)
+        {
             return selectedImagePath;
         }
-        else if (filemanagerPath != null) {
+        else if (filemanagerPath != null)
+        {
             return filemanagerPath;
         }
         return null;
     }
 
-    private void startBrowserActivity(LiveConnectSession session) {
+    private void startBrowserActivity(LiveConnectSession session)
+    {
         assert session != null;
         mApp.setSession(session);
         mApp.setConnectClient(new LiveConnectClient(session));
@@ -135,10 +158,12 @@ public class SharingReceiverActivity extends Activity {
         /* This is the key that opens up for uploading <|:D~ */
         Intent intentThatStartedMe = getIntent();
         Intent startIntent = new Intent(getApplicationContext(), BrowserActivity.class);
-        if(intentThatStartedMe.getAction() != null
-                && intentThatStartedMe.getAction().equals(Intent.ACTION_SEND)){
+        if (intentThatStartedMe.getAction() != null
+                && intentThatStartedMe.getAction().equals(Intent.ACTION_SEND))
+        {
             Bundle extras = intentThatStartedMe.getExtras();
-            if (extras.containsKey(Intent.EXTRA_STREAM)) {
+            if (extras.containsKey(Intent.EXTRA_STREAM))
+            {
                 Uri uri = (Uri) extras.getParcelable(Intent.EXTRA_STREAM);
 
                 ArrayList<String> filePath = new ArrayList<String>();
@@ -147,13 +172,17 @@ public class SharingReceiverActivity extends Activity {
                 startIntent.setAction("killerud.skydrive.UPLOAD_PICK_FOLDER");
                 startIntent.putExtra(UploadFileActivity.EXTRA_FILES_LIST, filePath);
             }
-        }else if(intentThatStartedMe.getAction() != null
-                && intentThatStartedMe.getAction().equals(Intent.ACTION_SEND_MULTIPLE)){
+        }
+        else if (intentThatStartedMe.getAction() != null
+                && intentThatStartedMe.getAction().equals(Intent.ACTION_SEND_MULTIPLE))
+        {
             Bundle extras = intentThatStartedMe.getExtras();
-            if(extras.containsKey(Intent.EXTRA_STREAM)){
+            if (extras.containsKey(Intent.EXTRA_STREAM))
+            {
                 ArrayList<Uri> fileList = intentThatStartedMe.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
                 ArrayList<String> filePaths = new ArrayList<String>();
-                for(int i=0;i<fileList.size();i++){
+                for (int i = 0; i < fileList.size(); i++)
+                {
                     filePaths.add(parseUriToFilePath(fileList.get(i)));
                 }
                 startIntent.setAction("killerud.skydrive.UPLOAD_PICK_FOLDER");

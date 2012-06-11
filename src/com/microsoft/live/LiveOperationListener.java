@@ -6,8 +6,10 @@
 
 package com.microsoft.live;
 
-public interface LiveOperationListener {
+public interface LiveOperationListener
+{
     public void onComplete(LiveOperation operation);
+
     public void onError(LiveOperationException exception,
                         LiveOperation operation);
 }

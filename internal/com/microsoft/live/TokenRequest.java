@@ -6,11 +6,8 @@
 
 package com.microsoft.live;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-
+import android.net.Uri;
+import android.text.TextUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -25,14 +22,17 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.net.Uri;
-import android.text.TextUtils;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Abstract class that represents an OAuth token request.
  * Known subclasses include AccessTokenRequest and RefreshAccessTokenRequest
  */
-abstract class TokenRequest {
+abstract class TokenRequest
+{
 
     private static final String CONTENT_TYPE =
             URLEncodedUtils.CONTENT_TYPE + ";charset=" + HTTP.UTF_8;
@@ -43,10 +43,11 @@ abstract class TokenRequest {
     /**
      * Constructs a new TokenRequest instance and initializes its parameters.
      *
-     * @param client the HttpClient to make HTTP requests on
+     * @param client   the HttpClient to make HTTP requests on
      * @param clientId the client_id of the calling application
      */
-    public TokenRequest(HttpClient client, String clientId) {
+    public TokenRequest(HttpClient client, String clientId)
+    {
         assert client != null;
         assert clientId != null;
         assert !TextUtils.isEmpty(clientId);
@@ -62,7 +63,8 @@ abstract class TokenRequest {
      * @throws LiveAuthException if there is any exception while executing the request
      *                           (e.g., IOException, JSONException)
      */
-    public OAuthResponse execute() throws LiveAuthException {
+    public OAuthResponse execute() throws LiveAuthException
+    {
         final Uri requestUri = Config.INSTANCE.getOAuthTokenUri();
 
         final HttpPost request = new HttpPost(requestUri.toString());
@@ -73,43 +75,57 @@ abstract class TokenRequest {
         // constructBody allows subclasses to add to body
         this.constructBody(body);
 
-        try {
+        try
+        {
             final UrlEncodedFormEntity entity = new UrlEncodedFormEntity(body, HTTP.UTF_8);
             entity.setContentType(CONTENT_TYPE);
             request.setEntity(entity);
-        } catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e)
+        {
             throw new LiveAuthException(ErrorMessages.CLIENT_ERROR, e);
         }
 
         final HttpResponse response;
-        try {
+        try
+        {
             response = this.client.execute(request);
-        } catch (ClientProtocolException e) {
+        } catch (ClientProtocolException e)
+        {
             throw new LiveAuthException(ErrorMessages.SERVER_ERROR, e);
-        } catch (IOException e) {
+        } catch (IOException e)
+        {
             throw new LiveAuthException(ErrorMessages.SERVER_ERROR, e);
         }
 
         final HttpEntity entity = response.getEntity();
         final String stringResponse;
-        try {
+        try
+        {
             stringResponse = EntityUtils.toString(entity);
-        } catch (IOException e) {
+        } catch (IOException e)
+        {
             throw new LiveAuthException(ErrorMessages.SERVER_ERROR, e);
         }
 
         final JSONObject jsonResponse;
-        try {
+        try
+        {
             jsonResponse = new JSONObject(stringResponse);
-        } catch (JSONException e) {
+        } catch (JSONException e)
+        {
             throw new LiveAuthException(ErrorMessages.SERVER_ERROR, e);
         }
 
-        if (OAuthErrorResponse.validOAuthErrorResponse(jsonResponse)) {
+        if (OAuthErrorResponse.validOAuthErrorResponse(jsonResponse))
+        {
             return OAuthErrorResponse.createFromJson(jsonResponse);
-        } else if (OAuthSuccessfulResponse.validOAuthSuccessfulResponse(jsonResponse)) {
+        }
+        else if (OAuthSuccessfulResponse.validOAuthSuccessfulResponse(jsonResponse))
+        {
             return OAuthSuccessfulResponse.createFromJson(jsonResponse);
-        } else {
+        }
+        else
+        {
             throw new LiveAuthException(ErrorMessages.SERVER_ERROR);
         }
     }

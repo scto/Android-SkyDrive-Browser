@@ -61,7 +61,8 @@ public class UploadFileActivity extends SherlockListActivity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
                 File file = (File) parent.getItemAtPosition(position);
-                if(mActionMode == null){
+                if (mActionMode == null)
+                {
                     if (file.isDirectory())
                     {
                         mPreviousFolders.push(mCurrentFolder);
@@ -76,7 +77,9 @@ public class UploadFileActivity extends SherlockListActivity
                         setResult(Activity.RESULT_OK, data);
                         finish();
                     }
-                }else{
+                }
+                else
+                {
                     mAdapter.setChecked(position, true);
                     mCurrentlySelectedFiles.add(
                             ((UploadFileListAdapter) getListAdapter()).getItem(position).getPath());
@@ -425,7 +428,7 @@ public class UploadFileActivity extends SherlockListActivity
         public boolean onActionItemClicked(final com.actionbarsherlock.view.ActionMode mode, MenuItem item)
         {
             String title = item.getTitle().toString();
-            if(title.equalsIgnoreCase(ContextItems.MENU_TITLE_UPLOAD))
+            if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_UPLOAD))
             {
                 Intent data = new Intent();
                 data.putExtra(EXTRA_FILES_LIST, (ArrayList<String>) mCurrentlySelectedFiles.clone());
@@ -433,7 +436,8 @@ public class UploadFileActivity extends SherlockListActivity
                 mode.finish();
                 finish();
                 return true;
-            }else if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_SELECT_ALL))
+            }
+            else if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_SELECT_ALL))
             {
                 mAdapter.checkAll();
                 item.setTitle(ContextItems.MENU_TITLE_DESELECT_ALL);

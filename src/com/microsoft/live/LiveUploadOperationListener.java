@@ -6,7 +6,8 @@
 
 package com.microsoft.live;
 
-public interface LiveUploadOperationListener {
+public interface LiveUploadOperationListener
+{
     public void onUploadCompleted(LiveOperation operation);
 
     public void onUploadFailed(LiveOperationException exception,

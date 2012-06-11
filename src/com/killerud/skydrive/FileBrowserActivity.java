@@ -61,7 +61,8 @@ public class FileBrowserActivity extends SherlockListActivity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
                 File file = (File) parent.getItemAtPosition(position);
-                if(mActionMode == null){
+                if (mActionMode == null)
+                {
                     if (file.isDirectory())
                     {
                         mPreviousFolders.push(mCurrentFolder);
@@ -76,7 +77,9 @@ public class FileBrowserActivity extends SherlockListActivity
                         setResult(Activity.RESULT_OK, data);
                         finish();
                     }
-                }else{
+                }
+                else
+                {
                     mAdapter.setChecked(position, true);
                     mCurrentlySelectedFiles.add(
                             ((FileBrowserListAdapter) getListAdapter()).getItem(position).getPath());
@@ -120,7 +123,8 @@ public class FileBrowserActivity extends SherlockListActivity
     {
         super.onStart();
         File skyDriveFolder = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/");
-        if(!skyDriveFolder.exists()){
+        if (!skyDriveFolder.exists())
+        {
             skyDriveFolder.mkdirs();
         }
         loadFolder(skyDriveFolder);
@@ -412,9 +416,9 @@ public class FileBrowserActivity extends SherlockListActivity
         @Override
         public boolean onCreateActionMode(com.actionbarsherlock.view.ActionMode mode, Menu menu)
         {
-           menu.add(ContextItems.MENU_TITLE_DELETE)
+            menu.add(ContextItems.MENU_TITLE_DELETE)
                     .setIcon(android.R.drawable.ic_menu_delete)
-                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM|
+                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM |
                             MenuItem.SHOW_AS_ACTION_WITH_TEXT);
             menu.add(ContextItems.MENU_TITLE_SELECT_ALL)
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
@@ -442,7 +446,9 @@ public class FileBrowserActivity extends SherlockListActivity
                 mAdapter.clearChecked();
                 item.setTitle(ContextItems.MENU_TITLE_SELECT_ALL);
                 return true;
-            }else if(title.equalsIgnoreCase(ContextItems.MENU_TITLE_DELETE)){
+            }
+            else if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_DELETE))
+            {
                 final AlertDialog dialog = new AlertDialog.Builder(getSupportActionBar().getThemedContext()).create();
                 dialog.setTitle("Delete files?");
                 dialog.setIcon(R.drawable.warning_triangle);
@@ -450,10 +456,11 @@ public class FileBrowserActivity extends SherlockListActivity
                 deleteMessage.append("The following files will be deleted: \n\n");
                 for (int i = 0; i < mCurrentlySelectedFiles.size(); i++)
                 {
-                    int index =     mCurrentlySelectedFiles.get(i).lastIndexOf("/");
-                    if(index != -1){
+                    int index = mCurrentlySelectedFiles.get(i).lastIndexOf("/");
+                    if (index != -1)
+                    {
                         deleteMessage.append(mCurrentlySelectedFiles.get(i)
-                            .substring(index+1));
+                                .substring(index + 1));
                         deleteMessage.append("\n");
                     }
                 }
@@ -465,10 +472,12 @@ public class FileBrowserActivity extends SherlockListActivity
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i)
                     {
-                        ArrayList<File> files =  ((FileBrowserListAdapter) getListAdapter()).getFiles();
-                        for(int j=0;j<mCurrentlySelectedFiles.size();j++){
+                        ArrayList<File> files = ((FileBrowserListAdapter) getListAdapter()).getFiles();
+                        for (int j = 0; j < mCurrentlySelectedFiles.size(); j++)
+                        {
                             File file = new File(mCurrentlySelectedFiles.get(j));
-                            if(file.exists()){
+                            if (file.exists())
+                            {
                                 files.remove(file);
                                 file.delete();
                             }

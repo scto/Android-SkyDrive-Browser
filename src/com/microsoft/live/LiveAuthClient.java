@@ -6,15 +6,6 @@
 
 package com.microsoft.live;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -24,16 +15,21 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
-
 import com.microsoft.live.OAuth.ErrorType;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
+
+import java.util.*;
 
 /**
  * {@code LiveAuthClient} is a class responsible for retrieving a {@link LiveConnectSession}, which
  * can be given to a {@link LiveConnectClient} in order to make requests to the Live Connect API.
  */
-public class LiveAuthClient {
+public class LiveAuthClient
+{
 
-    private static class AuthCompleteRunnable extends AuthListenerCaller implements Runnable {
+    private static class AuthCompleteRunnable extends AuthListenerCaller implements Runnable
+    {
 
         private final LiveStatus status;
         private final LiveConnectSession session;
@@ -41,41 +37,48 @@ public class LiveAuthClient {
         public AuthCompleteRunnable(LiveAuthListener listener,
                                     Object userState,
                                     LiveStatus status,
-                                    LiveConnectSession session) {
+                                    LiveConnectSession session)
+        {
             super(listener, userState);
             this.status = status;
             this.session = session;
         }
 
         @Override
-        public void run() {
+        public void run()
+        {
             listener.onAuthComplete(status, session, userState);
         }
     }
 
-    private static class AuthErrorRunnable extends AuthListenerCaller implements Runnable {
+    private static class AuthErrorRunnable extends AuthListenerCaller implements Runnable
+    {
 
         private final LiveAuthException exception;
 
         public AuthErrorRunnable(LiveAuthListener listener,
                                  Object userState,
-                                 LiveAuthException exception) {
+                                 LiveAuthException exception)
+        {
             super(listener, userState);
             this.exception = exception;
         }
 
         @Override
-        public void run() {
+        public void run()
+        {
             listener.onAuthError(exception, userState);
         }
 
     }
 
-    private static abstract class AuthListenerCaller {
+    private static abstract class AuthListenerCaller
+    {
         protected final LiveAuthListener listener;
         protected final Object userState;
 
-        public AuthListenerCaller(LiveAuthListener listener, Object userState) {
+        public AuthListenerCaller(LiveAuthListener listener, Object userState)
+        {
             this.listener = listener;
             this.userState = userState;
         }
@@ -89,75 +92,92 @@ public class LiveAuthClient {
      * {@link LiveAuthListener#onAuthError(LiveAuthException, Object)}.
      */
     private class ListenerCallerObserver extends AuthListenerCaller
-                                         implements OAuthRequestObserver,
-                                                    OAuthResponseVisitor {
+            implements OAuthRequestObserver,
+            OAuthResponseVisitor
+    {
 
-        public ListenerCallerObserver(LiveAuthListener listener, Object userState) {
+        public ListenerCallerObserver(LiveAuthListener listener, Object userState)
+        {
             super(listener, userState);
         }
 
         @Override
-        public void onException(LiveAuthException exception) {
+        public void onException(LiveAuthException exception)
+        {
             new AuthErrorRunnable(listener, userState, exception).run();
         }
 
         @Override
-        public void onResponse(OAuthResponse response) {
+        public void onResponse(OAuthResponse response)
+        {
             response.accept(this);
         }
 
         @Override
-        public void visit(OAuthErrorResponse response) {
+        public void visit(OAuthErrorResponse response)
+        {
             String error = response.getError().toString().toLowerCase();
             String errorDescription = response.getErrorDescription();
             String errorUri = response.getErrorUri();
             LiveAuthException exception = new LiveAuthException(error,
-                                                                errorDescription,
-                                                                errorUri);
+                    errorDescription,
+                    errorUri);
 
             new AuthErrorRunnable(listener, userState, exception).run();
         }
 
         @Override
-        public void visit(OAuthSuccessfulResponse response) {
+        public void visit(OAuthSuccessfulResponse response)
+        {
             session.loadFromOAuthResponse(response);
 
             new AuthCompleteRunnable(listener, userState, LiveStatus.CONNECTED, session).run();
         }
     }
 
-    /** Observer that will, depending on the response, save or clear the refresh token. */
-    private class RefreshTokenWriter implements OAuthRequestObserver, OAuthResponseVisitor {
+    /**
+     * Observer that will, depending on the response, save or clear the refresh token.
+     */
+    private class RefreshTokenWriter implements OAuthRequestObserver, OAuthResponseVisitor
+    {
 
         @Override
-        public void onException(LiveAuthException exception) { }
+        public void onException(LiveAuthException exception)
+        {
+        }
 
         @Override
-        public void onResponse(OAuthResponse response) {
+        public void onResponse(OAuthResponse response)
+        {
             response.accept(this);
         }
 
         @Override
-        public void visit(OAuthErrorResponse response) {
-            if (response.getError() == ErrorType.INVALID_GRANT) {
+        public void visit(OAuthErrorResponse response)
+        {
+            if (response.getError() == ErrorType.INVALID_GRANT)
+            {
                 LiveAuthClient.this.clearRefreshTokenFromPreferences();
             }
         }
 
         @Override
-        public void visit(OAuthSuccessfulResponse response) {
+        public void visit(OAuthSuccessfulResponse response)
+        {
             String refreshToken = response.getRefreshToken();
-            if (!TextUtils.isEmpty(refreshToken)) {
+            if (!TextUtils.isEmpty(refreshToken))
+            {
                 this.saveRefreshTokenToPerferences(refreshToken);
             }
         }
 
-        private boolean saveRefreshTokenToPerferences(String refreshToken) {
+        private boolean saveRefreshTokenToPerferences(String refreshToken)
+        {
             assert !TextUtils.isEmpty(refreshToken);
 
             SharedPreferences settings =
                     applicationContext.getSharedPreferences(PreferencesConstants.FILE_NAME,
-                                                            Context.MODE_PRIVATE);
+                            Context.MODE_PRIVATE);
             Editor editor = settings.edit();
             editor.putString(PreferencesConstants.REFRESH_TOKEN_KEY, refreshToken);
 
@@ -169,12 +189,14 @@ public class LiveAuthClient {
      * An {@link OAuthResponseVisitor} that checks the {@link OAuthResponse} and if it is a
      * successful response, it loads the response into the given session.
      */
-    private static class SessionRefresher implements OAuthResponseVisitor {
+    private static class SessionRefresher implements OAuthResponseVisitor
+    {
 
         private final LiveConnectSession session;
         private boolean visitedSuccessfulResponse;
 
-        public SessionRefresher(LiveConnectSession session) {
+        public SessionRefresher(LiveConnectSession session)
+        {
             assert session != null;
 
             this.session = session;
@@ -182,17 +204,20 @@ public class LiveAuthClient {
         }
 
         @Override
-        public void visit(OAuthErrorResponse response) {
+        public void visit(OAuthErrorResponse response)
+        {
             this.visitedSuccessfulResponse = false;
         }
 
         @Override
-        public void visit(OAuthSuccessfulResponse response) {
+        public void visit(OAuthSuccessfulResponse response)
+        {
             this.session.loadFromOAuthResponse(response);
             this.visitedSuccessfulResponse = true;
         }
 
-        public boolean visitedSuccessfulResponse() {
+        public boolean visitedSuccessfulResponse()
+        {
             return this.visitedSuccessfulResponse;
         }
     }
@@ -202,11 +227,17 @@ public class LiveAuthClient {
      * This is used so when a null listener is passed in, this can be used, instead of null,
      * to avoid if (listener == null) checks.
      */
-    private static final LiveAuthListener NULL_LISTENER = new LiveAuthListener() {
+    private static final LiveAuthListener NULL_LISTENER = new LiveAuthListener()
+    {
         @Override
-        public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object sender) { }
+        public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object sender)
+        {
+        }
+
         @Override
-        public void onAuthError(LiveAuthException exception, Object sender) { }
+        public void onAuthError(LiveAuthException exception, Object sender)
+        {
+        }
     };
 
     private final Context applicationContext;
@@ -216,14 +247,19 @@ public class LiveAuthClient {
     /**
      * Responsible for all network (i.e., HTTP) calls.
      * Tests will want to change this to mock the network and HTTP responses.
+     *
      * @see #setHttpClient(HttpClient)
      */
     private HttpClient httpClient;
 
-    /** saved from initialize and used in the login call if login's scopes are null. */
+    /**
+     * saved from initialize and used in the login call if login's scopes are null.
+     */
     private Set<String> scopesFromInitialize;
 
-    /** One-to-one relationship between LiveAuthClient and LiveConnectSession. */
+    /**
+     * One-to-one relationship between LiveAuthClient and LiveConnectSession.
+     */
     private final LiveConnectSession session;
 
     {
@@ -235,10 +271,11 @@ public class LiveAuthClient {
     /**
      * Constructs a new {@code LiveAuthClient} instance and initializes its member variables.
      *
-     * @param context Context of the Application used to save any refresh_token.
+     * @param context  Context of the Application used to save any refresh_token.
      * @param clientId The client_id of the Live Connect Application to login to.
      */
-    public LiveAuthClient(Context context, String clientId) {
+    public LiveAuthClient(Context context, String clientId)
+    {
         LiveConnectUtils.assertNotNull(context, "context");
         LiveConnectUtils.assertNotNullOrEmpty(clientId, "clientId");
 
@@ -246,76 +283,85 @@ public class LiveAuthClient {
         this.clientId = clientId;
     }
 
-    /** @return the client_id of the Live Connect application. */
-    public String getClientId() {
+    /**
+     * @return the client_id of the Live Connect application.
+     */
+    public String getClientId()
+    {
         return this.clientId;
     }
 
     /**
      * Initializes a new {@link LiveConnectSession} with the given scopes.
-     *
+     * <p/>
      * The {@link LiveConnectSession} will be returned by calling
      * {@link LiveAuthListener#onAuthComplete(LiveStatus, LiveConnectSession, Object)}.
      * Otherwise, the {@link LiveAuthListener#onAuthError(LiveAuthException, Object)} will be
      * called. These methods will be called on the main/UI thread.
-     *
+     * <p/>
      * If the wl.offline_access scope is used, a refresh_token is stored in the given
      * {@link Activity}'s {@link SharedPerfences}.
      *
-     * @param scopes to initialize the {@link LiveConnectSession} with.
-     *        See <a href="http://msdn.microsoft.com/en-us/library/hh243646.aspx">MSDN Live Connect
-     *        Reference's Scopes and permissions</a> for a list of scopes and explanations.
+     * @param scopes   to initialize the {@link LiveConnectSession} with.
+     *                 See <a href="http://msdn.microsoft.com/en-us/library/hh243646.aspx">MSDN Live Connect
+     *                 Reference's Scopes and permissions</a> for a list of scopes and explanations.
      * @param listener called on either completion or error during the initialize process.
      */
-    public void initialize(Iterable<String> scopes, LiveAuthListener listener) {
+    public void initialize(Iterable<String> scopes, LiveAuthListener listener)
+    {
         this.initialize(scopes, listener, null);
     }
 
     /**
      * Initializes a new {@link LiveConnectSession} with the given scopes.
-     *
+     * <p/>
      * The {@link LiveConnectSession} will be returned by calling
      * {@link LiveAuthListener#onAuthComplete(LiveStatus, LiveConnectSession, Object)}.
      * Otherwise, the {@link LiveAuthListener#onAuthError(LiveAuthException, Object)} will be
      * called. These methods will be called on the main/UI thread.
-     *
+     * <p/>
      * If the wl.offline_access scope is used, a refresh_token is stored in the given
      * {@link Activity}'s {@link SharedPerfences}.
      *
-     * @param scopes to initialize the {@link LiveConnectSession} with.
-     *        See <a href="http://msdn.microsoft.com/en-us/library/hh243646.aspx">MSDN Live Connect
-     *        Reference's Scopes and permissions</a> for a list of scopes and explanations.
-     * @param listener called on either completion or error during the initialize process
+     * @param scopes    to initialize the {@link LiveConnectSession} with.
+     *                  See <a href="http://msdn.microsoft.com/en-us/library/hh243646.aspx">MSDN Live Connect
+     *                  Reference's Scopes and permissions</a> for a list of scopes and explanations.
+     * @param listener  called on either completion or error during the initialize process
      * @param userState arbitrary object that is used to determine the caller of the method.
      */
-    public void initialize(Iterable<String> scopes, LiveAuthListener listener, Object userState) {
-        if (listener == null) {
+    public void initialize(Iterable<String> scopes, LiveAuthListener listener, Object userState)
+    {
+        if (listener == null)
+        {
             listener = NULL_LISTENER;
         }
 
-        if (scopes == null) {
+        if (scopes == null)
+        {
             scopes = Arrays.asList(new String[0]);
         }
 
         // copy scopes for login
         this.scopesFromInitialize = new HashSet<String>();
-        for (String scope : scopes) {
+        for (String scope : scopes)
+        {
             this.scopesFromInitialize.add(scope);
         }
         this.scopesFromInitialize = Collections.unmodifiableSet(this.scopesFromInitialize);
 
         String refreshToken = this.getRefreshTokenFromPreferences();
 
-        if (refreshToken == null) {
+        if (refreshToken == null)
+        {
             listener.onAuthComplete(LiveStatus.UNKNOWN, null, userState);
             return;
         }
 
         RefreshAccessTokenRequest request =
                 new RefreshAccessTokenRequest(this.httpClient,
-                                              this.clientId,
-                                              refreshToken,
-                                              TextUtils.join(OAuth.SCOPE_DELIMITER, scopes));
+                        this.clientId,
+                        refreshToken,
+                        TextUtils.join(OAuth.SCOPE_DELIMITER, scopes));
         TokenRequestAsync asyncRequest = new TokenRequestAsync(request);
 
         asyncRequest.addObserver(new ListenerCallerObserver(listener, userState));
@@ -326,46 +372,48 @@ public class LiveAuthClient {
 
     /**
      * Initializes a new {@link LiveConnectSession} with the given scopes.
-     *
+     * <p/>
      * The {@link LiveConnectSession} will be returned by calling
      * {@link LiveAuthListener#onAuthComplete(LiveStatus, LiveConnectSession, Object)}.
      * Otherwise, the {@link LiveAuthListener#onAuthError(LiveAuthException, Object)} will be
      * called. These methods will be called on the main/UI thread.
-     *
+     * <p/>
      * If the wl.offline_access scope is used, a refresh_token is stored in the given
      * {@link Activity}'s {@link SharedPerfences}.
-     *
+     * <p/>
      * This initialize will use the last successfully used scopes from either a login or initialize.
      *
      * @param listener called on either completion or error during the initialize process.
      */
-    public void initialize(LiveAuthListener listener) {
+    public void initialize(LiveAuthListener listener)
+    {
         this.initialize(listener, null);
     }
 
     /**
      * Initializes a new {@link LiveConnectSession} with the given scopes.
-     *
+     * <p/>
      * The {@link LiveConnectSession} will be returned by calling
      * {@link LiveAuthListener#onAuthComplete(LiveStatus, LiveConnectSession, Object)}.
      * Otherwise, the {@link LiveAuthListener#onAuthError(LiveAuthException, Object)} will be
      * called. These methods will be called on the main/UI thread.
-     *
+     * <p/>
      * If the wl.offline_access scope is used, a refresh_token is stored in the given
      * {@link Activity}'s {@link SharedPerfences}.
-     *
+     * <p/>
      * This initialize will use the last successfully used scopes from either a login or initialize.
      *
-     * @param listener called on either completion or error during the initialize process.
+     * @param listener  called on either completion or error during the initialize process.
      * @param userState arbitrary object that is used to determine the caller of the method.
      */
-    public void initialize(LiveAuthListener listener, Object userState) {
+    public void initialize(LiveAuthListener listener, Object userState)
+    {
         this.initialize(null, listener, userState);
     }
 
     /**
      * Logs in an user with the given scopes.
-     *
+     * <p/>
      * login displays a {@link Dialog} that will prompt the
      * user for a username and password, and ask for consent to use the given scopes.
      * A {@link LiveConnectSession} will be returned by calling
@@ -374,19 +422,20 @@ public class LiveAuthClient {
      * called. These methods will be called on the main/UI thread.
      *
      * @param activity {@link Activity} instance to display the Login dialog on.
-     * @param scopes to initialize the {@link LiveConnectSession} with.
-     *        See <a href="http://msdn.microsoft.com/en-us/library/hh243646.aspx">MSDN Live Connect
-     *        Reference's Scopes and permissions</a> for a list of scopes and explanations.
+     * @param scopes   to initialize the {@link LiveConnectSession} with.
+     *                 See <a href="http://msdn.microsoft.com/en-us/library/hh243646.aspx">MSDN Live Connect
+     *                 Reference's Scopes and permissions</a> for a list of scopes and explanations.
      * @param listener called on either completion or error during the login process.
      * @throws IllegalStateException if there is a pending login request.
      */
-    public void login(Activity activity, Iterable<String> scopes, LiveAuthListener listener) {
+    public void login(Activity activity, Iterable<String> scopes, LiveAuthListener listener)
+    {
         this.login(activity, scopes, listener, null);
     }
 
     /**
      * Logs in an user with the given scopes.
-     *
+     * <p/>
      * login displays a {@link Dialog} that will prompt the
      * user for a username and password, and ask for consent to use the given scopes.
      * A {@link LiveConnectSession} will be returned by calling
@@ -394,42 +443,50 @@ public class LiveAuthClient {
      * Otherwise, the {@link LiveAuthListener#onAuthError(LiveAuthException, Object)} will be
      * called. These methods will be called on the main/UI thread.
      *
-     * @param activity {@link Activity} instance to display the Login dialog on
-     * @param scopes to initialize the {@link LiveConnectSession} with.
-     *        See <a href="http://msdn.microsoft.com/en-us/library/hh243646.aspx">MSDN Live Connect
-     *        Reference's Scopes and permissions</a> for a list of scopes and explanations.
-     * @param listener called on either completion or error during the login process.
+     * @param activity  {@link Activity} instance to display the Login dialog on
+     * @param scopes    to initialize the {@link LiveConnectSession} with.
+     *                  See <a href="http://msdn.microsoft.com/en-us/library/hh243646.aspx">MSDN Live Connect
+     *                  Reference's Scopes and permissions</a> for a list of scopes and explanations.
+     * @param listener  called on either completion or error during the login process.
      * @param userState arbitrary object that is used to determine the caller of the method.
      * @throws IllegalStateException if there is a pending login request.
      */
     public void login(Activity activity,
                       Iterable<String> scopes,
                       LiveAuthListener listener,
-                      Object userState) {
+                      Object userState)
+    {
         LiveConnectUtils.assertNotNull(activity, "activity");
 
-        if (listener == null) {
+        if (listener == null)
+        {
             listener = NULL_LISTENER;
         }
 
-        if (this.hasPendingLoginRequest) {
+        if (this.hasPendingLoginRequest)
+        {
             throw new IllegalStateException(ErrorMessages.LOGIN_IN_PROGRESS);
         }
 
         // if no scopes were passed in, use the scopes from initialize or if those are empty,
         // create an empty list
-        if (scopes == null) {
-            if (this.scopesFromInitialize == null) {
+        if (scopes == null)
+        {
+            if (this.scopesFromInitialize == null)
+            {
                 scopes = Arrays.asList(new String[0]);
-            } else {
+            }
+            else
+            {
                 scopes = this.scopesFromInitialize;
             }
         }
 
         // if the session is valid and contains all the scopes, do not display the login ui.
         boolean showDialog = this.session.isExpired() ||
-                             !this.session.contains(scopes);
-        if (!showDialog) {
+                !this.session.contains(scopes);
+        if (!showDialog)
+        {
             listener.onAuthComplete(LiveStatus.CONNECTED, this.session, userState);
             return;
         }
@@ -437,21 +494,24 @@ public class LiveAuthClient {
         String scope = TextUtils.join(OAuth.SCOPE_DELIMITER, scopes);
         String redirectUri = Config.INSTANCE.getOAuthDesktopUri().toString();
         AuthorizationRequest request = new AuthorizationRequest(activity,
-                                                                this.httpClient,
-                                                                this.clientId,
-                                                                redirectUri,
-                                                                scope);
+                this.httpClient,
+                this.clientId,
+                redirectUri,
+                scope);
 
         request.addObserver(new ListenerCallerObserver(listener, userState));
         request.addObserver(new RefreshTokenWriter());
-        request.addObserver(new OAuthRequestObserver() {
+        request.addObserver(new OAuthRequestObserver()
+        {
             @Override
-            public void onException(LiveAuthException exception) {
+            public void onException(LiveAuthException exception)
+            {
                 LiveAuthClient.this.hasPendingLoginRequest = false;
             }
 
             @Override
-            public void onResponse(OAuthResponse response) {
+            public void onResponse(OAuthResponse response)
+            {
                 LiveAuthClient.this.hasPendingLoginRequest = false;
             }
         });
@@ -463,7 +523,7 @@ public class LiveAuthClient {
 
     /**
      * Logs out the given user.
-     *
+     * <p/>
      * Also, this method clears the previously created {@link LiveConnectSession}.
      * {@link LiveAuthListener#onAuthComplete(LiveStatus, LiveConnectSession, Object)} will be
      * called on completion. Otherwise,
@@ -471,23 +531,26 @@ public class LiveAuthClient {
      *
      * @param listener called on either completion or error during the logout process.
      */
-    public void logout(LiveAuthListener listener) {
+    public void logout(LiveAuthListener listener)
+    {
         this.logout(listener, null);
     }
 
     /**
      * Logs out the given user.
-     *
+     * <p/>
      * Also, this method clears the previously created {@link LiveConnectSession}.
      * {@link LiveAuthListener#onAuthComplete(LiveStatus, LiveConnectSession, Object)} will be
      * called on completion. Otherwise,
      * {@link LiveAuthListener#onAuthError(LiveAuthException, Object)} will be called.
      *
-     * @param listener called on either completion or error during the logout process.
+     * @param listener  called on either completion or error during the logout process.
      * @param userState arbitrary object that is used to determine the caller of the method.
      */
-    public void logout(LiveAuthListener listener, Object userState) {
-        if (listener == null) {
+    public void logout(LiveAuthListener listener, Object userState)
+    {
+        if (listener == null)
+        {
             listener = NULL_LISTENER;
         }
 
@@ -507,14 +570,15 @@ public class LiveAuthClient {
         String domain = logoutUri.getHost();
 
         List<String> cookieKeys = this.getCookieKeysFromPreferences();
-        for (String cookieKey : cookieKeys) {
-            String value = TextUtils.join("", new String[] {
-               cookieKey,
-               "=; expires=Thu, 30-Oct-1980 16:00:00 GMT; domain=",
-               domain,
-               "; path=/; version=1"
+        for (String cookieKey : cookieKeys)
+        {
+            String value = TextUtils.join("", new String[]{
+                    cookieKey,
+                    "=; expires=Thu, 30-Oct-1980 16:00:00 GMT; domain=",
+                    domain,
+                    "; path=/; version=1"
             });
-	
+
             manager.setCookie(url, value);
             manager.setCookie(url, value + "; Secure");
         }
@@ -523,13 +587,19 @@ public class LiveAuthClient {
         listener.onAuthComplete(LiveStatus.UNKNOWN, null, userState);
     }
 
-    /** @return The {@link HttpClient} instance used by this {@code LiveAuthClient}. */
-    HttpClient getHttpClient() {
+    /**
+     * @return The {@link HttpClient} instance used by this {@code LiveAuthClient}.
+     */
+    HttpClient getHttpClient()
+    {
         return this.httpClient;
     }
 
-    /** @return The {@link LiveConnectSession} instance that this {@code LiveAuthClient} created. */
-    LiveConnectSession getSession() {
+    /**
+     * @return The {@link LiveConnectSession} instance that this {@code LiveAuthClient} created.
+     */
+    LiveConnectSession getSession()
+    {
         return session;
     }
 
@@ -538,11 +608,13 @@ public class LiveAuthClient {
      *
      * @return true if the session was successfully refreshed.
      */
-    boolean refresh() {
+    boolean refresh()
+    {
         String scope = TextUtils.join(OAuth.SCOPE_DELIMITER, this.session.getScopes());
         String refreshToken = this.session.getRefreshToken();
 
-        if (TextUtils.isEmpty(refreshToken)) {
+        if (TextUtils.isEmpty(refreshToken))
+        {
             return false;
         }
 
@@ -550,9 +622,11 @@ public class LiveAuthClient {
                 new RefreshAccessTokenRequest(this.httpClient, this.clientId, refreshToken, scope);
 
         OAuthResponse response;
-        try {
+        try
+        {
             response = request.execute();
-        } catch (LiveAuthException e) {
+        } catch (LiveAuthException e)
+        {
             return false;
         }
 
@@ -566,9 +640,11 @@ public class LiveAuthClient {
     /**
      * Sets the {@link HttpClient} that is used for HTTP requests by this {@code LiveAuthClient}.
      * Tests will want to change this to mock the network/HTTP responses.
+     *
      * @param client The new HttpClient to be set.
      */
-    void setHttpClient(HttpClient client) {
+    void setHttpClient(HttpClient client)
+    {
         assert client != null;
         this.httpClient = client;
     }
@@ -579,7 +655,8 @@ public class LiveAuthClient {
      *
      * @return true if the refresh token was successfully cleared.
      */
-    private boolean clearRefreshTokenFromPreferences() {
+    private boolean clearRefreshTokenFromPreferences()
+    {
         SharedPreferences settings = getSharedPreferences();
         Editor editor = settings.edit();
         editor.remove(PreferencesConstants.REFRESH_TOKEN_KEY);
@@ -587,12 +664,14 @@ public class LiveAuthClient {
         return editor.commit();
     }
 
-    private SharedPreferences getSharedPreferences() {
+    private SharedPreferences getSharedPreferences()
+    {
         return applicationContext.getSharedPreferences(PreferencesConstants.FILE_NAME,
-                                                       Context.MODE_PRIVATE);
+                Context.MODE_PRIVATE);
     }
 
-    private List<String> getCookieKeysFromPreferences() {
+    private List<String> getCookieKeysFromPreferences()
+    {
         SharedPreferences settings = getSharedPreferences();
         String cookieKeys = settings.getString(PreferencesConstants.COOKIES_KEY, "");
 
@@ -605,7 +684,8 @@ public class LiveAuthClient {
      *
      * @return the refresh token from persistent storage.
      */
-    private String getRefreshTokenFromPreferences() {
+    private String getRefreshTokenFromPreferences()
+    {
         SharedPreferences settings = getSharedPreferences();
         return settings.getString(PreferencesConstants.REFRESH_TOKEN_KEY, null);
     }

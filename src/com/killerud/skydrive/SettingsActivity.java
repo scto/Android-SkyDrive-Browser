@@ -1,7 +1,6 @@
 package com.killerud.skydrive;
 
 import android.os.Bundle;
-import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
 
 /**
@@ -12,7 +11,8 @@ import com.actionbarsherlock.app.SherlockPreferenceActivity;
 public class SettingsActivity extends SherlockPreferenceActivity
 {
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preferences);
     }

@@ -8,7 +8,8 @@ package com.killerud.skydrive.util;
  * See http://msdn.microsoft.com/en-us/library/hh243646.aspx for more
  * information.
  */
-public final class Scopes {
+public final class Scopes
+{
 
     /* Core Scopes */
     public final static String BASIC = "wl.basic";
@@ -39,24 +40,25 @@ public final class Scopes {
     public final static String APPLICATIONS_CREATE = "wl.applications_create";
 
     public final static String[] ALL = {
-        BASIC,
-        OFFLINE_ACCESS,
-        SIGNIN,
-        BIRTHDAY,
-        CONTACTS_BIRTHDAY,
-        CONTACTS_PHOTOS,
-        EMAILS,
-        EVENTS_CREATE,
-        PHONE_NUMBERS,
-        PHOTOS,
-        POSTAL_ADDRESSES,
-        SHARE,
-        WORK_PROFILE,
-        APPLICATIONS,
-        APPLICATIONS_CREATE
+            BASIC,
+            OFFLINE_ACCESS,
+            SIGNIN,
+            BIRTHDAY,
+            CONTACTS_BIRTHDAY,
+            CONTACTS_PHOTOS,
+            EMAILS,
+            EVENTS_CREATE,
+            PHONE_NUMBERS,
+            PHOTOS,
+            POSTAL_ADDRESSES,
+            SHARE,
+            WORK_PROFILE,
+            APPLICATIONS,
+            APPLICATIONS_CREATE
     };
 
-    private Scopes() {
+    private Scopes()
+    {
         throw new AssertionError("Unable to create a Scopes object.");
     }
 }

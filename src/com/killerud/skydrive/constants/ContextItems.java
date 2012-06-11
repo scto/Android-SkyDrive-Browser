@@ -5,7 +5,8 @@ package com.killerud.skydrive.constants;
  * Date: 14.05.12
  * Time: 16:13
  */
-public class ContextItems {
+public class ContextItems
+{
     public static final String MENU_TITLE_DOWNLOAD = "Save";
     public static final String MENU_TITLE_RENAME = "Rename";
     public static final String MENU_TITLE_CUT = "Cut";

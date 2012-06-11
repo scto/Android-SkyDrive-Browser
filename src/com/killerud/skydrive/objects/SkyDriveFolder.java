@@ -6,19 +6,23 @@ package com.killerud.skydrive.objects;
 
 import org.json.JSONObject;
 
-public class SkyDriveFolder extends SkyDriveObject {
+public class SkyDriveFolder extends SkyDriveObject
+{
     public static final String TYPE = "folder";
 
-    public SkyDriveFolder(JSONObject object) {
+    public SkyDriveFolder(JSONObject object)
+    {
         super(object);
     }
 
     @Override
-    public void accept(Visitor visitor) {
+    public void accept(Visitor visitor)
+    {
         visitor.visit(this);
     }
 
-    public int getCount() {
+    public int getCount()
+    {
         return mObject.optInt("count");
     }
 }

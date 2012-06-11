@@ -11,7 +11,7 @@
     <item
             android:id="@+id/uploadFile"
             android:showAsAction="ifRoom"
-            android:icon="@android:drawable/ic_menu_upload"
+            android:icon="@drawable/ic_menu_upload"
             android:title="@string/uploadFile"
             android:visible="true"
             />
@@ -27,21 +27,20 @@
           android:title="@string/paste"
           android:icon="@drawable/ic_menu_set_as"
           android:visible="false"
-          />
+            />
 
 
-    <item   android:id="@+id/savedFiles"
-            android:showAsAction="withText|never"
-            android:title="@string/savedFiles" />
+    <item android:id="@+id/savedFiles"
+          android:showAsAction="withText|never"
+          android:title="@string/savedFiles"/>
 
     <item android:title="@string/settings"
           android:showAsAction="withText|never"
-          android:id="@+id/settings" />
+          android:id="@+id/settings"/>
 
-    <item   android:id="@+id/signOut"
+    <item android:id="@+id/signOut"
           android:showAsAction="withText|never"
-          android:title="@string/signOut" />
-
+          android:title="@string/signOut"/>
 
 
 </menu>

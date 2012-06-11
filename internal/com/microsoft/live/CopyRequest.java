@@ -14,7 +14,8 @@ import org.json.JSONObject;
 /**
  * CopyRequest is a subclass of a BodyEnclosingApiRequest and performs a Copy request.
  */
-class CopyRequest extends EntityEnclosingApiRequest<JSONObject> {
+class CopyRequest extends EntityEnclosingApiRequest<JSONObject>
+{
 
     public static final String METHOD = HttpCopy.METHOD_NAME;
 
@@ -22,20 +23,24 @@ class CopyRequest extends EntityEnclosingApiRequest<JSONObject> {
      * Constructs a new CopyRequest and initializes its member variables.
      *
      * @param session with the access_token
-     * @param client to make Http requests on
-     * @param path of the request
-     * @param entity body of the request
+     * @param client  to make Http requests on
+     * @param path    of the request
+     * @param entity  body of the request
      */
     public CopyRequest(LiveConnectSession session,
                        HttpClient client,
                        String path,
-                       HttpEntity entity) {
+                       HttpEntity entity)
+    {
         super(session, client, JsonResponseHandler.INSTANCE, path, entity);
     }
 
-    /** @return the string "COPY" */
+    /**
+     * @return the string "COPY"
+     */
     @Override
-    public String getMethod() {
+    public String getMethod()
+    {
         return METHOD;
     }
 
@@ -45,7 +50,8 @@ class CopyRequest extends EntityEnclosingApiRequest<JSONObject> {
      * @return a HttpCopy with the properly body added to it.
      */
     @Override
-    protected HttpUriRequest createHttpRequest() throws LiveOperationException {
+    protected HttpUriRequest createHttpRequest() throws LiveOperationException
+    {
         final HttpCopy request = new HttpCopy(this.requestUri.toString());
 
         request.setEntity(this.entity);

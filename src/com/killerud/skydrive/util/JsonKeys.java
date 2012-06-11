@@ -4,7 +4,8 @@
 
 package com.killerud.skydrive.util;
 
-public final class JsonKeys {
+public final class JsonKeys
+{
     public static final String CODE = "code";
     public static final String DATA = "data";
     public static final String DESCRIPTION = "description";
@@ -32,7 +33,8 @@ public final class JsonKeys {
     public static final String PARENT_ID = "parent_id";
     public static final String SOURCE = "source";
 
-    private JsonKeys() {
+    private JsonKeys()
+    {
         throw new AssertionError();
     }
 }
