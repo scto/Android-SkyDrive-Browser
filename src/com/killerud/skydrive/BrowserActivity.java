@@ -1,8 +1,6 @@
 package com.killerud.skydrive;
 
 import android.app.AlertDialog;
-import android.app.NotificationManager;
-import android.app.Service;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -485,7 +483,7 @@ public class BrowserActivity extends SherlockListActivity
 
         if (folder == null)
         {
-            newText = updateFolderHierarchyWhenFolderIsNull();
+            newText = updateFolderHierarchyWhenNavigatingUp();
         }
         else
         {
@@ -504,7 +502,7 @@ public class BrowserActivity extends SherlockListActivity
         mFolderHierarchyView.setText(newText);
     }
 
-    private String updateFolderHierarchyWhenFolderIsNull()
+    private String updateFolderHierarchyWhenNavigatingUp()
     {
         if (!mFolderHierarchy.isEmpty())
         {
@@ -513,11 +511,11 @@ public class BrowserActivity extends SherlockListActivity
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < mFolderHierarchy.size(); i++)
         {
-            builder.append(mFolderHierarchy.get(i));
             if(i>0) //If not "Home"
             {
                 builder.append(">");
             }
+            builder.append(mFolderHierarchy.get(i));
         }
         return builder.toString();
     }
@@ -755,6 +753,7 @@ public class BrowserActivity extends SherlockListActivity
         public void clearChecked()
         {
             mCheckedPositions = new SparseBooleanArray();
+            mCurrentlySelectedFiles = new ArrayList<SkyDriveObject>();
             notifyDataSetChanged();
         }
 
@@ -763,6 +762,7 @@ public class BrowserActivity extends SherlockListActivity
             for (int i = 0; i < mSkyDriveObjs.size(); i++)
             {
                 mCheckedPositions.put(i, true);
+                mCurrentlySelectedFiles.add(mSkyDriveObjs.get(i));
             }
             notifyDataSetChanged();
         }
@@ -1321,10 +1321,6 @@ public class BrowserActivity extends SherlockListActivity
                 startRenameDialog.putExtra(RenameDialog.EXTRAS_FILE_IDS, fileIds);
                 startRenameDialog.putExtra(RenameDialog.EXTRAS_FILE_NAMES, fileNames);
                 startActivity(startRenameDialog);
-
-                ((SkyDriveListAdapter) getListAdapter()).clearChecked();
-                mCurrentlySelectedFiles.clear();
-                mode.finish();
                 return true;
             }
             else if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_SELECT_ALL))
@@ -1350,6 +1346,8 @@ public class BrowserActivity extends SherlockListActivity
         @Override
         public void onDestroyActionMode(com.actionbarsherlock.view.ActionMode mode)
         {
+            ((SkyDriveListAdapter) getListAdapter()).clearChecked();
+            mCurrentlySelectedFiles.clear();
             mActionMode = null;
             supportInvalidateOptionsMenu();
         }
