@@ -34,6 +34,10 @@
             android:showAsAction="withText|never"
             android:title="@string/savedFiles" />
 
+    <item android:title="@string/settings"
+          android:showAsAction="withText|never"
+          android:id="@+id/settings" />
+
     <item   android:id="@+id/signOut"
           android:showAsAction="withText|never"
           android:title="@string/signOut" />

@@ -6,12 +6,14 @@ import android.app.Service;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
@@ -426,8 +428,13 @@ public class BrowserActivity extends SherlockListActivity
     {
         super.onResume();
 
-        startService(new Intent(this, CameraImageAutoUploadService.class));
-
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if(preferences.getBoolean("automatic_camera_upload", false))
+        {
+            startService(new Intent(this, CameraImageAutoUploadService.class));
+        }else{
+            stopService(new Intent(this, CameraImageAutoUploadService.class));
+        }
 
         /* Checks to see if the progress notification was clicked and started the activity */
 
@@ -648,6 +655,9 @@ public class BrowserActivity extends SherlockListActivity
                 return true;
             case R.id.savedFiles:
                 startActivity(new Intent(getApplicationContext(), FileBrowserActivity.class));
+                return true;
+            case R.id.settings:
+                startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
                 return true;
             case R.id.signOut:
                 setSupportProgressBarIndeterminateVisibility(true);

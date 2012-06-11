@@ -25,6 +25,11 @@
 
     <!-- Service and settings -->
     <string name="label_service">SkyDrive Camera AutoUploader</string>
+    <string name="settings">Settings</string>
+    <string name="camera_upload_header">Camera upload</string>
+    <string name="camera_upload_description">Upload camera images automatically</string>
+    <string name="camera_upload_header">Camera upload</string>
+    <string name="camera_upload_description">Upload camera images automatically</string>
 
     <!-- Download file dialog -->
     <string name="download">Download</string>
