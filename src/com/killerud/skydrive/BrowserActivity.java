@@ -739,17 +739,6 @@ public class BrowserActivity extends SherlockListActivity
             notifyDataSetChanged();
         }
 
-        public void setChecked(String skyDriveFileId, boolean checked)
-        {
-            for (int i = 0; i < mSkyDriveObjs.size(); i++)
-            {
-                if (mSkyDriveObjs.get(i).getId().equals(skyDriveFileId))
-                {
-                    setChecked(i, checked);
-                    if (checked) mCurrentlySelectedFiles.add(mSkyDriveObjs.get(i));
-                }
-            }
-        }
 
         public void setCheckedPositions(SparseBooleanArray checkedPositions)
         {
