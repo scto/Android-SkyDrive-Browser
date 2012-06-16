@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.killerud.skydrive"
-          android:versionCode="7"
-          android:versionName="2.1.1">
+          android:versionCode="8"
+          android:versionName="2.2">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <uses-sdk android:minSdkVersion="8"
               android:targetSdkVersion="14"/>
 
@@ -14,6 +16,7 @@
             android:name=".BrowserForSkyDriveApplication"
             android:theme="@style/LightTheme"
             android:debuggable="false"
+            android:configChanges="orientation"
             android:uiOptions="splitActionBarWhenNarrow"
             android:icon="@drawable/icon">
 

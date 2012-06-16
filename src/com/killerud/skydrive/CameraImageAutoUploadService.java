@@ -2,10 +2,13 @@ package com.killerud.skydrive;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.FileObserver;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import com.microsoft.live.*;
 
 import java.util.ArrayList;
@@ -37,41 +40,57 @@ public class CameraImageAutoUploadService extends Service
     /* Binder stuff ends here */
     boolean mConnectedToSkyDrive;
     FileObserver mNewCameraImagesObserver;
+    boolean mAllWifiOnly;
+    boolean mCameraWifiOnly;
+    ConnectivityManager mConnectivityManager;
+    BrowserForSkyDriveApplication mApp;
 
     @Override
     public void onCreate()
     {
-        final BrowserForSkyDriveApplication browserForSkyDriveApplication = (BrowserForSkyDriveApplication) getApplication();
+        mApp = (BrowserForSkyDriveApplication) getApplication();
         final LiveAuthClient liveAuthClient = new LiveAuthClient(this, com.killerud.skydrive.constants.Constants.APP_CLIENT_ID);
-        browserForSkyDriveApplication.setAuthClient(liveAuthClient);
+        mConnectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 
-        liveAuthClient.initialize(Arrays.asList(com.killerud.skydrive.constants.Constants.APP_SCOPES), new LiveAuthListener()
-        {
-            @Override
-            public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState)
+        mApp.setAuthClient(liveAuthClient);
+
+        if(connectionIsUnavailable()){
+            onDestroy();
+        }else{
+            final String cameraFilePath = Environment.getExternalStorageDirectory() + "/DCIM/Camera/";
+            final XLoader skyDriveFileLoader = new XLoader(
+                    ((BrowserForSkyDriveApplication) getApplication()).getCurrentBrowser());
+
+            setupFileObserver(mApp, cameraFilePath, skyDriveFileLoader);
+
+
+
+            liveAuthClient.initialize(Arrays.asList(com.killerud.skydrive.constants.Constants.APP_SCOPES), new LiveAuthListener()
             {
-                if (status == LiveStatus.CONNECTED)
+                @Override
+                public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState)
                 {
-                    mConnectedToSkyDrive = true;
+                    if (status == LiveStatus.CONNECTED)
+                    {
+                        mConnectedToSkyDrive = true;
+                    }
+                    else
+                    {
+                        onDestroy();
+                    }
                 }
-                else
+
+                @Override
+                public void onAuthError(LiveAuthException exception, Object userState)
                 {
                     onDestroy();
                 }
-            }
+            });
+        }
+    }
 
-            @Override
-            public void onAuthError(LiveAuthException exception, Object userState)
-            {
-                onDestroy();
-            }
-        });
-
-        final String cameraFilePath = Environment.getExternalStorageDirectory() + "/DCIM/Camera/";
-
-        final XLoader skyDriveFileLoader = new XLoader(
-                ((BrowserForSkyDriveApplication) getApplication()).getCurrentBrowser());
-
+    private void setupFileObserver(final BrowserForSkyDriveApplication browserForSkyDriveApplication, final String cameraFilePath, final XLoader skyDriveFileLoader)
+    {
         mNewCameraImagesObserver = new FileObserver(cameraFilePath)
         {
             @Override
@@ -82,17 +101,39 @@ public class CameraImageAutoUploadService extends Service
                 {
                     if (mConnectedToSkyDrive)
                     {
-                        ArrayList fileNameContainer = new ArrayList<String>();
-                        fileNameContainer.add(cameraFilePath + fileName);
-                        skyDriveFileLoader.uploadFile(browserForSkyDriveApplication.getConnectClient(),
-                                fileNameContainer
-                                , "me/skydrive/camera_roll");
+                        if(connectionIsUnavailable()){
+                            return;
+                        }else{
+                            ArrayList fileNameContainer = new ArrayList<String>();
+                            fileNameContainer.add(cameraFilePath + fileName);
+                            skyDriveFileLoader.uploadFile(browserForSkyDriveApplication.getConnectClient(),
+                                    fileNameContainer
+                                    , "me/skydrive/camera_roll");
+
+                        }
                     }
                 }
             }
         };
-
         mNewCameraImagesObserver.startWatching();
+    }
+
+    private boolean connectionIsUnavailable()
+    {
+        getPreferences();
+        return (mAllWifiOnly &&
+                (mConnectivityManager.getActiveNetworkInfo().getType()
+                    != ConnectivityManager.TYPE_WIFI))
+                || (mCameraWifiOnly
+                    && (mConnectivityManager.getActiveNetworkInfo().getType()
+                    != ConnectivityManager.TYPE_WIFI));
+    }
+
+    private void getPreferences()
+    {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mApp);
+        mAllWifiOnly = preferences.getBoolean("limit_all_to_wifi", false);
+        mCameraWifiOnly = preferences.getBoolean("camera_upload_wifi_only", false);
     }
 
     @Override
@@ -110,14 +151,12 @@ public class CameraImageAutoUploadService extends Service
 
     public void stopWatchingForNewImages()
     {
-        assert mNewCameraImagesObserver != null;
-        mNewCameraImagesObserver.stopWatching();
+        if(mNewCameraImagesObserver != null) mNewCameraImagesObserver.stopWatching();
     }
 
     public void startWatchingForNewImages()
     {
-        assert mNewCameraImagesObserver != null;
-        mNewCameraImagesObserver.startWatching();
+        if(mNewCameraImagesObserver != null) mNewCameraImagesObserver.startWatching();
     }
 
 
@@ -125,7 +164,6 @@ public class CameraImageAutoUploadService extends Service
     public void onDestroy()
     {
         super.onDestroy();
-        assert mNewCameraImagesObserver != null;
-        mNewCameraImagesObserver.stopWatching();
+        if(mNewCameraImagesObserver != null) mNewCameraImagesObserver.stopWatching();
     }
 }

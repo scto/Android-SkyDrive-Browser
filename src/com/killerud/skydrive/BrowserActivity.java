@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,7 +27,10 @@ import com.actionbarsherlock.view.*;
 import com.killerud.skydrive.constants.Constants;
 import com.killerud.skydrive.constants.ContextItems;
 import com.killerud.skydrive.constants.SortCriteria;
-import com.killerud.skydrive.dialogs.*;
+import com.killerud.skydrive.dialogs.NewFolderDialog;
+import com.killerud.skydrive.dialogs.PlayAudioDialog;
+import com.killerud.skydrive.dialogs.RenameDialog;
+import com.killerud.skydrive.dialogs.ViewPhotoDialog;
 import com.killerud.skydrive.objects.*;
 import com.killerud.skydrive.util.JsonKeys;
 import com.microsoft.live.*;
@@ -79,6 +83,8 @@ public class BrowserActivity extends SherlockListActivity
      * Used by the share receiver activity.
      */
     private boolean mUploadDialog = false;
+    private boolean mAllWifiOnly;
+    private ConnectivityManager mConnectivityManager;
 
     /**
      * Handles the chosen file from the UploadFile dialog
@@ -103,12 +109,14 @@ public class BrowserActivity extends SherlockListActivity
     {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        mConnectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 
         mXloader = new XLoader(this);
         mSkyDriveListAdapter = new SkyDriveListAdapter(this);
         setListAdapter(mSkyDriveListAdapter);
 
         BrowserForSkyDriveApplication app = (BrowserForSkyDriveApplication) getApplication();
+
         mClient = app.getConnectClient();
 
         mCurrentlySelectedFiles = new ArrayList<SkyDriveObject>();
@@ -263,7 +271,7 @@ public class BrowserActivity extends SherlockListActivity
                 @Override
                 public void onClick(View view)
                 {
-                    mXloader.uploadFile(mClient,
+                    if (!connectionIsUnavailable()) mXloader.uploadFile(mClient,
                             getIntent().getStringArrayListExtra(UploadFileActivity.EXTRA_FILES_LIST),
                             mCurrentFolderId);
                     finish();
@@ -301,6 +309,8 @@ public class BrowserActivity extends SherlockListActivity
 
     private boolean navigateBack()
     {
+        if (connectionIsUnavailable()) return false;
+
         if (mPreviousFolderIds.isEmpty())
         {
             if (mActionBar != null)
@@ -362,7 +372,7 @@ public class BrowserActivity extends SherlockListActivity
                 Intent startPhotoDialog = new Intent(getApplicationContext(), ViewPhotoDialog.class);
                 startPhotoDialog.putExtra("killerud.skydrive.PHOTO_ID", photo.getId());
                 startPhotoDialog.putExtra("killerud.skydrive.PHOTO_NAME", photo.getName());
-                startActivity(startPhotoDialog);
+                if (!connectionIsUnavailable()) startActivity(startPhotoDialog);
             }
 
             @Override
@@ -380,7 +390,7 @@ public class BrowserActivity extends SherlockListActivity
                 ArrayList<SkyDriveObject> toDownload = new ArrayList<SkyDriveObject>();
                 toDownload.add(file);
                 toDownload.trimToSize();
-                mXloader.downloadFiles(mClient, toDownload);
+                if (!connectionIsUnavailable()) mXloader.downloadFiles(mClient, toDownload);
             }
 
             @Override
@@ -389,7 +399,7 @@ public class BrowserActivity extends SherlockListActivity
                 if (mUploadDialog) return;
                 ((BrowserForSkyDriveApplication) getApplication()).setCurrentVideo(video);
                 Intent startVideoDialog = new Intent(getApplicationContext(), PlayVideoActivity.class);
-                startActivity(startVideoDialog);
+                if (!connectionIsUnavailable()) startActivity(startVideoDialog);
             }
 
             @Override
@@ -398,7 +408,7 @@ public class BrowserActivity extends SherlockListActivity
                 if (mUploadDialog) return;
                 ((BrowserForSkyDriveApplication) getApplication()).setCurrentMusic(audio);
                 Intent startAudioDialog = new Intent(getApplicationContext(), PlayAudioDialog.class);
-                startActivity(startAudioDialog);
+                if (!connectionIsUnavailable()) startActivity(startAudioDialog);
             }
         });
     }
@@ -420,7 +430,7 @@ public class BrowserActivity extends SherlockListActivity
     {
         if (intentThatStartedMe.getExtras().getString(UploadFileActivity.EXTRA_FILES_LIST) != null)
         {
-            mXloader.uploadFile(mClient,
+            if (!connectionIsUnavailable()) mXloader.uploadFile(mClient,
                     intentThatStartedMe.getStringArrayListExtra(UploadFileActivity.EXTRA_FILES_LIST),
                     mCurrentFolderId);
         }
@@ -511,7 +521,7 @@ public class BrowserActivity extends SherlockListActivity
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < mFolderHierarchy.size(); i++)
         {
-            if(i>0) //If not "Home"
+            if (i > 0) //If not "Home"
             {
                 builder.append(">");
             }
@@ -534,6 +544,10 @@ public class BrowserActivity extends SherlockListActivity
     private void loadFolder(String folderId)
     {
         if (folderId == null) return;
+        if (connectionIsUnavailable())
+        {
+            return;
+        }
 
         setSupportProgressBarIndeterminateVisibility(true);
 
@@ -606,6 +620,25 @@ public class BrowserActivity extends SherlockListActivity
         });
     }
 
+    private boolean connectionIsUnavailable()
+    {
+        getPreferences();
+        boolean unavailable = (mAllWifiOnly &&
+                (mConnectivityManager.getActiveNetworkInfo().getType()
+                        != ConnectivityManager.TYPE_WIFI));
+        if (unavailable)
+        {
+            Toast.makeText(this, R.string.no_connection, Toast.LENGTH_LONG).show();
+        }
+        return unavailable;
+    }
+
+    private void getPreferences()
+    {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
+        mAllWifiOnly = preferences.getBoolean("limit_all_to_wifi", false);
+    }
+
     /* Menus and AB */
     @Override
     public boolean onPrepareOptionsMenu(Menu menu)
@@ -641,12 +674,12 @@ public class BrowserActivity extends SherlockListActivity
             case R.id.newFolder:
                 Intent startNewFolderDialog = new Intent(getApplicationContext(), NewFolderDialog.class);
                 startNewFolderDialog.putExtra("killerud.skydrive.CURRENT_FOLDER", mCurrentFolderId);
-                startActivity(startNewFolderDialog);
+                if (!connectionIsUnavailable()) startActivity(startNewFolderDialog);
                 supportInvalidateOptionsMenu();
                 return true;
             case R.id.uploadFile:
                 Intent intent = new Intent(getApplicationContext(), UploadFileActivity.class);
-                startActivityForResult(intent, UploadFileActivity.PICK_FILE_REQUEST);
+                if (!connectionIsUnavailable()) startActivityForResult(intent, UploadFileActivity.PICK_FILE_REQUEST);
                 supportInvalidateOptionsMenu();
                 return true;
             case R.id.reload:
@@ -655,7 +688,8 @@ public class BrowserActivity extends SherlockListActivity
                 return true;
             case R.id.paste:
                 setSupportProgressBarIndeterminateVisibility(true);
-                mXloader.pasteFiles(mClient, mCopyCutFiles, mCurrentFolderId, mCutNotPaste);
+                if (!connectionIsUnavailable())
+                    mXloader.pasteFiles(mClient, mCopyCutFiles, mCurrentFolderId, mCutNotPaste);
                 return true;
             case R.id.savedFiles:
                 startActivity(new Intent(getApplicationContext(), FileBrowserActivity.class));
@@ -1238,7 +1272,8 @@ public class BrowserActivity extends SherlockListActivity
                 /* Downloads are done by calling recursively on a trimmed version of the same arraylist onComplete
                 *  Create a clone so selected aren't cleared logically.
                 */
-                mXloader.downloadFiles(mClient, (ArrayList<SkyDriveObject>) mCurrentlySelectedFiles.clone());
+                if (!connectionIsUnavailable())
+                    mXloader.downloadFiles(mClient, (ArrayList<SkyDriveObject>) mCurrentlySelectedFiles.clone());
 
                 ((SkyDriveListAdapter) getListAdapter()).clearChecked();
                 mCurrentlySelectedFiles.clear();
@@ -1290,7 +1325,8 @@ public class BrowserActivity extends SherlockListActivity
                     public void onClick(DialogInterface dialogInterface, int i)
                     {
                         setSupportProgressBarIndeterminateVisibility(true);
-                        mXloader.deleteFiles(mClient, (ArrayList<SkyDriveObject>) mCurrentlySelectedFiles.clone());
+                        if (!connectionIsUnavailable())
+                            mXloader.deleteFiles(mClient, (ArrayList<SkyDriveObject>) mCurrentlySelectedFiles.clone());
                         ((SkyDriveListAdapter) getListAdapter()).clearChecked();
                         mCurrentlySelectedFiles.clear();
                         mode.finish();
@@ -1320,7 +1356,7 @@ public class BrowserActivity extends SherlockListActivity
                 }
                 startRenameDialog.putExtra(RenameDialog.EXTRAS_FILE_IDS, fileIds);
                 startRenameDialog.putExtra(RenameDialog.EXTRAS_FILE_NAMES, fileNames);
-                startActivity(startRenameDialog);
+                if (!connectionIsUnavailable()) startActivity(startRenameDialog);
                 return true;
             }
             else if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_SELECT_ALL))

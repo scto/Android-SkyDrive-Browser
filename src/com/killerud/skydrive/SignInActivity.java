@@ -3,6 +3,7 @@ package com.killerud.skydrive;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.util.Linkify;
@@ -89,21 +90,40 @@ public class SignInActivity extends Activity
             }
         });
 
-        mInitializeDialog = ProgressDialog.show(this, "", getString(R.string.initializing), true);
+
     }
 
     @Override
     protected void onStart()
     {
         super.onStart();
+        mInitializeDialog = new ProgressDialog(this);
+        mInitializeDialog.setMessage(getString(R.string.initializing));
+        mInitializeDialog.show();
+
         try
         {
+
             mAuthClient.initialize(Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener()
             {
                 @Override
                 public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState)
                 {
-                    mInitializeDialog.dismiss();
+                    try{
+                        mInitializeDialog.dismiss();
+                    }catch (NullPointerException e)
+                    {
+                       /*
+                       At this point the view has most likely been recreated, and as such the mInitializeDialog
+                       here is no longer available for dismissal.
+
+                       Seeing as the authorization process is restarted on recreation, we just return and let this
+                       thread die and be handled by the collector.
+                       Same goes for onAuthError.
+                        */
+                        Log.e(Constants.LOGTAG, "Orientation change during sign-in");
+                        return;
+                    }
                     if (status == LiveStatus.CONNECTED)
                     {
                         startBrowserActivity(session);
@@ -118,7 +138,13 @@ public class SignInActivity extends Activity
                 @Override
                 public void onAuthError(LiveAuthException exception, Object userState)
                 {
-                    mInitializeDialog.dismiss();
+                    try{
+                        mInitializeDialog.dismiss();
+                    }catch (NullPointerException e)
+                    {
+                        Log.e(Constants.LOGTAG, "Orientation change during sign-in");
+                        return;
+                    }
                     Log.e(Constants.LOGTAG, exception.getMessage());
                 }
             });

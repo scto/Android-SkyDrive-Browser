@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Sign in -->
-    <string name="appName">Android SkyDrive Explorer</string>
+    <string name="appName">Explorer for SkyDrive</string>
     <string name="initializing">Connecting the app to your Windows Live account...</string>
-    <string name="firstWelcome">Welcome to Android SkyDrive Browser!\n\nSign in with your
+    <string name="firstWelcome">Welcome to Android Explorer for SkyDrive!\n\nSign in with your
         Windows Live account and access your Microsoft SkyDrive. Easily upload files to your
         SkyDrive and share your files between computers and friends!\n\nSign in with your Windows Live account to get
         started!
@@ -36,6 +36,18 @@
     <string name="camera_upload_description">Upload camera images automatically</string>
     <string name="camera_upload_header">Camera upload</string>
     <string name="camera_upload_description">Upload camera images automatically</string>
+    <string name="camera_upload_wifi_only">Only upload while on WiFi</string>
+    <string name="camera_upload_wifi_only_summary">Use this if you do not have a data plan. Changes require app restart.</string>
+    <string name="limit_all_to_wifi">Limit all app traffic to WiFi</string>
+    <string name="limit_all_to_wifi_summary">Use this if you do not have a data plan. Changes require app restart.</string>
+    <string name="about_header">About the app</string>
+    <string name="no_connection">No available WiFi connection. To use the app enable mobile data in settings.</string>
+
+    <string name="versionHeader">Version</string>
+    <string name="credistHeader">The makers</string>
+    <string name="creditsBody">The app has been developed by William Killerud
+        using the Live SDK for Android by Microsoft and the ActionBarSherlock framework by Jake Wharton.
+        The app icon is by Tom Emery.</string>
 
     <!-- Download file dialog -->
     <string name="download">Download</string>

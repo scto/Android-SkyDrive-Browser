@@ -110,7 +110,7 @@ public class PlayAudioDialog extends SherlockActivity
             @Override
             public void onClick(View view)
             {
-                mPlayer.stop();
+                if (mPlayer != null)  mPlayer.stop();
                 playerStatus.setText(getString(R.string.stopped) + " " + audio.getName());
             }
         });
@@ -134,7 +134,7 @@ public class PlayAudioDialog extends SherlockActivity
             @Override
             public void onClick(View view)
             {
-                mPlayer.stop();
+                if (mPlayer != null) mPlayer.stop();
                 finish();
             }
         });

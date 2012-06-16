@@ -970,6 +970,7 @@ containing a value of this type.
         public static final int context_menu_multi=0x7f0c0002;
     }
     public static final class string {
+        public static final int about_header=0x7f0a0024;
         /**  Content description for the action bar "home" affordance. [CHAR LIMIT=NONE] 
          */
         public static final int abs__action_bar_home_description=0x7f0a0000;
@@ -1007,35 +1008,39 @@ containing a value of this type.
         public static final int automaticSignInError=0x7f0a0010;
         /**  Play audio dialog 
          */
-        public static final int buffering=0x7f0a003f;
+        public static final int buffering=0x7f0a0048;
         public static final int camera_upload_description=0x7f0a001f;
         public static final int camera_upload_header=0x7f0a001e;
-        public static final int cancel=0x7f0a0029;
-        public static final int close=0x7f0a003a;
-        public static final int copy=0x7f0a0036;
+        public static final int camera_upload_wifi_only=0x7f0a0020;
+        public static final int camera_upload_wifi_only_summary=0x7f0a0021;
+        public static final int cancel=0x7f0a0032;
+        public static final int close=0x7f0a0043;
+        public static final int copy=0x7f0a003f;
         public static final int copyCutSelectedFiles=0x7f0a001a;
         /**  New folder dialog 
          */
-        public static final int createFolder=0x7f0a0028;
-        public static final int cut=0x7f0a0035;
+        public static final int createFolder=0x7f0a0031;
+        public static final int credistHeader=0x7f0a0027;
+        public static final int creditsBody=0x7f0a0028;
+        public static final int cut=0x7f0a003e;
         /**  Context menus 
          */
-        public static final int delete=0x7f0a0033;
-        public static final int description=0x7f0a002b;
+        public static final int delete=0x7f0a003c;
+        public static final int description=0x7f0a0034;
         /**  Download file dialog 
          */
-        public static final int download=0x7f0a0020;
-        public static final int downloadError=0x7f0a0025;
-        public static final int downloading=0x7f0a0023;
+        public static final int download=0x7f0a0029;
+        public static final int downloadError=0x7f0a002e;
+        public static final int downloading=0x7f0a002c;
         /**  Error messages 
          */
-        public static final int errorFolderCouldNotBeCreated=0x7f0a0047;
-        public static final int errorNoApplicationCouldOpenTheFile=0x7f0a0048;
-        public static final int errorOpeningAudioFile=0x7f0a0049;
-        public static final int fileAlreadySaved=0x7f0a0026;
-        public static final int fileAlreadySavedMessage=0x7f0a0027;
-        public static final int fileSaved=0x7f0a0024;
-        public static final int fileWillBeDownloaded=0x7f0a0021;
+        public static final int errorFolderCouldNotBeCreated=0x7f0a0050;
+        public static final int errorNoApplicationCouldOpenTheFile=0x7f0a0051;
+        public static final int errorOpeningAudioFile=0x7f0a0052;
+        public static final int fileAlreadySaved=0x7f0a002f;
+        public static final int fileAlreadySavedMessage=0x7f0a0030;
+        public static final int fileSaved=0x7f0a002d;
+        public static final int fileWillBeDownloaded=0x7f0a002a;
         public static final int firstWelcome=0x7f0a000d;
         /**  Browser 
          */
@@ -1046,42 +1051,46 @@ containing a value of this type.
         /**  Service and settings 
          */
         public static final int label_service=0x7f0a001c;
-        public static final int loggedOut=0x7f0a003d;
+        public static final int limit_all_to_wifi=0x7f0a0022;
+        public static final int limit_all_to_wifi_summary=0x7f0a0023;
+        public static final int loggedOut=0x7f0a0046;
         public static final int manualSignInError=0x7f0a0011;
         public static final int mySkyDrive=0x7f0a000f;
-        public static final int name=0x7f0a002a;
+        public static final int name=0x7f0a0033;
         public static final int navigateWait=0x7f0a0018;
         public static final int newFolder=0x7f0a0016;
         public static final int newFolderTitle=0x7f0a0015;
         public static final int noAccount=0x7f0a0012;
         public static final int noItems=0x7f0a0014;
-        public static final int ok=0x7f0a0022;
-        public static final int paste=0x7f0a003b;
-        public static final int pause=0x7f0a0042;
-        public static final int paused=0x7f0a0043;
-        public static final int play=0x7f0a0041;
-        public static final int playing=0x7f0a0040;
-        public static final int reload=0x7f0a0038;
-        public static final int rename=0x7f0a0037;
-        public static final int renameTitle=0x7f0a002c;
-        public static final int save=0x7f0a0039;
-        public static final int saved=0x7f0a0044;
-        public static final int savedFiles=0x7f0a003e;
-        public static final int selectAll=0x7f0a0031;
-        public static final int selectNone=0x7f0a0032;
+        public static final int no_connection=0x7f0a0025;
+        public static final int ok=0x7f0a002b;
+        public static final int paste=0x7f0a0044;
+        public static final int pause=0x7f0a004b;
+        public static final int paused=0x7f0a004c;
+        public static final int play=0x7f0a004a;
+        public static final int playing=0x7f0a0049;
+        public static final int reload=0x7f0a0041;
+        public static final int rename=0x7f0a0040;
+        public static final int renameTitle=0x7f0a0035;
+        public static final int save=0x7f0a0042;
+        public static final int saved=0x7f0a004d;
+        public static final int savedFiles=0x7f0a0047;
+        public static final int selectAll=0x7f0a003a;
+        public static final int selectNone=0x7f0a003b;
         public static final int settings=0x7f0a001d;
-        public static final int share=0x7f0a0034;
+        public static final int share=0x7f0a003d;
         public static final int signIn=0x7f0a000e;
-        public static final int signOut=0x7f0a003c;
-        public static final int stop=0x7f0a0045;
-        public static final int stopped=0x7f0a0046;
-        public static final int uploadError=0x7f0a002e;
+        public static final int signOut=0x7f0a0045;
+        public static final int stop=0x7f0a004e;
+        public static final int stopped=0x7f0a004f;
+        public static final int uploadError=0x7f0a0037;
         public static final int uploadFile=0x7f0a0017;
-        public static final int uploadSelected=0x7f0a0030;
-        public static final int uploadToThisFolder=0x7f0a002f;
+        public static final int uploadSelected=0x7f0a0039;
+        public static final int uploadToThisFolder=0x7f0a0038;
         /**  Upload file dialog 
          */
-        public static final int uploading=0x7f0a002d;
+        public static final int uploading=0x7f0a0036;
+        public static final int versionHeader=0x7f0a0026;
     }
     public static final class style {
         public static final int DialogWindowTitle_Sherlock=0x7f0b0033;

@@ -374,9 +374,15 @@ public class UploadFileActivity extends SherlockListActivity
         assert folder.isDirectory();
         mCurrentFolder = folder;
         setSupportProgressBarIndeterminateVisibility(true);
+
         ArrayList<File> adapterFiles = mFileBrowserAdapter.getFiles();
         adapterFiles.clear();
-        adapterFiles.addAll(Arrays.asList(folder.listFiles()));
+        try{
+            adapterFiles.addAll(Arrays.asList(folder.listFiles()));
+        }catch (NullPointerException e){
+            adapterFiles.add(new File(mCurrentFolder + "/No files in this folder"));
+        }
+
         if (mActionMode == null)
         {
             mFileBrowserAdapter.clearChecked();

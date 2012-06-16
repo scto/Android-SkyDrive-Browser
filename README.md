@@ -3,7 +3,7 @@ Android-SkyDrive-Browser
 
 A cleaner, simpler Microsoft SkyDrive experience!
 
-Based on the Android Live SDK, Android SkyDrive Explorer is a clean, free and ad-free client for SkyDrive. 
+Based on the Android Live SDK, Android Explorer for SkyDrive is a clean, free and ad-free client for SkyDrive.
 
 Supports batch uploading and downloading, renaming, deleting, copying and moving.
 
@@ -14,6 +14,13 @@ App icon by Tom Emery
 
 Changelog
 ---------
+2.2
+- Settings to limit data to WiFi appwide and for auto uploading of camera images
+- Rebranding to comply with SkyDrive branding guidelines
+- App should no longer crash during sign in when changing orientation
+- Fixed uploader crash
+- Fixed audio dialog crash
+
 2.1.1
 - Service crash hotfix
 

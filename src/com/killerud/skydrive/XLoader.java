@@ -32,7 +32,6 @@ public class XLoader
 
     private NotificationManager mNotificationManager;
     private Notification mNotificationProgress;
-    private RemoteViews mNotificationView;
     public static int NOTIFICATION_PROGRESS_ID = 2;
     public static int NOTIFICATION_XLOADED_ID = 1;
     private BrowserActivity mContext;
@@ -50,10 +49,12 @@ public class XLoader
     public XLoader(BrowserActivity browserActivity)
     {
         mContext = browserActivity;
-        try{
+        try
+        {
             mNotificationManager = (NotificationManager) mContext.getSystemService(Service.NOTIFICATION_SERVICE);
             mNotificationAvailable = true;
-        }catch (IllegalStateException e){
+        } catch (IllegalStateException e)
+        {
             mNotificationAvailable = false;
         }
         mIOUtil = new IOUtil();
@@ -71,7 +72,13 @@ public class XLoader
     {
         if (localFilePaths.size() <= 0)
         {
-            mContext.reloadFolder();
+            try
+            {
+                mContext.reloadFolder();
+            } catch (NullPointerException e)
+            {
+                /* No longer have a valid context, so cannot reload... */
+            }
             return;
         }
 
@@ -137,8 +144,14 @@ public class XLoader
                             public void onUploadFailed(LiveOperationException exception,
                                                        LiveOperation operation)
                             {
-                                if(mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
-                                Toast.makeText(mContext, mContext.getString(R.string.uploadError), Toast.LENGTH_SHORT).show();
+                                if (mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
+                                try
+                                {
+                                    Toast.makeText(mContext, mContext.getString(R.string.uploadError), Toast.LENGTH_SHORT).show();
+                                } catch (NullPointerException e)
+                                {
+                                    /* No longer have a valid context, so cannot toast... */
+                                }
 
                                 localFilePaths.remove(localFilePaths.size() - 1);
                                 localFilePaths.trimToSize();
@@ -148,15 +161,21 @@ public class XLoader
                             @Override
                             public void onUploadCompleted(LiveOperation operation)
                             {
-                                if(mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
+                                if (mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
                                 JSONObject result = operation.getResult();
                                 if (result.has(JsonKeys.ERROR))
                                 {
                                     JSONObject error = result.optJSONObject(JsonKeys.ERROR);
                                     String message = error.optString(JsonKeys.MESSAGE);
                                     String code = error.optString(JsonKeys.CODE);
-                                    Toast.makeText(mContext,
-                                            mContext.getString(R.string.uploadError), Toast.LENGTH_SHORT).show();
+                                    try
+                                    {
+                                        Toast.makeText(mContext,
+                                                mContext.getString(R.string.uploadError), Toast.LENGTH_SHORT).show();
+                                    } catch (NullPointerException e)
+                                    {
+                                        /* No longer have a valid context, so cannot toast... */
+                                    }
                                     return;
                                 }
                                 showFileXloadedNotification(file, false);
@@ -207,16 +226,22 @@ public class XLoader
                             public void onDownloadFailed(LiveOperationException exception,
                                                          LiveDownloadOperation operation)
                             {
-                                if(mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
+                                if (mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
                                 Log.e("ASE", exception.getMessage());
-                                Toast.makeText(mContext, mContext.getString(R.string.downloadError),
-                                        Toast.LENGTH_SHORT).show();
+                                try
+                                {
+                                    Toast.makeText(mContext, mContext.getString(R.string.downloadError),
+                                            Toast.LENGTH_SHORT).show();
+                                } catch (NullPointerException e)
+                                {
+                                    /* No longer have a valid context, so cannot toast... */
+                                }
                             }
 
                             @Override
                             public void onDownloadCompleted(LiveDownloadOperation operation)
                             {
-                                if(mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
+                                if (mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
                             }
                         });
     }
@@ -233,7 +258,13 @@ public class XLoader
     {
         if (fileIds.size() <= 0)
         {
-            mContext.reloadFolder();
+            try
+            {
+                mContext.reloadFolder();
+            } catch (NullPointerException e)
+            {
+                /* No longer have a valid context, so cannot toast... */
+            }
             return;
         }
 
@@ -269,12 +300,18 @@ public class XLoader
                             public void onDownloadFailed(LiveOperationException exception,
                                                          LiveDownloadOperation operation)
                             {
-                                if(mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
+                                if (mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
                                 Log.e("ASE", exception.getMessage());
 
-                                Toast.makeText(mContext, mContext.getString(R.string.downloadError),
-                                        Toast.LENGTH_SHORT).show();
+                                try
+                                {
+                                    Toast.makeText(mContext, mContext.getString(R.string.downloadError),
+                                            Toast.LENGTH_SHORT).show();
 
+                                } catch (NullPointerException e)
+                                {
+                                    /* No longer have a valid context, so cannot toast... */
+                                }
                                 fileIds.remove(fileIds.size() - 1);
                                 fileIds.trimToSize();
                                 downloadFiles(client, fileIds);
@@ -283,7 +320,7 @@ public class XLoader
                             @Override
                             public void onDownloadCompleted(LiveDownloadOperation operation)
                             {
-                                if(mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
+                                if (mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
                                 showFileXloadedNotification(fileToCreateLocally, true);
 
                                 fileIds.remove(fileIds.size() - 1);
@@ -303,9 +340,15 @@ public class XLoader
     {
         if (fileIds.size() <= 0)
         {
-            mContext.reloadFolder();
-            Toast.makeText(mContext,
-                    "Deleted file(s)", Toast.LENGTH_SHORT).show();
+            try
+            {
+                mContext.reloadFolder();
+                Toast.makeText(mContext,
+                        "Deleted file(s)", Toast.LENGTH_SHORT).show();
+            } catch (NullPointerException e)
+            {
+                /* No longer have a valid context, so cannot toast... */
+            }
             return;
         }
 
@@ -314,8 +357,14 @@ public class XLoader
         {
             public void onError(LiveOperationException exception, LiveOperation operation)
             {
-                Toast.makeText(mContext,
-                        "Error deleting file" + (fileIds.size() > 1 ? "s" : ""), Toast.LENGTH_SHORT).show();
+                try
+                {
+                    Toast.makeText(mContext,
+                            "Error deleting file" + (fileIds.size() > 1 ? "s" : ""), Toast.LENGTH_SHORT).show();
+                } catch (NullPointerException e)
+                {
+                    /* No longer have a valid context, so cannot toast... */
+                }
                 Log.e("ASE", exception.getMessage());
                 fileIds.remove(fileIds.size() - 1);
                 fileIds.trimToSize();
@@ -346,10 +395,16 @@ public class XLoader
 
         if (fileIds.size() <= 0)
         {
-            Toast.makeText(mContext,
-                    "Moved file(s)",
-                    Toast.LENGTH_SHORT).show();
-            mContext.reloadFolder();
+            try
+            {
+                Toast.makeText(mContext,
+                        "Moved file(s)",
+                        Toast.LENGTH_SHORT).show();
+                mContext.reloadFolder();
+            } catch (NullPointerException e)
+            {
+                /* No longer have a valid context, so cannot toast... */
+            }
             return;
         }
 
@@ -360,8 +415,14 @@ public class XLoader
             {
                 public void onError(LiveOperationException exception, LiveOperation operation)
                 {
-                    Toast.makeText(mContext,
-                            "Error moving file" + (fileIds.size() > 1 ? "s" : ""), Toast.LENGTH_SHORT).show();
+                    try
+                    {
+                        Toast.makeText(mContext,
+                                "Error moving file" + (fileIds.size() > 1 ? "s" : ""), Toast.LENGTH_SHORT).show();
+                    } catch (NullPointerException e)
+                    {
+                        /* No longer have a valid context, so cannot toast... */
+                    }
                     Log.e("ASE", exception.getMessage());
                     fileIds.remove(fileIds.size() - 1);
                     fileIds.trimToSize();
@@ -382,8 +443,14 @@ public class XLoader
             {
                 public void onError(LiveOperationException exception, LiveOperation operation)
                 {
-                    Toast.makeText(mContext,
-                            "Error copying file" + (fileIds.size() > 1 ? "s" : ""), Toast.LENGTH_SHORT).show();
+                    try
+                    {
+                        Toast.makeText(mContext,
+                                "Error copying file" + (fileIds.size() > 1 ? "s" : ""), Toast.LENGTH_SHORT).show();
+                    } catch (NullPointerException e)
+                    {
+                        /* No longer have a valid context, so cannot toast... */
+                    }
                     Log.e("ASE", exception.getMessage());
                     fileIds.remove(fileIds.size() - 1);
                     fileIds.trimToSize();
@@ -392,15 +459,24 @@ public class XLoader
 
                 public void onComplete(LiveOperation operation)
                 {
-                    try{
+                    try
+                    {
                         fileIds.remove(fileIds.size() - 1);
                         fileIds.trimToSize();
                         pasteFiles(client, fileIds, currentFolder, cutNotCopy);
-                    }catch (IndexOutOfBoundsException e){
-                        Toast.makeText(mContext,
-                                "Something happened while moving. Some files may not have been moved.",
-                                Toast.LENGTH_SHORT).show();
-                        mContext.reloadFolder();
+                    } catch (IndexOutOfBoundsException e)
+                    {
+                        try
+                        {
+                            Toast.makeText(mContext,
+                                    "Something happened while moving. Some files may not have been moved.",
+                                    Toast.LENGTH_SHORT).show();
+                            mContext.reloadFolder();
+                        } catch (NullPointerException f)
+                        {
+                            /* No longer have a valid context, so cannot toast... */
+                        }
+
                         return;
                     }
 
@@ -425,9 +501,15 @@ public class XLoader
     {
         if (fileIds.size() <= 0)
         {
-            mContext.setSupportProgressBarIndeterminateVisibility(false);
-            Toast.makeText(mContext, "File renamed", Toast.LENGTH_SHORT).show();
-            mContext.reloadFolder();
+            try
+            {
+                mContext.setSupportProgressBarIndeterminateVisibility(false);
+                Toast.makeText(mContext, "File renamed", Toast.LENGTH_SHORT).show();
+                mContext.reloadFolder();
+            } catch (NullPointerException e)
+            {
+                /* No longer have a valid context, so cannot toast... */
+            }
             return;
         }
 
@@ -454,7 +536,12 @@ public class XLoader
                 fileNames.remove(fileNames.size() - 1);
                 fileNames.trimToSize();
                 renameFiles(client, fileIds, fileNames, baseName, baseDescription);
-                Toast.makeText(mContext, "Could not rename file", Toast.LENGTH_SHORT).show();
+                try{
+                    Toast.makeText(mContext, "Could not rename file", Toast.LENGTH_SHORT).show();
+                } catch (NullPointerException e)
+                {
+                    /* No longer have a valid context, so cannot toast... */
+                }
             }
         };
 
@@ -477,7 +564,12 @@ public class XLoader
             client.putAsync(fileId, body, operationListener);
         } catch (JSONException e)
         {
-            Toast.makeText(mContext, "Could not rename file", Toast.LENGTH_SHORT).show();
+            try{
+                Toast.makeText(mContext, "Could not rename file", Toast.LENGTH_SHORT).show();
+            } catch (NullPointerException f)
+            {
+                /* No longer have a valid context, so cannot toast... */
+            }
         }
     }
 
@@ -490,7 +582,8 @@ public class XLoader
      */
     private void createProgressNotification(String fileName, boolean downloading)
     {
-        if(!mNotificationAvailable) return;
+        if (!mNotificationAvailable) return;
+        if(mContext == null) return;
 
         mNotificationProgress = new Notification(R.drawable.notification_icon,
                 (downloading ? "Downloading " : "Uploading ") + fileName,
@@ -500,10 +593,10 @@ public class XLoader
         mNotificationProgress.flags |= Notification.FLAG_AUTO_CANCEL;
         mNotificationProgress.flags |= Notification.FLAG_ONGOING_EVENT;
 
-        mNotificationView = new RemoteViews(mContext.getPackageName(), R.layout.notification_xload);
-        mNotificationView.setImageViewResource(R.id.image, R.drawable.notification_icon);
-        mNotificationView.setTextViewText(R.id.title, (downloading ? "Downloading " : "Uploading ") + fileName);
-        mNotificationView.setProgressBar(R.id.progressBar, 100, 0, false);
+        RemoteViews notificationView = new RemoteViews(mContext.getPackageName(), R.layout.notification_xload);
+        notificationView.setImageViewResource(R.id.image, R.drawable.notification_icon);
+        notificationView.setTextViewText(R.id.title, (downloading ? "Downloading " : "Uploading ") + fileName);
+        notificationView.setProgressBar(R.id.progressBar, 100, 0, false);
 
         Intent cancelOperation = new Intent(mContext, BrowserActivity.class);
         if (downloading)
@@ -517,7 +610,7 @@ public class XLoader
 
         mNotificationProgress.contentIntent = PendingIntent.getActivity(
                 mContext, 0, cancelOperation, 0);
-        mNotificationProgress.contentView = mNotificationView;
+        mNotificationProgress.contentView = notificationView;
 
         mNotificationManager.notify(NOTIFICATION_PROGRESS_ID, mNotificationProgress);
     }
@@ -580,7 +673,9 @@ public class XLoader
      */
     public void showFileXloadedNotification(File file, boolean download)
     {
-        if(!mNotificationAvailable) return;
+        if (!mNotificationAvailable) return;
+        if(mContext == null) return;
+
         int icon = R.drawable.notification_icon;
         CharSequence tickerText = file.getName() + " saved " + (download ? "from" : "to") + "SkyDrive!";
         long when = System.currentTimeMillis();
@@ -621,7 +716,8 @@ public class XLoader
      */
     private void fileNotSupportedBySkyDriveNotification(File file)
     {
-        if(mNotificationAvailable) return;
+        if (mNotificationAvailable) return;
+        if(mContext == null) return;
 
         int icon = R.drawable.notification_icon;
         CharSequence tickerText = file.getName() + " cannot be uploaded to SkyDrive by third-party apps and has been skipped...";
