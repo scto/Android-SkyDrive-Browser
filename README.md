@@ -1,4 +1,4 @@
-Android-SkyDrive-Browser
+Android Explorer for SkyDrive
 ========================
 
 A cleaner, simpler Microsoft SkyDrive experience!
