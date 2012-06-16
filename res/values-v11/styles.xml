@@ -1,4 +1,0 @@
-<resources>
-    <style name="LightTheme" parent="Theme.Sherlock.Light" />
-    <style name="LightThemeDialog" parent="Theme.Sherlock.Light.Dialog" />
-</resources>
