@@ -532,9 +532,16 @@ public class BrowserActivity extends SherlockListActivity
 
     public void reloadFolder()
     {
-        setSupportProgressBarIndeterminateVisibility(false);
-        supportInvalidateOptionsMenu();
-        loadFolder(mCurrentFolderId);
+        try{
+            setSupportProgressBarIndeterminateVisibility(false);
+            supportInvalidateOptionsMenu();
+            loadFolder(mCurrentFolderId);
+        }catch (NullPointerException e)
+        {
+            /* At this point an XLoader object has attempted a reload of a BrowserActivity that no longer exists.
+            * We do nothing in this case, as it is pointless to update a UI that doesn't exist.
+            * */
+        }
     }
 
 
