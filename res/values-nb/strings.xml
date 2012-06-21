@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Sign in -->
+    <string name="appName">Utforsker for SkyDrive</string>
+    <string name="initializing">Logger på din Windows Live konto...</string>
+    <string name="firstWelcome">Velkommen til Android Utforsker for SkyDrive!\n\nLogg inn med din
+        Windows Live konto og få sømløs tilgang til din Microsoft SkyDrive, så kan du enkelt laste opp filer
+		og dele mellom telefonen, PCer og venner!\n\nLogg inn med din Windows Live konto for å komme i gang!
+    </string>
+    <string name="signIn">Logg inn med Windows Live</string>
+    <string name="mySkyDrive">Min SkyDrive</string>
+    <string name="automaticSignInError">Fikk ikke logget på Windows Live automatisk. Prøv å logge på manuelt.
+    </string>
+    <string name="manualSignInError">Fikk ikke logget på Windows Live. Har du nettforbindelse?
+    </string>
+    <string name="noAccount">Ingen Live-konto? Besøk live.com og registrer deg for 7GB gratis lagring!</string>
+
+    <!-- Browser -->
+    <string name="iconDescription">Ikon</string>
+    <string name="noItems">Mappen er tom</string>
+    <string name="newFolderTitle">Lag en ny mappe her</string>
+    <string name="newFolder">Ny mappe</string>
+    <string name="uploadFile">Last opp til SkyDrive</string>
+    <string name="navigateWait">Snakker med SkyDrive...</string>
+    <string name="imageDisplayError">Kunne ikke vise bildet</string>
+    <string name="copyCutSelectedFiles">Valgte filer klare til å limes inn</string>
+    <string name="imageLoading">Bildet laster. Vennligst vent.</string>
+
+    <!-- Service and settings -->
+    <string name="label_service">Automatisk kameraopplasting for SkyDrive</string>
+    <string name="settings">Instillinger</string>
+    <string name="camera_upload_header">Kameraopplasting</string>
+    <string name="camera_upload_description">Automatisk opplasting av kamerabilder</string>
+    <string name="camera_upload_wifi_only">Kun last opp når koblet til WiFi</string>
+    <string name="camera_upload_wifi_only_summary">Bruk dette om du ikke har et abonnement med inkludert datatrafikk</string>
+    <string name="limit_all_to_wifi">Begrens all datatrafikk til WiFi</string>
+    <string name="limit_all_to_wifi_summary">Bruk dette om du ikke har et abonnement med inkludert datatrafikk</string>
+    <string name="about_header">Om appen</string>
+    <string name="no_connection">Ingen WiFi tilgjengelig. Skru av begrensningen i instillinger for å bruke appen.</string>
+
+    <string name="versionHeader">Versjon</string>
+    <string name="credistHeader">Utviklerne</string>
+    <string name="creditsBody">Appen har blitt utviklet av William Killerud
+        ved hjelp av Live SDK for Android av Microsoft og ActionBarSherlock av Jake Wharton.
+        Ikonet er av Tom Emery.</string>
+
+    <!-- Download file dialog -->
+    <string name="download">Last ned</string>
+    <string name="fileWillBeDownloaded">Filen blir lastet ned til telefonen din</string>
+    <string name="ok">OK</string>
+    <string name="downloading">Laster ned fra SkyDrive...</string>
+    <string name="fileSaved">Filen ble lagret</string>
+    <string name="downloadError">Noe gikk galt. Fikk ikke lastet ned filen.</string>
+    <string name="fileAlreadySaved">Filen er allerede lagret</string>
+    <string name="fileAlreadySavedMessage">Den filen har blitt lastet ned fra før, men den kan ha endret seg siden da. Last ned igjen?
+    </string>
+
+
+    <!-- New folder dialog -->
+    <string name="createFolder">Lag ny mappe</string>
+    <string name="cancel">Avbryt</string>
+    <string name="name">Navn</string>
+    <string name="description">Beskrivelse (Valgfri)</string>
+    <string name="renameTitle">Gi nytt navn</string>
+
+    <!-- Upload file dialog -->
+    <string name="uploading">Laster opp til SkyDrive...</string>
+    <string name="uploadError">Noe gikk galt. Filen ble ikke lastet opp.</string>
+    <string name="uploadToThisFolder">Last opp her</string>
+    <string name="uploadSelected">Last opp valgte filer</string>
+    <string name="selectAll">Velg alle</string>
+    <string name="selectNone">Velg ingen</string>
+
+    <!-- Context menus -->
+    <string name="delete">Slett</string>
+    <string name="share">Del</string>
+    <string name="cut">Klipp ut</string>
+    <string name="copy">Kopier</string>
+    <string name="rename">Gi nytt navn</string>
+    <string name="reload">Oppdater</string>
+    <string name="save">Last ned</string>
+    <string name="close">Steng</string>
+    <string name="paste">Lim inn</string>
+    <string name="signOut">Logg ut</string>
+    <string name="loggedOut">Logget ut</string>
+    <string name="savedFiles">Lagrede filer</string>
+
+    <!-- Play audio dialog -->
+    <string name="buffering">Buffrer</string>
+    <string name="playing">Spiller</string>
+    <string name="play">Spill</string>
+    <string name="pause">Pause</string>
+    <string name="paused">Pauset</string>
+    <string name="saved">Lastet ned</string>
+    <string name="stop">Stop</string>
+    <string name="stopped">Stoppet</string>
+
+    <!-- Error messages -->
+    <string name="errorFolderCouldNotBeCreated">Fikk ikke laget den nye mappen. Prøv igjen.</string>
+    <string name="errorNoApplicationCouldOpenTheFile">Du har ingen app kan åpne denne filen</string>
+    <string name="errorOpeningAudioFile">Kunne ikke spille filen</string>
+
+</resources>
