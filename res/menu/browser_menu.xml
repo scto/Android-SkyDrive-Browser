@@ -12,7 +12,7 @@
             android:id="@+id/uploadFile"
             android:showAsAction="ifRoom"
             android:icon="@drawable/ic_menu_upload"
-            android:title="@string/uploadFile"
+            android:title="@string/uploadToSkyDrive"
             android:visible="true"
             />
     <item

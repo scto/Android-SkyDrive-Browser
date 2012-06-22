@@ -47,7 +47,7 @@ public class SharingReceiverActivity extends Activity
         mAuthClient = new LiveAuthClient(this, Constants.APP_CLIENT_ID);
         mApp.setAuthClient(mAuthClient);
 
-        mInitializeDialog = ProgressDialog.show(this, "", getString(R.string.initializing), true);
+        mInitializeDialog = ProgressDialog.show(this, "", getString(R.string.initializingMessage), true);
 
         mSignInButton = (Button) findViewById(R.id.signInButton);
         mIntroText = (TextView) findViewById(R.id.introTextView);

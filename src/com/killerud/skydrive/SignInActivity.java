@@ -49,7 +49,7 @@ public class SignInActivity extends Activity
         mIntroText = (TextView) findViewById(R.id.introTextView);
 
         final TextView noAccountText = (TextView) findViewById(R.id.noAccountText);
-        noAccountText.setText(getString(R.string.noAccount));
+        noAccountText.setText(getString(R.string.noAccountQuestion));
         Linkify.addLinks(noAccountText, Linkify.ALL);
 
         mSignInButton.setOnClickListener(new View.OnClickListener()
@@ -98,7 +98,7 @@ public class SignInActivity extends Activity
     {
         super.onStart();
         mInitializeDialog = new ProgressDialog(this);
-        mInitializeDialog.setMessage(getString(R.string.initializing));
+        mInitializeDialog.setMessage(getString(R.string.initializingMessage));
         mInitializeDialog.show();
 
         try
@@ -302,7 +302,7 @@ public class SignInActivity extends Activity
                     });
                 } catch (IllegalStateException e)
                 {
-                    Toast.makeText(getApplicationContext(), "Error during login", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), getString(R.string.errorDuringLogin), Toast.LENGTH_SHORT).show();
                     finish();
                 }
             }

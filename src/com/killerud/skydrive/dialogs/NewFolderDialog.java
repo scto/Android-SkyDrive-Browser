@@ -58,14 +58,10 @@ public class NewFolderDialog extends SherlockActivity
             @Override
             public void onClick(View v)
             {
-                /* Uses a hashmap for creating a JSON object later on.
-                * Communication with the SkyDrive API is in JSON.
-                */
                 Map<String, String> folder = new HashMap<String, String>();
                 folder.put(JsonKeys.NAME, name.getText().toString());
                 folder.put(JsonKeys.DESCRIPTION, description.getText().toString());
 
-                /* Attempts to create the folder */
                 mClient.postAsync(mCurrentFolderId,
                         new JSONObject(folder),
                         new LiveOperationListener()
@@ -78,9 +74,6 @@ public class NewFolderDialog extends SherlockActivity
                                 Log.e(LOGTAC, exception.getMessage());
                             }
 
-                            /* Gets the result of the operation and shows the user in a toast
-                            * on error, reloads on success
-                            */
                             @Override
                             public void onComplete(LiveOperation operation)
                             {

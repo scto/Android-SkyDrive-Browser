@@ -139,12 +139,6 @@ public class CameraImageAutoUploadService extends Service
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
-        /*
-            "If you need your service to keep running,
-            but you can live with interruptions from time to time,
-            return START_STICKY from onStartCommand()"
-            - http://stackoverflow.com/questions/6951868/service-getting-stopped-even-after-using-alarm-manager
-        */
         return Service.START_STICKY;
     }
 

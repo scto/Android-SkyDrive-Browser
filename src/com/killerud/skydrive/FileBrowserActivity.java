@@ -20,7 +20,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.killerud.skydrive.constants.Constants;
-import com.killerud.skydrive.constants.ContextItems;
+import com.killerud.skydrive.util.IOUtil;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -45,7 +45,7 @@ public class FileBrowserActivity extends SherlockListActivity
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
-        setTitle("Saved files");
+        setTitle(getString(R.string.savedFilesTitle));
         setContentView(R.layout.file_picker);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -241,153 +241,14 @@ public class FileBrowserActivity extends SherlockListActivity
         setSupportProgressBarIndeterminateVisibility(false);
     }
 
-    private String getFileExtension(File file)
-    {
-        String fileName = file.getName();
-        String extension = "";
-        int positionOfLastDot = fileName.lastIndexOf(".");
-        extension = fileName.substring(positionOfLastDot + 1, fileName.length());
-        return extension;
-    }
-
     private int determineFileDrawable(File file)
     {
         if (file.isDirectory())
         {
             return R.drawable.folder;
         }
-
-        String fileType = getFileExtension(file);
-        if (fileType.equalsIgnoreCase("png") ||
-                fileType.equalsIgnoreCase("jpg") ||
-                fileType.equalsIgnoreCase("jpeg") ||
-                fileType.equalsIgnoreCase("tiff") ||
-                fileType.equalsIgnoreCase("gif") ||
-                fileType.equalsIgnoreCase("bmp") ||
-                fileType.equalsIgnoreCase("raw"))
-        {
-            return R.drawable.image_x_generic;
-        }
-        else if (fileType.equalsIgnoreCase("mp3") ||
-                fileType.equalsIgnoreCase("wav") ||
-                fileType.equalsIgnoreCase("wma") ||
-                fileType.equalsIgnoreCase("acc") ||
-                fileType.equalsIgnoreCase("ogg"))
-        {
-            return R.drawable.audio_x_generic;
-        }
-        else if (fileType.equalsIgnoreCase("mov") ||
-                fileType.equalsIgnoreCase("avi") ||
-                fileType.equalsIgnoreCase("divx") ||
-                fileType.equalsIgnoreCase("wmv") ||
-                fileType.equalsIgnoreCase("ogv") ||
-                fileType.equalsIgnoreCase("mkv") ||
-                fileType.equalsIgnoreCase("mp4"))
-        {
-            return R.drawable.video_x_generic;
-        }
-        else if (fileType.equalsIgnoreCase("doc") ||
-                fileType.equalsIgnoreCase("odt") ||
-                fileType.equalsIgnoreCase("fodt") ||
-                fileType.equalsIgnoreCase("docx") ||
-                fileType.equalsIgnoreCase("odf"))
-        {
-            return R.drawable.office_document;
-        }
-        else if (fileType.equalsIgnoreCase("ppt") ||
-                fileType.equalsIgnoreCase("pps") ||
-                fileType.equalsIgnoreCase("pptx") ||
-                fileType.equalsIgnoreCase("ppsx") ||
-                fileType.equalsIgnoreCase("odp") ||
-                fileType.equalsIgnoreCase("fodp"))
-        {
-            return R.drawable.office_presentation;
-        }
-        else if (fileType.equalsIgnoreCase("ods") ||
-                fileType.equalsIgnoreCase("xls") ||
-                fileType.equalsIgnoreCase("xlr") ||
-                fileType.equalsIgnoreCase("xlsx") ||
-                fileType.equalsIgnoreCase("ots"))
-        {
-            return R.drawable.office_spreadsheet;
-        }
-        else if (fileType.equalsIgnoreCase("pdf"))
-        {
-            return R.drawable.document_pdf;
-        }
-        else if (fileType.equalsIgnoreCase("zip") ||
-                fileType.equalsIgnoreCase("rar") ||
-                fileType.equalsIgnoreCase("gz") ||
-                fileType.equalsIgnoreCase("bz2") ||
-                fileType.equalsIgnoreCase("tar") ||
-                fileType.equalsIgnoreCase("jar"))
-        {
-            return R.drawable.archive_generic;
-        }
-        else if (fileType.equalsIgnoreCase("7z"))
-        {
-            return R.drawable.archive_sevenzip;
-        }
-        else if (fileType.equalsIgnoreCase("torrent"))
-        {
-            return R.drawable.document_torrent;
-        }
-        else if (fileType.equalsIgnoreCase("exe") ||
-                fileType.equalsIgnoreCase("msi"))
-        {
-            return R.drawable.executable_generic;
-        }
-        else if (fileType.equalsIgnoreCase("iso") ||
-                fileType.equalsIgnoreCase("nrg") ||
-                fileType.equalsIgnoreCase("img") ||
-                fileType.equalsIgnoreCase("bin"))
-        {
-            return R.drawable.archive_disc_image;
-        }
-        else if (fileType.equalsIgnoreCase("apk"))
-        {
-            return R.drawable.executable_apk;
-        }
-        else if (fileType.equalsIgnoreCase("html") ||
-                fileType.equalsIgnoreCase("htm"))
-        {
-            return R.drawable.text_html;
-        }
-        else if (fileType.equalsIgnoreCase("css"))
-        {
-            return R.drawable.text_css;
-        }
-        else if (fileType.equalsIgnoreCase("deb"))
-        {
-            return R.drawable.executable_deb;
-        }
-        else if (fileType.equalsIgnoreCase("rpm"))
-        {
-            return R.drawable.executable_rpm;
-        }
-        else if (fileType.equalsIgnoreCase("java") ||
-                fileType.equalsIgnoreCase("class"))
-        {
-            return R.drawable.document_java;
-        }
-        else if (fileType.equalsIgnoreCase("pl") ||
-                fileType.equalsIgnoreCase("plc"))
-        {
-            return R.drawable.document_perl;
-        }
-        else if (fileType.equalsIgnoreCase("php"))
-        {
-            return R.drawable.document_php;
-        }
-        else if (fileType.equalsIgnoreCase("py"))
-        {
-            return R.drawable.document_python;
-        }
-        else if (fileType.equalsIgnoreCase("rb"))
-        {
-            return R.drawable.document_ruby;
-        }
-        return R.drawable.text_x_preview;
+        String fileType = IOUtil.getFileExtension(file);
+        return IOUtil.determineFileTypeDrawable(fileType);
     }
 
     private class FileBrowserListAdapter extends BaseAdapter
@@ -503,11 +364,11 @@ public class FileBrowserActivity extends SherlockListActivity
         @Override
         public boolean onCreateActionMode(com.actionbarsherlock.view.ActionMode mode, Menu menu)
         {
-            menu.add(ContextItems.MENU_TITLE_DELETE)
+            menu.add(getString(R.string.delete))
                     .setIcon(R.drawable.ic_menu_delete)
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM |
                             MenuItem.SHOW_AS_ACTION_WITH_TEXT);
-            menu.add(ContextItems.MENU_TITLE_SELECT_ALL)
+            menu.add(getString(R.string.selectAll))
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
             return true;
         }
@@ -522,26 +383,26 @@ public class FileBrowserActivity extends SherlockListActivity
         public boolean onActionItemClicked(final com.actionbarsherlock.view.ActionMode mode, MenuItem item)
         {
             String title = item.getTitle().toString();
-            if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_SELECT_ALL))
+            if (title.equalsIgnoreCase(getString(R.string.selectAll)))
             {
                 mFileBrowserAdapter.checkAll();
-                item.setTitle(ContextItems.MENU_TITLE_DESELECT_ALL);
+                item.setTitle(getString(R.string.selectNone));
                 return true;
             }
-            else if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_DESELECT_ALL))
+            else if (title.equalsIgnoreCase(getString(R.string.selectNone)))
             {
                 mFileBrowserAdapter.clearChecked();
                 mCurrentlySelectedFiles.clear();
-                item.setTitle(ContextItems.MENU_TITLE_SELECT_ALL);
+                item.setTitle(getString(R.string.selectAll));
                 return true;
             }
-            else if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_DELETE))
+            else if (title.equalsIgnoreCase(getString(R.string.delete)))
             {
                 final AlertDialog dialog = new AlertDialog.Builder(getSupportActionBar().getThemedContext()).create();
-                dialog.setTitle("Delete files?");
+                dialog.setTitle(getString(R.string.deleteConfirmationTitle));
                 dialog.setIcon(R.drawable.warning_triangle);
                 StringBuilder deleteMessage = new StringBuilder();
-                deleteMessage.append("The following files will be deleted: \n\n");
+                deleteMessage.append(getString(R.string.deleteConfirmationBody));
                 for (int i = 0; i < mCurrentlySelectedFiles.size(); i++)
                 {
                     int index = mCurrentlySelectedFiles.get(i).lastIndexOf("/");
@@ -552,10 +413,10 @@ public class FileBrowserActivity extends SherlockListActivity
                         deleteMessage.append("\n");
                     }
                 }
-                deleteMessage.append("Are you sure you want to do this?");
+                deleteMessage.append(getString(R.string.deleteConfirmationQuestion));
 
                 dialog.setMessage(deleteMessage.toString());
-                dialog.setButton("Yes", new DialogInterface.OnClickListener()
+                dialog.setButton(getString(R.string.yes), new DialogInterface.OnClickListener()
                 {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i)
@@ -577,7 +438,7 @@ public class FileBrowserActivity extends SherlockListActivity
                         mode.finish();
                     }
                 });
-                dialog.setButton2("No!", new DialogInterface.OnClickListener()
+                dialog.setButton2(getString(R.string.no), new DialogInterface.OnClickListener()
                 {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i)

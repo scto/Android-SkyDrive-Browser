@@ -49,7 +49,7 @@
         </activity>
 
         <activity android:name=".UploadFileActivity"
-                  android:label="@string/uploadFile"
+                  android:label="@string/uploadToSkyDrive"
                 />
 
         <activity android:name=".FileBrowserActivity"
@@ -78,7 +78,7 @@
 
         <service android:name=".CameraImageAutoUploadService"
                  android:exported="false"
-                 android:label="@string/label_service"
+                 android:label="@string/serviceLabel"
                  android:permission="android.permission.INTERNET"/>
 
     </application>

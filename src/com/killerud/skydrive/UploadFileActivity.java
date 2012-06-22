@@ -17,7 +17,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.killerud.skydrive.constants.Constants;
-import com.killerud.skydrive.constants.ContextItems;
+import com.killerud.skydrive.util.IOUtil;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -44,7 +44,7 @@ public class UploadFileActivity extends SherlockListActivity
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
 
-        setTitle("Upload to SkyDrive");
+        setTitle(getString(R.string.uploadToSkyDrive));
         setContentView(R.layout.file_picker);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -201,136 +201,7 @@ public class UploadFileActivity extends SherlockListActivity
         }
 
         String fileType = getFileExtension(file);
-        if (fileType.equalsIgnoreCase("png") ||
-                fileType.equalsIgnoreCase("jpg") ||
-                fileType.equalsIgnoreCase("jpeg") ||
-                fileType.equalsIgnoreCase("tiff") ||
-                fileType.equalsIgnoreCase("gif") ||
-                fileType.equalsIgnoreCase("bmp") ||
-                fileType.equalsIgnoreCase("raw"))
-        {
-            return R.drawable.image_x_generic;
-        }
-        else if (fileType.equalsIgnoreCase("mp3") ||
-                fileType.equalsIgnoreCase("wav") ||
-                fileType.equalsIgnoreCase("wma") ||
-                fileType.equalsIgnoreCase("acc") ||
-                fileType.equalsIgnoreCase("ogg"))
-        {
-            return R.drawable.audio_x_generic;
-        }
-        else if (fileType.equalsIgnoreCase("mov") ||
-                fileType.equalsIgnoreCase("avi") ||
-                fileType.equalsIgnoreCase("divx") ||
-                fileType.equalsIgnoreCase("wmv") ||
-                fileType.equalsIgnoreCase("ogv") ||
-                fileType.equalsIgnoreCase("mkv") ||
-                fileType.equalsIgnoreCase("mp4"))
-        {
-            return R.drawable.video_x_generic;
-        }
-        else if (fileType.equalsIgnoreCase("doc") ||
-                fileType.equalsIgnoreCase("odt") ||
-                fileType.equalsIgnoreCase("fodt") ||
-                fileType.equalsIgnoreCase("docx") ||
-                fileType.equalsIgnoreCase("odf"))
-        {
-            return R.drawable.office_document;
-        }
-        else if (fileType.equalsIgnoreCase("ppt") ||
-                fileType.equalsIgnoreCase("pps") ||
-                fileType.equalsIgnoreCase("pptx") ||
-                fileType.equalsIgnoreCase("ppsx") ||
-                fileType.equalsIgnoreCase("odp") ||
-                fileType.equalsIgnoreCase("fodp"))
-        {
-            return R.drawable.office_presentation;
-        }
-        else if (fileType.equalsIgnoreCase("ods") ||
-                fileType.equalsIgnoreCase("xls") ||
-                fileType.equalsIgnoreCase("xlr") ||
-                fileType.equalsIgnoreCase("xlsx") ||
-                fileType.equalsIgnoreCase("ots"))
-        {
-            return R.drawable.office_spreadsheet;
-        }
-        else if (fileType.equalsIgnoreCase("pdf"))
-        {
-            return R.drawable.document_pdf;
-        }
-        else if (fileType.equalsIgnoreCase("zip") ||
-                fileType.equalsIgnoreCase("rar") ||
-                fileType.equalsIgnoreCase("gz") ||
-                fileType.equalsIgnoreCase("bz2") ||
-                fileType.equalsIgnoreCase("tar") ||
-                fileType.equalsIgnoreCase("jar"))
-        {
-            return R.drawable.archive_generic;
-        }
-        else if (fileType.equalsIgnoreCase("7z"))
-        {
-            return R.drawable.archive_sevenzip;
-        }
-        else if (fileType.equalsIgnoreCase("torrent"))
-        {
-            return R.drawable.document_torrent;
-        }
-        else if (fileType.equalsIgnoreCase("exe") ||
-                fileType.equalsIgnoreCase("msi"))
-        {
-            return R.drawable.executable_generic;
-        }
-        else if (fileType.equalsIgnoreCase("iso") ||
-                fileType.equalsIgnoreCase("nrg") ||
-                fileType.equalsIgnoreCase("img") ||
-                fileType.equalsIgnoreCase("bin"))
-        {
-            return R.drawable.archive_disc_image;
-        }
-        else if (fileType.equalsIgnoreCase("apk"))
-        {
-            return R.drawable.executable_apk;
-        }
-        else if (fileType.equalsIgnoreCase("html") ||
-                fileType.equalsIgnoreCase("htm"))
-        {
-            return R.drawable.text_html;
-        }
-        else if (fileType.equalsIgnoreCase("css"))
-        {
-            return R.drawable.text_css;
-        }
-        else if (fileType.equalsIgnoreCase("deb"))
-        {
-            return R.drawable.executable_deb;
-        }
-        else if (fileType.equalsIgnoreCase("rpm"))
-        {
-            return R.drawable.executable_rpm;
-        }
-        else if (fileType.equalsIgnoreCase("java") ||
-                fileType.equalsIgnoreCase("class"))
-        {
-            return R.drawable.document_java;
-        }
-        else if (fileType.equalsIgnoreCase("pl") ||
-                fileType.equalsIgnoreCase("plc"))
-        {
-            return R.drawable.document_perl;
-        }
-        else if (fileType.equalsIgnoreCase("php"))
-        {
-            return R.drawable.document_php;
-        }
-        else if (fileType.equalsIgnoreCase("py"))
-        {
-            return R.drawable.document_python;
-        }
-        else if (fileType.equalsIgnoreCase("rb"))
-        {
-            return R.drawable.document_ruby;
-        }
-        return R.drawable.text_x_preview;
+        return IOUtil.determineFileTypeDrawable(fileType);
     }
 
     @Override
@@ -380,7 +251,7 @@ public class UploadFileActivity extends SherlockListActivity
         try{
             adapterFiles.addAll(Arrays.asList(folder.listFiles()));
         }catch (NullPointerException e){
-            adapterFiles.add(new File(mCurrentFolder + "/No files in this folder"));
+            adapterFiles.add(new File(mCurrentFolder + "/" + getString(R.string.noFilesInFolder)));
         }
 
         if (mActionMode == null)
@@ -511,9 +382,9 @@ public class UploadFileActivity extends SherlockListActivity
         @Override
         public boolean onCreateActionMode(com.actionbarsherlock.view.ActionMode mode, Menu menu)
         {
-            menu.add(ContextItems.MENU_TITLE_SELECT_ALL)
+            menu.add(getString(R.string.selectAll))
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-            menu.add(ContextItems.MENU_TITLE_UPLOAD)
+            menu.add(getString(R.string.uploadSelected))
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
             return true;
         }
@@ -528,7 +399,7 @@ public class UploadFileActivity extends SherlockListActivity
         public boolean onActionItemClicked(final com.actionbarsherlock.view.ActionMode mode, MenuItem item)
         {
             String title = item.getTitle().toString();
-            if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_UPLOAD))
+            if (title.equalsIgnoreCase(getString(R.string.uploadSelected)))
             {
                 Intent data = new Intent();
                 data.putExtra(EXTRA_FILES_LIST, (ArrayList<String>) mCurrentlySelectedFiles.clone());
@@ -541,18 +412,18 @@ public class UploadFileActivity extends SherlockListActivity
                 finish();
                 return true;
             }
-            else if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_SELECT_ALL))
+            else if (title.equalsIgnoreCase(getString(R.string.selectAll)))
             {
                 mFileBrowserAdapter.checkAll();
-                item.setTitle(ContextItems.MENU_TITLE_DESELECT_ALL);
+                item.setTitle(getString(R.string.selectNone));
                 return true;
             }
-            else if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_DESELECT_ALL))
+            else if (title.equalsIgnoreCase(getString(R.string.selectNone)))
             {
                 mFileBrowserAdapter.clearChecked();
                 mCurrentlySelectedFiles.clear();
 
-                item.setTitle(ContextItems.MENU_TITLE_SELECT_ALL);
+                item.setTitle(getString(R.string.selectAll));
                 return true;
             }
             else

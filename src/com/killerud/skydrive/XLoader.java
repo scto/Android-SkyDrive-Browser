@@ -344,7 +344,7 @@ public class XLoader
             {
                 mContext.reloadFolder();
                 Toast.makeText(mContext,
-                        "Deleted file(s)", Toast.LENGTH_SHORT).show();
+                       mContext.getString(R.string.deletedFiles), Toast.LENGTH_SHORT).show();
             } catch (NullPointerException e)
             {
                 /* No longer have a valid context, so cannot toast... */
@@ -360,7 +360,7 @@ public class XLoader
                 try
                 {
                     Toast.makeText(mContext,
-                            "Error deleting file" + (fileIds.size() > 1 ? "s" : ""), Toast.LENGTH_SHORT).show();
+                            mContext.getString(R.string.errorDeletingFile), Toast.LENGTH_SHORT).show();
                 } catch (NullPointerException e)
                 {
                     /* No longer have a valid context, so cannot toast... */
@@ -398,7 +398,7 @@ public class XLoader
             try
             {
                 Toast.makeText(mContext,
-                        "Moved file(s)",
+                        (cutNotCopy?mContext.getString(R.string.movedFiles):mContext.getString(R.string.copiedFiles)),
                         Toast.LENGTH_SHORT).show();
                 mContext.reloadFolder();
             } catch (NullPointerException e)
@@ -418,7 +418,7 @@ public class XLoader
                     try
                     {
                         Toast.makeText(mContext,
-                                "Error moving file" + (fileIds.size() > 1 ? "s" : ""), Toast.LENGTH_SHORT).show();
+                                mContext.getString(R.string.errorMovingFile), Toast.LENGTH_SHORT).show();
                     } catch (NullPointerException e)
                     {
                         /* No longer have a valid context, so cannot toast... */
@@ -446,7 +446,7 @@ public class XLoader
                     try
                     {
                         Toast.makeText(mContext,
-                                "Error copying file" + (fileIds.size() > 1 ? "s" : ""), Toast.LENGTH_SHORT).show();
+                                mContext.getString(R.string.errorCopyingFile), Toast.LENGTH_SHORT).show();
                     } catch (NullPointerException e)
                     {
                         /* No longer have a valid context, so cannot toast... */
@@ -469,7 +469,7 @@ public class XLoader
                         try
                         {
                             Toast.makeText(mContext,
-                                    "Something happened while moving. Some files may not have been moved.",
+                                    (cutNotCopy?mContext.getString(R.string.errorMovingFile):mContext.getString(R.string.errorCopyingFile)),
                                     Toast.LENGTH_SHORT).show();
                             mContext.reloadFolder();
                         } catch (NullPointerException f)
@@ -504,7 +504,7 @@ public class XLoader
             try
             {
                 mContext.setSupportProgressBarIndeterminateVisibility(false);
-                Toast.makeText(mContext, "File renamed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, mContext.getString(R.string.renamedFiles), Toast.LENGTH_SHORT).show();
                 mContext.reloadFolder();
             } catch (NullPointerException e)
             {
@@ -537,7 +537,7 @@ public class XLoader
                 fileNames.trimToSize();
                 renameFiles(client, fileIds, fileNames, baseName, baseDescription);
                 try{
-                    Toast.makeText(mContext, "Could not rename file", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, mContext.getString(R.string.errorRenamingFile), Toast.LENGTH_SHORT).show();
                 } catch (NullPointerException e)
                 {
                     /* No longer have a valid context, so cannot toast... */
@@ -565,7 +565,7 @@ public class XLoader
         } catch (JSONException e)
         {
             try{
-                Toast.makeText(mContext, "Could not rename file", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, mContext.getString(R.string.errorRenamingFile), Toast.LENGTH_SHORT).show();
             } catch (NullPointerException f)
             {
                 /* No longer have a valid context, so cannot toast... */
@@ -586,8 +586,8 @@ public class XLoader
         if(mContext == null) return;
 
         mNotificationProgress = new Notification(R.drawable.notification_icon,
-                (downloading ? "Downloading " : "Uploading ") + fileName,
-                System.currentTimeMillis());
+                (downloading ? mContext.getString(R.string.downloading) : mContext.getString(R.string.uploading)) + " "
+                        + fileName, System.currentTimeMillis());
 
 
         mNotificationProgress.flags |= Notification.FLAG_AUTO_CANCEL;
@@ -595,7 +595,9 @@ public class XLoader
 
         RemoteViews notificationView = new RemoteViews(mContext.getPackageName(), R.layout.notification_xload);
         notificationView.setImageViewResource(R.id.image, R.drawable.notification_icon);
-        notificationView.setTextViewText(R.id.title, (downloading ? "Downloading " : "Uploading ") + fileName);
+        notificationView.setTextViewText(R.id.title,
+                (downloading ? mContext.getString(R.string.downloading) : mContext.getString(R.string.uploading))
+                        + " " + fileName);
         notificationView.setProgressBar(R.id.progressBar, 100, 0, false);
 
         Intent cancelOperation = new Intent(mContext, BrowserActivity.class);
@@ -644,7 +646,7 @@ public class XLoader
         }
         int copyNr = 1;
         File result = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/" +
-                fileName + " Copy " + copyNr + extension);
+                fileName + mContext.getString(R.string.savedFileCopy) + copyNr + extension);
         boolean availableFileNameFound = false;
 
         while (availableFileNameFound)
@@ -653,7 +655,8 @@ public class XLoader
             {
                 copyNr++;
                 result = new File(file.getName().substring(0, index) +
-                        " Copy " + copyNr + file.getName().substring(index, file.getName().length()));
+                        mContext.getString(R.string.savedFileCopy) +
+                        copyNr + file.getName().substring(index, file.getName().length()));
             }
             else
             {
@@ -677,7 +680,9 @@ public class XLoader
         if(mContext == null) return;
 
         int icon = R.drawable.notification_icon;
-        CharSequence tickerText = file.getName() + " saved " + (download ? "from" : "to") + "SkyDrive!";
+        CharSequence tickerText = file.getName() + " " + mContext.getString(R.string.saved) + " "
+                + (download ? mContext.getString(R.string.from) : mContext.getString(R.string.to))
+                + " " + mContext.getString(R.string.skyDrive);
         long when = System.currentTimeMillis();
 
         Notification notification = new Notification(icon, tickerText, when);
@@ -685,7 +690,7 @@ public class XLoader
 
         Context context = mContext;
         CharSequence contentTitle = mContext.getString(R.string.appName);
-        CharSequence contentText = file.getName() + " was saved to your " + (download ? "phone" : "SkyDrive") + "!";
+        CharSequence contentText = tickerText;
 
         Intent notificationIntent;
 
@@ -720,14 +725,14 @@ public class XLoader
         if(mContext == null) return;
 
         int icon = R.drawable.notification_icon;
-        CharSequence tickerText = file.getName() + " cannot be uploaded to SkyDrive by third-party apps and has been skipped...";
+        CharSequence tickerText = file.getName() + mContext.getString(R.string.thirdPartyError);
         long when = System.currentTimeMillis();
 
         Notification notification = new Notification(icon, tickerText, when);
 
         Context context = mContext;
         CharSequence contentTitle = mContext.getString(R.string.appName);
-        CharSequence contentText = file.getName() + " is of a file type that cannot be uploaded to SkyDrive by third-party apps and has been skipped...";
+        CharSequence contentText = tickerText;
 
         Intent notificationIntent = new Intent(context, XLoader.class);
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);

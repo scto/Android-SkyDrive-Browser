@@ -20,19 +20,21 @@
             android:drawSelectorOnTop="false">
     </ListView>
 
-    <TextView
-            android:id="@id/android:empty"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:text="@string/noItems"
-            android:visible="false"/>
-
     <Button android:id="@+id/uploadToThisFolder"
             android:text="@string/uploadToThisFolder"
             android:layout_height="wrap_content"
             android:layout_width="fill_parent"
             android:layout_weight="0">
     </Button>
+
+    <TextView
+            android:id="@id/android:empty"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:text="@string/noItemsInFolder"
+            android:visible="false"/>
+
+
 
 
 </LinearLayout>

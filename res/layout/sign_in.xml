@@ -9,18 +9,18 @@
     <TextView android:layout_width="fill_parent"
               android:layout_height="wrap_content"
               android:id="@+id/introTextView"
-              android:text="@string/firstWelcome"
+              android:text="@string/firstWelcomeMessage"
               android:layout_marginBottom="20dip"/>
 
     <Button android:id="@+id/signInButton"
             android:layout_height="wrap_content"
             android:layout_width="fill_parent"
-            android:text="@string/signIn"/>
+            android:text="@string/signInToWindowsLive"/>
 
     <TextView android:layout_width="fill_parent"
               android:id="@+id/noAccountText"
               android:layout_height="wrap_content"
-              android:text="@string/noAccount"
+              android:text="@string/noAccountQuestion"
               android:layout_marginBottom="20dip"/>
 </LinearLayout>
 

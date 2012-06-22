@@ -5,6 +5,10 @@ package com.killerud.skydrive.constants;
  * Date: 13.05.12
  * Time: 17:18
  */
+
+/**
+ * Different sort criteria parameters interpreted by the SkyDrive API
+ */
 public class SortCriteria
 {
     public static final String NAME = "name";

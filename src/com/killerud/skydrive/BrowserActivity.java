@@ -25,13 +25,13 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockListActivity;
 import com.actionbarsherlock.view.*;
 import com.killerud.skydrive.constants.Constants;
-import com.killerud.skydrive.constants.ContextItems;
 import com.killerud.skydrive.constants.SortCriteria;
 import com.killerud.skydrive.dialogs.NewFolderDialog;
 import com.killerud.skydrive.dialogs.PlayAudioDialog;
 import com.killerud.skydrive.dialogs.RenameDialog;
 import com.killerud.skydrive.dialogs.ViewPhotoDialog;
 import com.killerud.skydrive.objects.*;
+import com.killerud.skydrive.util.IOUtil;
 import com.killerud.skydrive.util.JsonKeys;
 import com.microsoft.live.*;
 import org.json.JSONArray;
@@ -139,7 +139,7 @@ public class BrowserActivity extends SherlockListActivity
 
         mFolderHierarchyView = (TextView) findViewById(R.id.folder_hierarchy);
         mFolderHierarchy = new Stack<String>();
-        mFolderHierarchy.push("Home");
+        mFolderHierarchy.push(getString(R.string.rootFolderTitle));
         updateFolderHierarchy(null);
 
         app.setCurrentBrowser(this);
@@ -198,11 +198,7 @@ public class BrowserActivity extends SherlockListActivity
 
     }
 
-    /**
-     * Sets up the List View click- and selection listeners
-     *
-     * @param lv The lisst view to set up
-     */
+
     private void setupListView(ListView lv)
     {
         lv.setTextFilterEnabled(true);
@@ -216,7 +212,6 @@ public class BrowserActivity extends SherlockListActivity
                     boolean rowIsChecked = mSkyDriveListAdapter.isSelected(position);
                     if (rowIsChecked)
                     {
-                        /* It's checked. Time to make it not! */
                         mCurrentlySelectedFiles.remove(
                                 ((SkyDriveListAdapter) getListAdapter()).getItem(position));
                     }
@@ -253,13 +248,7 @@ public class BrowserActivity extends SherlockListActivity
         });
     }
 
-    /**
-     * Determines whether or not the activity was started from the sharing activity.
-     * If yes, load the uploading layout and set the state to uploading. This makes
-     * the activity display only folders.
-     *
-     * @param startIntent
-     */
+
     private void determineBrowserStateAndLayout(Intent startIntent)
     {
         if (startIntent.getAction() != null && startIntent.getAction().equalsIgnoreCase("killerud.skydrive.UPLOAD_PICK_FOLDER"))
@@ -291,7 +280,6 @@ public class BrowserActivity extends SherlockListActivity
     {
         if (keyCode == KeyEvent.KEYCODE_BACK)
         {
-            /* If the previous folder stack is empty, exit the application */
             if (navigateBack())
             {
                 return true;
@@ -318,7 +306,6 @@ public class BrowserActivity extends SherlockListActivity
                 mActionBar.setDisplayHomeAsUpEnabled(false);
             }
 
-            /* Do not navigate back, as the stack is empty */
             return false;
         }
 
@@ -347,9 +334,6 @@ public class BrowserActivity extends SherlockListActivity
         }
     }
 
-    /**
-     * Sets up the listadapter for the browser, making sure the correct dialogs are opened for different file types
-     */
     private void handleListItemClick(AdapterView<?> parent, int position)
     {
         SkyDriveObject skyDriveObj = (SkyDriveObject) parent.getItemAtPosition(position);
@@ -521,7 +505,7 @@ public class BrowserActivity extends SherlockListActivity
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < mFolderHierarchy.size(); i++)
         {
-            if (i > 0) //If not "Home"
+            if (i > 0) //If not root
             {
                 builder.append(">");
             }
@@ -544,10 +528,6 @@ public class BrowserActivity extends SherlockListActivity
         }
     }
 
-
-    /**
-     * Gets the folder content for displaying
-     */
     private void loadFolder(String folderId)
     {
         if (folderId == null) return;
@@ -635,7 +615,7 @@ public class BrowserActivity extends SherlockListActivity
                         != ConnectivityManager.TYPE_WIFI));
         if (unavailable)
         {
-            Toast.makeText(this, R.string.no_connection, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.noInternetConnection, Toast.LENGTH_LONG).show();
         }
         return unavailable;
     }
@@ -734,9 +714,7 @@ public class BrowserActivity extends SherlockListActivity
     }
 
 
-    /**
-     * The SkyDrive list adapter. Determines the list item layout and display behaviour.
-     */
+
     private class SkyDriveListAdapter extends BaseAdapter
     {
         private final LayoutInflater mInflater;
@@ -1123,111 +1101,9 @@ public class BrowserActivity extends SherlockListActivity
                         String extension = file.getName().substring(index + 1,
                                 file.getName().length());
 
-                        /* Try to do the most popular types first to hopefully
-                           limit the number of comparisons */
-                        if (extension.equalsIgnoreCase("doc") ||
-                                extension.equalsIgnoreCase("odt") ||
-                                extension.equalsIgnoreCase("fodt") ||
-                                extension.equalsIgnoreCase("docx") ||
-                                extension.equalsIgnoreCase("odf"))
-                        {
-                            return R.drawable.office_document;
-                        }
-                        else if (extension.equalsIgnoreCase("ppt") ||
-                                extension.equalsIgnoreCase("pps") ||
-                                extension.equalsIgnoreCase("pptx") ||
-                                extension.equalsIgnoreCase("ppsx") ||
-                                extension.equalsIgnoreCase("odp") ||
-                                extension.equalsIgnoreCase("fodp"))
-                        {
-                            return R.drawable.office_presentation;
-                        }
-                        else if (extension.equalsIgnoreCase("ods") ||
-                                extension.equalsIgnoreCase("xls") ||
-                                extension.equalsIgnoreCase("xlr") ||
-                                extension.equalsIgnoreCase("xlsx") ||
-                                extension.equalsIgnoreCase("ots"))
-                        {
-                            return R.drawable.office_spreadsheet;
-                        }
-                        else if (extension.equalsIgnoreCase("pdf"))
-                        {
-                            return R.drawable.document_pdf;
-                        }
-                        else if (extension.equalsIgnoreCase("zip") ||
-                                extension.equalsIgnoreCase("rar") ||
-                                extension.equalsIgnoreCase("gz") ||
-                                extension.equalsIgnoreCase("bz2") ||
-                                extension.equalsIgnoreCase("tar") ||
-                                extension.equalsIgnoreCase("jar"))
-                        {
-                            return R.drawable.archive_generic;
-                        }
-                        else if (extension.equalsIgnoreCase("7z"))
-                        {
-                            return R.drawable.archive_sevenzip;
-                        }
-                        else if (extension.equalsIgnoreCase("torrent"))
-                        {
-                            return R.drawable.document_torrent;
-                        }
-                        else if (extension.equalsIgnoreCase("exe") ||
-                                extension.equalsIgnoreCase("msi"))
-                        {
-                            return R.drawable.executable_generic;
-                        }
-                        else if (extension.equalsIgnoreCase("iso") ||
-                                extension.equalsIgnoreCase("nrg") ||
-                                extension.equalsIgnoreCase("img") ||
-                                extension.equalsIgnoreCase("bin"))
-                        {
-                            return R.drawable.archive_disc_image;
-                        }
-                        else if (extension.equalsIgnoreCase("apk"))
-                        {
-                            return R.drawable.executable_apk;
-                        }
-                        else if (extension.equalsIgnoreCase("html") ||
-                                extension.equalsIgnoreCase("htm"))
-                        {
-                            return R.drawable.text_html;
-                        }
-                        else if (extension.equalsIgnoreCase("css"))
-                        {
-                            return R.drawable.text_css;
-                        }
-                        else if (extension.equalsIgnoreCase("deb"))
-                        {
-                            return R.drawable.executable_deb;
-                        }
-                        else if (extension.equalsIgnoreCase("rpm"))
-                        {
-                            return R.drawable.executable_rpm;
-                        }
-                        else if (extension.equalsIgnoreCase("java") ||
-                                extension.equalsIgnoreCase("class"))
-                        {
-                            return R.drawable.document_java;
-                        }
-                        else if (extension.equalsIgnoreCase("pl") ||
-                                extension.equalsIgnoreCase("plc"))
-                        {
-                            return R.drawable.document_perl;
-                        }
-                        else if (extension.equalsIgnoreCase("php"))
-                        {
-                            return R.drawable.document_php;
-                        }
-                        else if (extension.equalsIgnoreCase("py"))
-                        {
-                            return R.drawable.document_python;
-                        }
-                        else if (extension.equalsIgnoreCase("rb"))
-                        {
-                            return R.drawable.document_ruby;
-                        }
+                        return IOUtil.determineFileTypeDrawable(extension);
                     }
-                    /* If all else fails */
+
                     return R.drawable.text_x_preview;
                 }
 
@@ -1244,22 +1120,22 @@ public class BrowserActivity extends SherlockListActivity
         public boolean onCreateActionMode(com.actionbarsherlock.view.ActionMode mode, Menu menu)
         {
 
-            menu.add(ContextItems.MENU_TITLE_DOWNLOAD)
+            menu.add(getString(R.string.download))
                     .setIcon(R.drawable.ic_menu_save)
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-            menu.add(ContextItems.MENU_TITLE_COPY)
+            menu.add(getString(R.string.copy))
                     .setIcon(R.drawable.ic_menu_copy_holo_light)
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-            menu.add(ContextItems.MENU_TITLE_CUT)
+            menu.add(getString(R.string.cut))
                     .setIcon(R.drawable.ic_menu_cut_holo_light)
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-            menu.add(ContextItems.MENU_TITLE_RENAME)
+            menu.add(getString(R.string.rename))
                     .setIcon(R.drawable.ic_menu_edit)
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-            menu.add(ContextItems.MENU_TITLE_DELETE)
+            menu.add(getString(R.string.delete))
                     .setIcon(R.drawable.ic_menu_delete)
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-            menu.add(ContextItems.MENU_TITLE_SELECT_ALL)
+            menu.add(getString(R.string.selectAll))
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
             return true;
         }
@@ -1274,7 +1150,7 @@ public class BrowserActivity extends SherlockListActivity
         public boolean onActionItemClicked(final com.actionbarsherlock.view.ActionMode mode, MenuItem item)
         {
             String title = item.getTitle().toString();
-            if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_DOWNLOAD))
+            if (title.equalsIgnoreCase(getString(R.string.download)))
             {
                 /* Downloads are done by calling recursively on a trimmed version of the same arraylist onComplete
                 *  Create a clone so selected aren't cleared logically.
@@ -1287,7 +1163,7 @@ public class BrowserActivity extends SherlockListActivity
                 mode.finish();
                 return true;
             }
-            else if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_COPY))
+            else if (title.equalsIgnoreCase(getString(R.string.copy)))
             {
                 mCopyCutFiles = (ArrayList<SkyDriveObject>) mCurrentlySelectedFiles.clone();
                 mCutNotPaste = false;
@@ -1299,7 +1175,7 @@ public class BrowserActivity extends SherlockListActivity
                 mode.finish();
                 return true;
             }
-            else if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_CUT))
+            else if (title.equalsIgnoreCase(getString(R.string.cut)))
             {
                 mCopyCutFiles = (ArrayList<SkyDriveObject>) mCurrentlySelectedFiles.clone();
                 mCutNotPaste = true;
@@ -1311,22 +1187,22 @@ public class BrowserActivity extends SherlockListActivity
                 mode.finish();
                 return true;
             }
-            else if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_DELETE))
+            else if (title.equalsIgnoreCase(getString(R.string.delete)))
             {
                 final AlertDialog dialog = new AlertDialog.Builder(getSupportActionBar().getThemedContext()).create();
-                dialog.setTitle("Delete files?");
+                dialog.setTitle(getString(R.string.deleteConfirmationTitle));
                 dialog.setIcon(R.drawable.warning_triangle);
                 StringBuilder deleteMessage = new StringBuilder();
-                deleteMessage.append("The following files will be deleted: \n\n");
+                deleteMessage.append(getString(R.string.deleteConfirmationBody));
                 for (int i = 0; i < mCurrentlySelectedFiles.size(); i++)
                 {
                     deleteMessage.append(mCurrentlySelectedFiles.get(i).getName());
                     deleteMessage.append("\n");
                 }
-                deleteMessage.append("Are you sure you want to do this?");
+                deleteMessage.append(getString(R.string.deleteConfirmationQuestion));
 
                 dialog.setMessage(deleteMessage.toString());
-                dialog.setButton("Yes", new DialogInterface.OnClickListener()
+                dialog.setButton(getString(R.string.yes), new DialogInterface.OnClickListener()
                 {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i)
@@ -1340,7 +1216,7 @@ public class BrowserActivity extends SherlockListActivity
 
                     }
                 });
-                dialog.setButton2("No!", new DialogInterface.OnClickListener()
+                dialog.setButton2(getString(R.string.no), new DialogInterface.OnClickListener()
                 {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i)
@@ -1351,7 +1227,7 @@ public class BrowserActivity extends SherlockListActivity
                 dialog.show();
                 return true;
             }
-            else if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_RENAME))
+            else if (title.equalsIgnoreCase(getString(R.string.rename)))
             {
                 Intent startRenameDialog = new Intent(getSupportActionBar().getThemedContext(), RenameDialog.class);
                 ArrayList<String> fileIds = new ArrayList<String>();
@@ -1366,17 +1242,17 @@ public class BrowserActivity extends SherlockListActivity
                 if (!connectionIsUnavailable()) startActivity(startRenameDialog);
                 return true;
             }
-            else if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_SELECT_ALL))
+            else if (title.equalsIgnoreCase(getString(R.string.selectAll)))
             {
                 ((SkyDriveListAdapter) getListAdapter()).checkAll();
-                item.setTitle(ContextItems.MENU_TITLE_DESELECT_ALL);
+                item.setTitle(getString(R.string.selectNone));
                 return true;
             }
-            else if (title.equalsIgnoreCase(ContextItems.MENU_TITLE_DESELECT_ALL))
+            else if (title.equalsIgnoreCase(getString(R.string.selectNone)))
             {
                 ((SkyDriveListAdapter) getListAdapter()).clearChecked();
                 mCurrentlySelectedFiles.clear();
-                item.setTitle(ContextItems.MENU_TITLE_SELECT_ALL);
+                item.setTitle(getString(R.string.selectAll));
                 return true;
             }
             else

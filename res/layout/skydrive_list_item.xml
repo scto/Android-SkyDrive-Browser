@@ -10,7 +10,7 @@
             android:layout_height="50dip"
             android:layout_gravity="center_vertical"
             android:scaleType="centerInside"
-            android:contentDescription="@string/iconDescription"/>
+            android:contentDescription="@string/icon"/>
 
 
     <LinearLayout

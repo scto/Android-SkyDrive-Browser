@@ -109,7 +109,6 @@ public class ViewPhotoDialog extends SherlockActivity
                                 @Override
                                 public void onDownloadCompleted(LiveDownloadOperation operation)
                                 {
-                                    /* JPG was not supported right off the bat. Options fix that. */
                                     BitmapFactory.Options options = new BitmapFactory.Options();
                                     options.inSampleSize = 2;
                                     imageView.setImageBitmap(BitmapFactory.decodeFile(mFile.getPath(), options));
