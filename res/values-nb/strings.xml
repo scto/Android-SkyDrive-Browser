@@ -1,103 +1,118 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Sign in -->
-    <string name="appName">Utforsker for SkyDrive</string>
-    <string name="initializing">Logger på din Windows Live konto...</string>
-    <string name="firstWelcome">Velkommen til Android Utforsker for SkyDrive!\n\nLogg inn med din
-        Windows Live konto og få sømløs tilgang til din Microsoft SkyDrive, så kan du enkelt laste opp filer
-		og dele mellom telefonen, PCer og venner!\n\nLogg inn med din Windows Live konto for å komme i gang!
-    </string>
-    <string name="signIn">Logg inn med Windows Live</string>
-    <string name="mySkyDrive">Min SkyDrive</string>
-    <string name="automaticSignInError">Fikk ikke logget på Windows Live automatisk. Prøv å logge på manuelt.
-    </string>
-    <string name="manualSignInError">Fikk ikke logget på Windows Live. Har du nettforbindelse?
-    </string>
-    <string name="noAccount">Ingen Live-konto? Besøk live.com og registrer deg for 7GB gratis lagring!</string>
 
-    <!-- Browser -->
-    <string name="iconDescription">Ikon</string>
-    <string name="noItems">Mappen er tom</string>
+    <string name="appName">Utforsker for SkyDrive</string>
+    <string name="initializingMessage">Logger på Windows Live...</string>
+    <string name="firstWelcomeMessage">Velkommen til Android Utforsker for SkyDrive!!\n\nLogg inn med din Windows Live-konto
+        og få sømløs tilgang til SkyDrive.
+    </string>
+    <string name="signInToWindowsLive">Logg inn på Windows Live</string>
+    <string name="mySkyDrive">Min SkyDrive</string>
+    <string name="automaticSignInError">Kunne ikke logge på Windows Live automatisk. Prøv å logge på manuelt.</string>
+    <string name="manualSignInError">Kunne ikke logge på Windows Live. Har du en nettforbindelse?</string>
+    <string name="noAccountQuestion">Ingen Live-konto? Gå til live.com og registrer deg for 7GB gratis lagring!</string>
+
+    <string name="icon">Ikon</string>
+    <string name="noItemsInFolder">Ingen filer i denne mappen</string>
     <string name="newFolderTitle">Lag en ny mappe her</string>
     <string name="newFolder">Ny mappe</string>
-    <string name="uploadFile">Last opp til SkyDrive</string>
-    <string name="navigateWait">Snakker med SkyDrive...</string>
+    <string name="uploadToSkyDrive">Last opp til SkyDrive</string>
+    <string name="talkingToSkyDriveWait">Snakker med SkyDrive...</string>
     <string name="imageDisplayError">Kunne ikke vise bildet</string>
     <string name="copyCutSelectedFiles">Valgte filer klare til å limes inn</string>
-    <string name="imageLoading">Bildet laster. Vennligst vent.</string>
+    <string name="imageLoading">Bildet lastes inn. Vennligst vent...</string>
+    <string name="rootFolderTitle">Hjem</string>
+    <string name="savedFilesTitle">Lagrede filer</string>
 
-    <!-- Service and settings -->
-    <string name="label_service">Automatisk kameraopplasting for SkyDrive</string>
+    <string name="deletedFiles">Slettet file(r)</string>
+    <string name="movedFiles">Flyttet file(r)</string>
+    <string name="copiedFiles">Kopierte file(r)</string>
+    <string name="renamedFiles">Endret file(r)</string>
+    <string name="serviceLabel">Tjeneste for automatisk kameraopplasing til SkyDrive</string>
     <string name="settings">Instillinger</string>
-    <string name="camera_upload_header">Kameraopplasting</string>
-    <string name="camera_upload_description">Automatisk opplasting av kamerabilder</string>
-    <string name="camera_upload_wifi_only">Kun last opp når koblet til WiFi</string>
-    <string name="camera_upload_wifi_only_summary">Bruk dette om du ikke har et abonnement med inkludert datatrafikk</string>
-    <string name="limit_all_to_wifi">Begrens all datatrafikk til WiFi</string>
-    <string name="limit_all_to_wifi_summary">Bruk dette om du ikke har et abonnement med inkludert datatrafikk</string>
-    <string name="about_header">Om appen</string>
-    <string name="no_connection">Ingen WiFi tilgjengelig. Skru av begrensningen i instillinger for å bruke appen.</string>
-
+    <string name="cameraUploadHeader">Atomatisk kameraopplasting</string>
+    <string name="cameraUploadSummary">Last opp nye kamerabilder automatisk</string>
+    <string name="limitCameraToWifiHeader">Kameraopplasting kun på WiFi</string>
+    <string name="limitCameraToWifiSummary">Bruk dette om du har et abonnement uten inkludert datatrafikk</string>
+    <string name="limitDataToWiFiHeader">Begrens all data til WiFi</string>
+    <string name="limitDataToWiFiSummary">Bruk dette om du har et abonnement uten inkludert datatrafikk</string>
+    <string name="aboutTheAppHeader">Om appen</string>
+    <string name="noInternetConnection">Ingen WiFi tilgjengelig. Finn et trådløst nett eller skru av begrensingen i instillinger.</string>
     <string name="versionHeader">Versjon</string>
-    <string name="credistHeader">Utviklerne</string>
-    <string name="creditsBody">Appen har blitt utviklet av William Killerud
-        ved hjelp av Live SDK for Android av Microsoft og ActionBarSherlock av Jake Wharton.
-        Ikonet er av Tom Emery.</string>
+    <string name="creditsHeader">Skaperene</string>
+    <string name="creditsBody">Utvikler: William Killerud\n
+			App-ikon: Tom Emery\n
+			Biblioteker brukt: Live SDK for Android av Microsoft og ActionBarSherlock av Jake Wharton
+        </string>
 
-    <!-- Download file dialog -->
-    <string name="download">Last ned</string>
-    <string name="fileWillBeDownloaded">Filen blir lastet ned til telefonen din</string>
+    <string name="fileWillBeDownloaded">Filen lastes ned til telefonen</string>
     <string name="ok">OK</string>
-    <string name="downloading">Laster ned fra SkyDrive...</string>
-    <string name="fileSaved">Filen ble lagret</string>
-    <string name="downloadError">Noe gikk galt. Fikk ikke lastet ned filen.</string>
-    <string name="fileAlreadySaved">Filen er allerede lagret</string>
-    <string name="fileAlreadySavedMessage">Den filen har blitt lastet ned fra før, men den kan ha endret seg siden da. Last ned igjen?
-    </string>
+    <string name="downloading">Laster ned</string>
+    <string name="uploading">Laster opp</string>
+    <string name="downloadingFromSkyDrive">Laster ned fra SkyDrive...</string>
+    <string name="fileSaved">Filen lagret</string>
+    <string name="downloadError">Noe gikk galt under nedlastingen. Filen ble ikke lagret.</string>
+    <string name="fileAlreadySaved">Filen finnes allerede</string>
+    <string name="fileAlreadySavedMessage">Den filen har blitt lastet ned før, men kan ha blitt endret siden da. Last ned på nytt?</string>
+    <string name="savedFileCopy"> Kopi </string>
+    <string name="saved">lagret</string>
+    <string name="from">fra</string>
+    <string name="to">til</string>
+    <string name="skyDrive">SkyDrive</string>
 
 
-    <!-- New folder dialog -->
     <string name="createFolder">Lag ny mappe</string>
     <string name="cancel">Avbryt</string>
     <string name="name">Navn</string>
-    <string name="description">Beskrivelse (Valgfri)</string>
+    <string name="description">Beskrivelse (valgfri)</string>
     <string name="renameTitle">Gi nytt navn</string>
 
-    <!-- Upload file dialog -->
-    <string name="uploading">Laster opp til SkyDrive...</string>
-    <string name="uploadError">Noe gikk galt. Filen ble ikke lastet opp.</string>
+    <string name="uploadToSkyDrive">Last opp til SkyDrive</string>
+    <string name="uploadingToSkyDrive">Laster opp til SkyDrive...</string>
+    <string name="uploadError">Noe skjedde under opplastingen. Filen ble ikke sendt til SkyDrive.</string>
     <string name="uploadToThisFolder">Last opp her</string>
-    <string name="uploadSelected">Last opp valgte filer</string>
+    <string name="uploadSelected">Last opp valgte</string>
+    <string name="noFilesInFolder">Ingen filer i denne mappen</string>
+
+
     <string name="selectAll">Velg alle</string>
     <string name="selectNone">Velg ingen</string>
-
-    <!-- Context menus -->
     <string name="delete">Slett</string>
     <string name="share">Del</string>
     <string name="cut">Klipp ut</string>
     <string name="copy">Kopier</string>
     <string name="rename">Gi nytt navn</string>
     <string name="reload">Oppdater</string>
-    <string name="save">Last ned</string>
+    <string name="download">Last ned</string>
     <string name="close">Steng</string>
     <string name="paste">Lim inn</string>
     <string name="signOut">Logg ut</string>
     <string name="loggedOut">Logget ut</string>
     <string name="savedFiles">Lagrede filer</string>
 
-    <!-- Play audio dialog -->
+    <string name="deleteConfirmationTitle">Slett filer?</string>
+    <string name="deleteConfirmationBody">Disse filene vil bli slettet: \n\n</string>
+    <string name="deleteConfirmationQuestion">Er du sikker på at du vil slette dem?</string>
+    <string name="yes">Ja</string>
+    <string name="no">Nei</string>
+
     <string name="buffering">Buffrer</string>
     <string name="playing">Spiller</string>
     <string name="play">Spill</string>
     <string name="pause">Pause</string>
     <string name="paused">Pauset</string>
-    <string name="saved">Lastet ned</string>
-    <string name="stop">Stop</string>
+    <string name="saved">Lagret</string>
+    <string name="stop">Stopp</string>
     <string name="stopped">Stoppet</string>
 
-    <!-- Error messages -->
-    <string name="errorFolderCouldNotBeCreated">Fikk ikke laget den nye mappen. Prøv igjen.</string>
-    <string name="errorNoApplicationCouldOpenTheFile">Du har ingen app kan åpne denne filen</string>
-    <string name="errorOpeningAudioFile">Kunne ikke spille filen</string>
+    <string name="errorFolderCouldNotBeCreated">Noe gikk galt så de nye mappen ble ikke laget. Prøv igjen.</string>
+    <string name="errorNoApplicationCouldOpenTheFile">Ingen app kunne åpne filen</string>
+    <string name="errorOpeningAudioFile">Kunne ikke åpne musikkfilen</string>
+    <string name="errorDuringLogin">Feil under innlogging</string>
+    <string name="errorDeletingFile">Feil under sletting</string>
+    <string name="errorMovingFile">Feil under flytting</string>
+    <string name="errorRenamingFile">Feil under endring</string>
+    <string name="errorCopyingFile">Feil under kopiering</string>
+    <string name="thirdPartyError"> kan ikke lastes opp av tredjepartsapplikasjoner og har blitt ignorert...</string>
 
 </resources>
