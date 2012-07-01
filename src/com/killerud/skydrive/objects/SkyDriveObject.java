@@ -4,6 +4,7 @@
 
 package com.killerud.skydrive.objects;
 
+import android.os.Environment;
 import org.json.JSONObject;
 
 public abstract class SkyDriveObject
@@ -102,6 +103,7 @@ public abstract class SkyDriveObject
     }
 
     protected final JSONObject mObject;
+    protected String localDownloadLocation;
 
     public SkyDriveObject(JSONObject object)
     {
@@ -159,6 +161,21 @@ public abstract class SkyDriveObject
     public String getUploadLocation()
     {
         return mObject.optString("upload_location");
+    }
+
+    public String getLocalDownloadLocation()
+    {
+        if(localDownloadLocation == null)
+        {
+            return Environment.getExternalStorageDirectory() + "/SkyDrive/";
+        }
+
+        return this.localDownloadLocation;
+    }
+
+    public void setLocalDownloadLocation(String localDownloadLocation)
+    {
+        this.localDownloadLocation = localDownloadLocation + "/"; //Must always be a directory path
     }
 
     public SharedWith getSharedWith()

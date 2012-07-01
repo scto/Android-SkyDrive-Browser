@@ -12,10 +12,12 @@ import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 import com.killerud.skydrive.constants.Constants;
+import com.killerud.skydrive.constants.SortCriteria;
 import com.killerud.skydrive.objects.SkyDriveObject;
 import com.killerud.skydrive.util.IOUtil;
 import com.killerud.skydrive.util.JsonKeys;
 import com.microsoft.live.*;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -268,11 +270,17 @@ public class XLoader
             return;
         }
 
-        SkyDriveObject skyDriveFile = fileIds.get(fileIds.size() - 1);
+        final SkyDriveObject skyDriveFile = fileIds.get(fileIds.size() - 1);
+        if(skyDriveFile.getType().equals("folder"))
+        {
+            addFolderFilesToDownloadList(client, fileIds, skyDriveFile);
+            fileIds.remove(skyDriveFile);
+        }
+
         createProgressNotification(skyDriveFile.getName(), true);
 
         final File fileToCreateLocally = checkForFileDuplicateAndCreateCopy(
-                new File(Environment.getExternalStorageDirectory() + "/SkyDrive/" + skyDriveFile.getName()));
+                new File(skyDriveFile.getLocalDownloadLocation()  + skyDriveFile.getName()));
 
         final LiveDownloadOperation operation =
                 client.downloadAsync(skyDriveFile.getId() + "/content",
@@ -301,18 +309,23 @@ public class XLoader
                                                          LiveDownloadOperation operation)
                             {
                                 if (mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
+
                                 Log.e("ASE", exception.getMessage());
-
-                                try
+                                if(!skyDriveFile.getType().equals("folder"))
                                 {
-                                    Toast.makeText(mContext, mContext.getString(R.string.downloadError),
-                                            Toast.LENGTH_SHORT).show();
+                                    try
+                                    {
+                                        Toast.makeText(mContext, mContext.getString(R.string.downloadError),
+                                                Toast.LENGTH_SHORT).show();
 
-                                } catch (NullPointerException e)
-                                {
-                                    /* No longer have a valid context, so cannot toast... */
+                                    } catch (NullPointerException e)
+                                    {
+                                        /* No longer have a valid context, so cannot toast... */
+                                    }
+
+                                    fileIds.remove(fileIds.size() - 1);
                                 }
-                                fileIds.remove(fileIds.size() - 1);
+
                                 fileIds.trimToSize();
                                 downloadFiles(client, fileIds);
                             }
@@ -328,6 +341,47 @@ public class XLoader
                                 downloadFiles(client, fileIds);
                             }
                         });
+    }
+
+    private void addFolderFilesToDownloadList(final LiveConnectClient client, final ArrayList<SkyDriveObject> fileIds,
+                                              final SkyDriveObject skyDriveFolder) {
+        skyDriveFolder.setLocalDownloadLocation(skyDriveFolder.getLocalDownloadLocation() + skyDriveFolder.getName());
+
+        final File folder = new File(skyDriveFolder.getLocalDownloadLocation());
+        folder.mkdirs();
+
+        client.getAsync(skyDriveFolder.getId() + "/files?sort_by=" +
+                SortCriteria.NAME + "&sort_order=" + SortCriteria.ASCENDING, new LiveOperationListener()
+        {
+            @Override
+            public void onComplete(LiveOperation operation)
+            {
+                JSONObject result = operation.getResult();
+                if (result.has(JsonKeys.ERROR))
+                {
+                    JSONObject error = result.optJSONObject(JsonKeys.ERROR);
+                    String message = error.optString(JsonKeys.MESSAGE);
+                    String code = error.optString(JsonKeys.CODE);
+                    Log.e("ASE", code + ": " + message);
+                    return;
+                }
+
+                JSONArray data = result.optJSONArray(JsonKeys.DATA);
+                for (int i = 0; i < data.length(); i++)
+                {
+                    SkyDriveObject skyDriveObj = SkyDriveObject.create(data.optJSONObject(i));
+                    skyDriveObj.setLocalDownloadLocation(folder.getPath());
+                    fileIds.add(skyDriveObj);
+                }
+
+            }
+
+            @Override
+            public void onError(LiveOperationException exception, LiveOperation operation)
+            {
+                Log.e("ASE", exception.getMessage());
+            }
+        });
     }
 
     /**

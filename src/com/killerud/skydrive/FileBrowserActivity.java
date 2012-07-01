@@ -300,6 +300,7 @@ public class FileBrowserActivity extends SherlockListActivity
             for (int i = 0; i < mFiles.size(); i++)
             {
                 mCheckedPositions.put(i, true);
+                mCurrentlySelectedFiles.add(mFiles.get(i).getPath());
             }
             notifyDataSetChanged();
         }
@@ -422,14 +423,30 @@ public class FileBrowserActivity extends SherlockListActivity
                     public void onClick(DialogInterface dialogInterface, int i)
                     {
                         ArrayList<File> files = ((FileBrowserListAdapter) getListAdapter()).getFiles();
-                        for (int j = 0; j < mCurrentlySelectedFiles.size(); j++)
+                        for (int j = 0; j < files.size(); j++)
                         {
-                            File file = new File(mCurrentlySelectedFiles.get(j));
+                            File file = files.get(j);
                             if (file.exists())
                             {
-                                files.remove(file);
-                                file.delete();
+                                if(file.isDirectory())
+                                {
+                                    File[] directoryFiles = file.listFiles();
+                                    for(int k=0;k<directoryFiles.length;k++)
+                                    {
+                                        files.add(directoryFiles[k]);
+                                    }
+                                }else
+                                {
+                                    file.delete();
+                                }
                             }
+                        }
+
+                        /* Second round to remove empty folders */
+                        for (int j = files.size()-1; j >= 0; j--)
+                        {
+                            File file = files.get(j);
+                            file.delete();
                         }
 
                         mFileBrowserAdapter.clearChecked();
