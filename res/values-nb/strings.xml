@@ -96,6 +96,10 @@
     <string name="yes">Ja</string>
     <string name="no">Nei</string>
 
+    <string name="appExitConfirmationHeader">Er du sikker på at du vil lukke?</string>
+    <string name="confirmExitHeader">Bekreft lukking</string>
+    <string name="confirmExitSummary">Hindrer deg i å lukke appen ved et uhell ved å åpne en dialogboks for bekreftelse</string>
+
     <string name="buffering">Buffrer</string>
     <string name="playing">Spiller</string>
     <string name="play">Spill</string>

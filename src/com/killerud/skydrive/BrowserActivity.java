@@ -280,13 +280,38 @@ public class BrowserActivity extends SherlockListActivity
     {
         if (keyCode == KeyEvent.KEYCODE_BACK)
         {
-            if (navigateBack())
+            if (canNavigateBack())
             {
+                navigateBack();
                 return true;
             }
             else
             {
-                return super.onKeyDown(keyCode, event);
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+                if (preferences.getBoolean(Constants.CONFIRM_EXIT, false))
+                {
+                    AlertDialog.Builder  builder = new AlertDialog.Builder(this);
+                    builder.setMessage(R.string.appExitConfirmationHeader)
+                        .setCancelable(false)
+                        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                BrowserActivity.this.finish();
+                            }
+                        })
+                        .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.cancel();
+                            }
+                        });
+                    AlertDialog alertDialog = builder.create();
+                    alertDialog.show();
+
+                    return true;
+                }else{
+                    return super.onKeyDown(keyCode, event);
+                }
             }
         }
         else
@@ -295,7 +320,7 @@ public class BrowserActivity extends SherlockListActivity
         }
     }
 
-    private boolean navigateBack()
+    private boolean canNavigateBack()
     {
         if (connectionIsUnavailable()) return false;
 
@@ -308,7 +333,10 @@ public class BrowserActivity extends SherlockListActivity
 
             return false;
         }
+        return true;
+    }
 
+    private void navigateBack() {
         loadFolder(mPreviousFolderIds.pop());
 
         if (!mFolderHierarchy.isEmpty())
@@ -316,8 +344,6 @@ public class BrowserActivity extends SherlockListActivity
             mFolderHierarchy.pop();
             updateFolderHierarchy(null);
         }
-
-        return true;
     }
 
     private void pushPreviousFolderId(String folderId)
@@ -655,7 +681,7 @@ public class BrowserActivity extends SherlockListActivity
         switch (item.getItemId())
         {
             case android.R.id.home:
-                navigateBack();
+                canNavigateBack();
                 return true;
 
             case R.id.newFolder:

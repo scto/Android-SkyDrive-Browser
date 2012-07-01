@@ -18,4 +18,9 @@
                         android:summary="@string/limitCameraToWifiSummary"
             android:defaultValue="false"/>
 
+    <CheckBoxPreference android:title="@string/confirmExitHeader"
+                           android:key="confirm_exit"
+                           android:summary="@string/confirmExitSummary"
+                           android:defaultValue="false" />
+
 </PreferenceScreen>

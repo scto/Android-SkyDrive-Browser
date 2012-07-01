@@ -99,6 +99,12 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
 
+
+    <string name="appExitConfirmationHeader">Are you sure you want to close?</string>
+    <string name="confirmExitHeader">Confirm on app exit</string>
+    <string name="confirmExitSummary">Stops you from accidentally closing the app by presenting a confirmation dialog on exit</string>
+
+
     <string name="buffering">Buffering</string>
     <string name="playing">Playing</string>
     <string name="play">Play</string>
