@@ -14,6 +14,12 @@ App icon by Tom Emery
 
 Changelog
 ---------
+2.3
+- Files shared with you can now be reached via a menu option
+- New SkyDrive permission required for the above. This does not affect your phone.
+- Confirmation dialog on exit can be enabled in Settings
+- Uploads where the file exists already now updates the file stored on SkyDrive. Download, edit and upload finally works!
+
 2.2
 - Settings to limit data to WiFi appwide and for auto uploading of camera images
 - Rebranding to comply with SkyDrive branding guidelines

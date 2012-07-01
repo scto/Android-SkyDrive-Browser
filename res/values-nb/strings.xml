@@ -100,6 +100,8 @@
     <string name="confirmExitHeader">Bekreft lukking</string>
     <string name="confirmExitSummary">Hindrer deg i å lukke appen ved et uhell ved å åpne en dialogboks for bekreftelse</string>
 
+    <string name="sharedFiles">Delte filer</string>
+
     <string name="buffering">Buffrer</string>
     <string name="playing">Spiller</string>
     <string name="play">Spill</string>

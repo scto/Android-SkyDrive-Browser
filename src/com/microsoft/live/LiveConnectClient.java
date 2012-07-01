@@ -1738,6 +1738,15 @@ public class LiveConnectClient
                                      String filename,
                                      File file,
                                      boolean overwriteExisting,
+                                     LiveUploadOperationListener listener)
+    {
+        return this.uploadAsync(path, filename, file, overwriteExisting, listener, null);
+    }
+
+    public LiveOperation uploadAsync(String path,
+                                     String filename,
+                                     File file,
+                                     boolean overwriteExisting,
                                      LiveUploadOperationListener listener,
                                      Object userState)
     {

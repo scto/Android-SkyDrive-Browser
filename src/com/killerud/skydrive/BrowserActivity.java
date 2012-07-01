@@ -554,6 +554,11 @@ public class BrowserActivity extends SherlockListActivity
         }
     }
 
+    private void loadSharedFiles()
+    {
+        loadFolder("me/skydrive/shared");
+    }
+
     private void loadFolder(String folderId)
     {
         if (folderId == null) return;
@@ -703,6 +708,9 @@ public class BrowserActivity extends SherlockListActivity
                 setSupportProgressBarIndeterminateVisibility(true);
                 if (!connectionIsUnavailable())
                     mXloader.pasteFiles(mClient, mCopyCutFiles, mCurrentFolderId, mCutNotPaste);
+                return true;
+            case R.id.sharedFiles:
+                loadSharedFiles();
                 return true;
             case R.id.savedFiles:
                 startActivity(new Intent(getApplicationContext(), FileBrowserActivity.class));

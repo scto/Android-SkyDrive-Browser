@@ -29,6 +29,9 @@
           android:visible="false"
             />
 
+    <item android:id="@+id/sharedFiles"
+          android:showAsAction="withText|never"
+          android:title="@string/sharedFiles"/>
 
     <item android:id="@+id/savedFiles"
           android:showAsAction="withText|never"

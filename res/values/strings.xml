@@ -105,6 +105,8 @@
     <string name="confirmExitSummary">Stops you from accidentally closing the app by presenting a confirmation dialog on exit</string>
 
 
+    <string name="sharedFiles">Shared files</string>
+
     <string name="buffering">Buffering</string>
     <string name="playing">Playing</string>
     <string name="play">Play</string>

@@ -117,7 +117,7 @@ public class XLoader
         final LiveOperation operation =
                 client.uploadAsync(currentFolderId,
                         file.getName(),
-                        file,
+                        file, true,
                         new LiveUploadOperationListener()
                         {
                             int lastPercent = 0;

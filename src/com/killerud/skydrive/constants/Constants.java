@@ -1,5 +1,7 @@
 package com.killerud.skydrive.constants;
 
+import com.killerud.skydrive.util.Scopes;
+
 /**
  * User: William
  * Date: 25.04.12
@@ -11,8 +13,9 @@ final public class Constants
 
     /* App permissions. Be as precise as possible. */
     public static final String[] APP_SCOPES = {
-            "wl.offline_access",
-            "wl.skydrive_update"
+            Scopes.OFFLINE_ACCESS,
+            Scopes.CONTACTS_SKYDRIVE,
+            Scopes.SKYDRIVE_UPDATE
     };
 
 
