@@ -133,7 +133,7 @@
     <string name="errorRenamingFile">Error renaming file(s)</string>
     <string name="errorCopyingFile">Error copying file(s)</string>
     <string name="thirdPartyError"> cannot be uploaded to SkyDrive by third-party apps and has been skipped...</string>
-    <string name="errorCouldNotFetchFileForSharing">Could not get to the file for sharing, sorry!</string>
+    <string name="errorCouldNotFetchFileForSharing">Could not find the file you shared, sorry!</string>
     <string name="errorTooManyFilesAtOnce">Cannot handle more than 99 files in one go, sorry. Handling as many as I can!</string>
     <string name="errorLoggedOut">You have been logged out and need to log in again to continue using the app</string>
 

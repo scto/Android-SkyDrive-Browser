@@ -81,9 +81,19 @@ public class FileBrowserActivity extends SherlockListActivity
                 }
                 else
                 {
-                    mFileBrowserAdapter.setChecked(position, true);
-                    mCurrentlySelectedFiles.add(
+                    boolean isChecked = mFileBrowserAdapter.isChecked(position);
+                    if(isChecked)
+                    {
+                        mFileBrowserAdapter.setChecked(position, false);
+                        mCurrentlySelectedFiles.remove(
+                                ((FileBrowserListAdapter) getListAdapter()).getItem(position).getPath());
+                    }else
+                    {
+                        mFileBrowserAdapter.setChecked(position, true);
+                        mCurrentlySelectedFiles.add(
                             ((FileBrowserListAdapter) getListAdapter()).getItem(position).getPath());
+                    }
+                    updateActionModeTitleWithSelectedCount();
                 }
             }
         });
@@ -98,6 +108,7 @@ public class FileBrowserActivity extends SherlockListActivity
                     mFileBrowserAdapter.setChecked(position, true);
                     mCurrentlySelectedFiles.add(
                             ((FileBrowserListAdapter) getListAdapter()).getItem(position).getPath());
+                    updateActionModeTitleWithSelectedCount();
                 }
                 return true;
             }
@@ -257,13 +268,14 @@ public class FileBrowserActivity extends SherlockListActivity
         private final ArrayList<File> mFiles;
         private View mView;
         private SparseBooleanArray mCheckedPositions;
-        private int mPosition;
+        private int mChecked;
 
         public FileBrowserListAdapter(Context context)
         {
             mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             mFiles = new ArrayList<File>();
             mCheckedPositions = new SparseBooleanArray();
+            mChecked = 0;
         }
 
 
@@ -272,8 +284,14 @@ public class FileBrowserActivity extends SherlockListActivity
             return mCheckedPositions.get(pos, false);
         }
 
+        public int getCheckedCount()
+        {
+            return this.mChecked;
+        }
+
         public void setCheckedPositions(SparseBooleanArray checkedPositions)
         {
+            mChecked = checkedPositions.size();
             this.mCheckedPositions = checkedPositions;
             notifyDataSetChanged();
         }
@@ -285,12 +303,20 @@ public class FileBrowserActivity extends SherlockListActivity
 
         public void setChecked(int pos, boolean checked)
         {
+            if(checked != isChecked(pos) && checked)
+            {
+                mChecked++;
+            }else if(checked != isChecked(pos)){
+                mChecked--;
+            }
+
             mCheckedPositions.put(pos, checked);
             notifyDataSetChanged();
         }
 
         public void clearChecked()
         {
+            mChecked = 0;
             mCheckedPositions = new SparseBooleanArray();
             notifyDataSetChanged();
         }
@@ -299,6 +325,11 @@ public class FileBrowserActivity extends SherlockListActivity
         {
             for (int i = 0; i < mFiles.size(); i++)
             {
+                if(!isChecked(i))
+                {
+                    mChecked++;
+                }
+
                 mCheckedPositions.put(i, true);
                 mCurrentlySelectedFiles.add(mFiles.get(i).getPath());
             }
@@ -388,6 +419,7 @@ public class FileBrowserActivity extends SherlockListActivity
             {
                 mFileBrowserAdapter.checkAll();
                 item.setTitle(getString(R.string.selectNone));
+                updateActionModeTitleWithSelectedCount();
                 return true;
             }
             else if (title.equalsIgnoreCase(getString(R.string.selectNone)))
@@ -395,6 +427,7 @@ public class FileBrowserActivity extends SherlockListActivity
                 mFileBrowserAdapter.clearChecked();
                 mCurrentlySelectedFiles.clear();
                 item.setTitle(getString(R.string.selectAll));
+                updateActionModeTitleWithSelectedCount();
                 return true;
             }
             else if (title.equalsIgnoreCase(getString(R.string.delete)))
@@ -422,10 +455,10 @@ public class FileBrowserActivity extends SherlockListActivity
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i)
                     {
-                        ArrayList<File> files = ((FileBrowserListAdapter) getListAdapter()).getFiles();
+                        ArrayList<String> files = mCurrentlySelectedFiles;
                         for (int j = 0; j < files.size(); j++)
                         {
-                            File file = files.get(j);
+                            File file = new File(files.get(j));
                             if (file.exists())
                             {
                                 if(file.isDirectory())
@@ -433,7 +466,7 @@ public class FileBrowserActivity extends SherlockListActivity
                                     File[] directoryFiles = file.listFiles();
                                     for(int k=0;k<directoryFiles.length;k++)
                                     {
-                                        files.add(directoryFiles[k]);
+                                        files.add(directoryFiles[k].getPath());
                                     }
                                 }else
                                 {
@@ -445,13 +478,13 @@ public class FileBrowserActivity extends SherlockListActivity
                         /* Second round to remove empty folders */
                         for (int j = files.size()-1; j >= 0; j--)
                         {
-                            File file = files.get(j);
+                            File file = new File(files.get(j));
                             file.delete();
                         }
 
-                        mFileBrowserAdapter.clearChecked();
-                        mCurrentlySelectedFiles.clear();
-                        ((FileBrowserListAdapter) getListAdapter()).notifyDataSetChanged();
+                        finish();
+                        startActivity(getIntent());
+
                         mode.finish();
                     }
                 });
@@ -480,6 +513,21 @@ public class FileBrowserActivity extends SherlockListActivity
             mActionMode = null;
             ((FileBrowserListAdapter) getListAdapter()).notifyDataSetChanged();
             supportInvalidateOptionsMenu();
+        }
+    }
+
+    private void updateActionModeTitleWithSelectedCount() {
+        final int checkedCount = ((FileBrowserListAdapter) getListAdapter()).getCheckedCount();
+        switch (checkedCount) {
+            case 0:
+                mActionMode.setTitle(null);
+                break;
+            case 1:
+                mActionMode.setTitle(getString(R.string.selectedOne));
+                break;
+            default:
+                mActionMode.setTitle("" + checkedCount + " " + getString(R.string.selectedSeveral));
+                break;
         }
     }
 }

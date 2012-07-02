@@ -221,12 +221,13 @@ public class XLoader {
 
 
         final SkyDriveObject skyDriveFile = fileIds.get(fileIds.size() - 1);
+        createProgressNotification(skyDriveFile.getName(), true);
+
         if (skyDriveFile.getType().equals("folder")) {
             addFolderFilesToDownloadList(client, fileIds, skyDriveFile);
             fileIds.remove(skyDriveFile);
+            return;
         }
-
-        createProgressNotification(skyDriveFile.getName(), true);
 
         final File fileToCreateLocally = checkForFileDuplicateAndCreateCopy(
                 new File(skyDriveFile.getLocalDownloadLocation() + skyDriveFile.getName()));
@@ -325,6 +326,7 @@ public class XLoader {
                         fileIds.add(skyDriveObj);
                     }
 
+                    downloadFiles(client, fileIds);
                 }
 
                 @Override

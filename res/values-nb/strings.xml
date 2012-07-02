@@ -126,5 +126,8 @@
     <string name="errorRenamingFile">Feil under endring</string>
     <string name="errorCopyingFile">Feil under kopiering</string>
     <string name="thirdPartyError"> kan ikke lastes opp av tredjepartsapplikasjoner og har blitt ignorert...</string>
+    <string name="errorCouldNotFetchFileForSharing">Kunne ikke finne filen du delte, beklager!</string>
+    <string name="errorTooManyFilesAtOnce">Klarer ikke gjøre mer enn 99 ting om gangen. Gjør så godt jeg kan!</string>
+    <string name="errorLoggedOut">Du har blitt logget ut og må logge inn igjen for å bruke appen</string>
 
 </resources>

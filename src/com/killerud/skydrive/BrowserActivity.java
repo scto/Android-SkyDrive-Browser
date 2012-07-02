@@ -202,7 +202,7 @@ public class BrowserActivity extends SherlockListActivity
             {
                 if (mActionMode != null)
                 {
-                    boolean rowIsChecked = mSkyDriveListAdapter.isSelected(position);
+                    boolean rowIsChecked = mSkyDriveListAdapter.isChecked(position);
                     if(position >= mSkyDriveListAdapter.getCount()) return;
                     if (rowIsChecked)
                     {
@@ -246,7 +246,7 @@ public class BrowserActivity extends SherlockListActivity
     }
 
     private void updateActionModeTitleWithSelectedCount() {
-        final int checkedCount = mCurrentlySelectedFiles.size();
+        final int checkedCount = ((SkyDriveListAdapter) getListAdapter()).getCheckedCount();
         switch (checkedCount) {
             case 0:
                 mActionMode.setTitle(null);
@@ -833,13 +833,14 @@ public class BrowserActivity extends SherlockListActivity
         private View mView;
         private SparseBooleanArray mCheckedPositions;
         private int mPosition;
+        private int mChecked;
 
         public SkyDriveListAdapter(Context context)
         {
             mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             mSkyDriveObjs = new ArrayList<SkyDriveObject>();
             mCheckedPositions = new SparseBooleanArray();
-
+            mChecked = 0;
         }
 
         /**
@@ -857,13 +858,27 @@ public class BrowserActivity extends SherlockListActivity
             return mSkyDriveObjs.size();
         }
 
-        public boolean isSelected(int pos)
+        public int getCheckedCount()
+        {
+            return this.mChecked;
+        }
+
+        public boolean isChecked(int pos)
         {
             return mCheckedPositions.get(pos, false);
         }
 
+
+
         public void setChecked(int pos, boolean checked)
         {
+            if(checked != isChecked(pos) && checked)
+            {
+                mChecked++;
+            }else if(checked != isChecked(pos)){
+                mChecked--;
+            }
+
             mCheckedPositions.put(pos, checked);
             notifyDataSetChanged();
         }
@@ -871,6 +886,7 @@ public class BrowserActivity extends SherlockListActivity
 
         public void setCheckedPositions(SparseBooleanArray checkedPositions)
         {
+            mChecked = checkedPositions.size();
             this.mCheckedPositions = checkedPositions;
             notifyDataSetChanged();
         }
@@ -882,6 +898,7 @@ public class BrowserActivity extends SherlockListActivity
 
         public void clearChecked()
         {
+            mChecked = 0;
             mCheckedPositions = new SparseBooleanArray();
             mCurrentlySelectedFiles = new ArrayList<SkyDriveObject>();
             notifyDataSetChanged();
@@ -891,6 +908,10 @@ public class BrowserActivity extends SherlockListActivity
         {
             for (int i = 0; i < mSkyDriveObjs.size(); i++)
             {
+                if(!isChecked(i))
+                {
+                    mChecked++;
+                }
                 mCheckedPositions.put(i, true);
                 mCurrentlySelectedFiles.add(mSkyDriveObjs.get(i));
             }
@@ -933,7 +954,7 @@ public class BrowserActivity extends SherlockListActivity
 
                     setIcon(R.drawable.video_x_generic);
                     setName(video);
-                    setSelected(isSelected(mPosition));
+                    setSelected(isChecked(mPosition));
                 }
 
                 @Override
@@ -947,7 +968,7 @@ public class BrowserActivity extends SherlockListActivity
 
                     setIcon(determineFileIcon(file));
                     setName(file);
-                    setSelected(isSelected(mPosition));
+                    setSelected(isChecked(mPosition));
                 }
 
                 @Override
@@ -960,7 +981,7 @@ public class BrowserActivity extends SherlockListActivity
 
                     setIcon(R.drawable.folder);
                     setName(folder);
-                    setSelected(isSelected(mPosition));
+                    setSelected(isChecked(mPosition));
                 }
 
                 @Override
@@ -972,7 +993,7 @@ public class BrowserActivity extends SherlockListActivity
                     }
                     setIcon(R.drawable.folder_image);
                     setName(album);
-                    setSelected(isSelected(mPosition));
+                    setSelected(isChecked(mPosition));
                 }
 
                 @Override
@@ -985,7 +1006,7 @@ public class BrowserActivity extends SherlockListActivity
 
                     setIcon(R.drawable.audio_x_generic);
                     setName(audio);
-                    setSelected(isSelected(mPosition));
+                    setSelected(isChecked(mPosition));
                 }
 
                 @Override
@@ -1001,7 +1022,7 @@ public class BrowserActivity extends SherlockListActivity
 
                     setIcon(R.drawable.image_x_generic);
                     setName(photo);
-                    setSelected(isSelected(mPosition));
+                    setSelected(isChecked(mPosition));
 
 
                     if (!setThumbnailFromCacheIfExists(view, photo))
@@ -1282,8 +1303,7 @@ public class BrowserActivity extends SherlockListActivity
                 if (!connectionIsUnavailable())
                     mXloader.downloadFiles(mClient, (ArrayList<SkyDriveObject>) mCurrentlySelectedFiles.clone());
 
-                ((SkyDriveListAdapter) getListAdapter()).clearChecked();
-                mCurrentlySelectedFiles.clear();
+                resetSelection();
                 mode.finish();
                 return true;
             }
@@ -1316,12 +1336,12 @@ public class BrowserActivity extends SherlockListActivity
             {
                 ((SkyDriveListAdapter) getListAdapter()).checkAll();
                 item.setTitle(getString(R.string.selectNone));
+                updateActionModeTitleWithSelectedCount();
                 return true;
             }
             else if (title.equalsIgnoreCase(getString(R.string.selectNone)))
             {
-                ((SkyDriveListAdapter) getListAdapter()).clearChecked();
-                mCurrentlySelectedFiles.clear();
+                resetSelection();
                 item.setTitle(getString(R.string.selectAll));
                 return true;
             }
@@ -1335,8 +1355,7 @@ public class BrowserActivity extends SherlockListActivity
         @Override
         public void onDestroyActionMode(com.actionbarsherlock.view.ActionMode mode)
         {
-            ((SkyDriveListAdapter) getListAdapter()).clearChecked();
-            mCurrentlySelectedFiles.clear();
+            resetSelection();
             mActionMode = null;
             supportInvalidateOptionsMenu();
         }
@@ -1350,8 +1369,7 @@ public class BrowserActivity extends SherlockListActivity
 
         Toast.makeText(getApplicationContext(), R.string.copyCutSelectedFiles, Toast.LENGTH_SHORT).show();
 
-        ((SkyDriveListAdapter) getListAdapter()).clearChecked();
-        mCurrentlySelectedFiles.clear();
+        resetSelection();
         mode.finish();
     }
 
@@ -1361,8 +1379,7 @@ public class BrowserActivity extends SherlockListActivity
 
         Toast.makeText(getApplicationContext(), R.string.copyCutSelectedFiles, Toast.LENGTH_SHORT).show();
 
-        ((SkyDriveListAdapter) getListAdapter()).clearChecked();
-        mCurrentlySelectedFiles.clear();
+        resetSelection();
         mode.finish();
     }
 
@@ -1388,8 +1405,7 @@ public class BrowserActivity extends SherlockListActivity
                 setSupportProgressBarIndeterminateVisibility(true);
                 if (!connectionIsUnavailable())
                     mXloader.deleteFiles(mClient, (ArrayList<SkyDriveObject>) mCurrentlySelectedFiles.clone());
-                ((SkyDriveListAdapter) getListAdapter()).clearChecked();
-                mCurrentlySelectedFiles.clear();
+                resetSelection();
                 mode.finish();
 
             }
@@ -1416,6 +1432,8 @@ public class BrowserActivity extends SherlockListActivity
         }
         startRenameDialog.putExtra(RenameDialog.EXTRAS_FILE_IDS, fileIds);
         startRenameDialog.putExtra(RenameDialog.EXTRAS_FILE_NAMES, fileNames);
+        resetSelection();
+
         if (!connectionIsUnavailable()) startActivity(startRenameDialog);
     }
 
@@ -1428,7 +1446,14 @@ public class BrowserActivity extends SherlockListActivity
             fileIds.add(mCurrentlySelectedFiles.get(i).getId());
         }
         startSharingDialog.putExtra(RenameDialog.EXTRAS_FILE_IDS, fileIds);
+        resetSelection();
         if (!connectionIsUnavailable()) startActivity(startSharingDialog);
+    }
+
+    private void resetSelection() {
+        ((SkyDriveListAdapter) getListAdapter()).clearChecked();
+        mCurrentlySelectedFiles.clear();
+        updateActionModeTitleWithSelectedCount();
     }
 }
 
