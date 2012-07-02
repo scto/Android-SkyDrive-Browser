@@ -1029,13 +1029,16 @@ containing a value of this type.
         public static final int downloading=0x7f0a0031;
         public static final int downloadingFromSkyDrive=0x7f0a0033;
         public static final int errorCopyingFile=0x7f0a0072;
+        public static final int errorCouldNotFetchFileForSharing=0x7f0a0074;
         public static final int errorDeletingFile=0x7f0a006f;
         public static final int errorDuringLogin=0x7f0a006e;
         public static final int errorFolderCouldNotBeCreated=0x7f0a006b;
+        public static final int errorLoggedOut=0x7f0a0076;
         public static final int errorMovingFile=0x7f0a0070;
         public static final int errorNoApplicationCouldOpenTheFile=0x7f0a006c;
         public static final int errorOpeningAudioFile=0x7f0a006d;
         public static final int errorRenamingFile=0x7f0a0071;
+        public static final int errorTooManyFilesAtOnce=0x7f0a0075;
         public static final int fileAlreadySaved=0x7f0a0036;
         public static final int fileAlreadySavedMessage=0x7f0a0037;
         public static final int fileSaved=0x7f0a0034;

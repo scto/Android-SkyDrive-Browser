@@ -121,12 +121,19 @@ public class CameraImageAutoUploadService extends Service
     private boolean connectionIsUnavailable()
     {
         getPreferences();
-        return (mAllWifiOnly &&
-                (mConnectivityManager.getActiveNetworkInfo().getType()
-                    != ConnectivityManager.TYPE_WIFI))
-                || (mCameraWifiOnly
+        boolean unavailable;
+        try{
+            unavailable = (mAllWifiOnly &&
+                    (mConnectivityManager.getActiveNetworkInfo().getType()
+                            != ConnectivityManager.TYPE_WIFI))
+                    || (mCameraWifiOnly
                     && (mConnectivityManager.getActiveNetworkInfo().getType()
                     != ConnectivityManager.TYPE_WIFI));
+        }catch (NullPointerException e)
+        {
+            unavailable = true;
+        }
+        return unavailable;
     }
 
     private void getPreferences()

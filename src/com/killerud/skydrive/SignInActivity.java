@@ -13,18 +13,19 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Window;
 import com.killerud.skydrive.constants.Constants;
 import com.microsoft.live.*;
 
 import java.io.File;
 import java.util.Arrays;
 
-public class SignInActivity extends Activity
+public class SignInActivity extends SherlockActivity
 {
     BrowserForSkyDriveApplication mApp;
     TextView mResultTextView;
     LiveAuthClient mAuthClient;
-    ProgressDialog mInitializeDialog;
     Button mSignInButton;
     TextView mIntroText;
 
@@ -35,8 +36,9 @@ public class SignInActivity extends Activity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.sign_in);
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
+        setContentView(R.layout.sign_in);
         handleLocalCache();
 
         mApp = (BrowserForSkyDriveApplication) getApplication();
@@ -78,7 +80,7 @@ public class SignInActivity extends Activity
                         @Override
                         public void onAuthError(LiveAuthException exception, Object userState)
                         {
-                            Log.e(Constants.LOGTAG, exception.getMessage());
+                            Log.e(Constants.LOGTAG, "Error: " + exception.getMessage());
                         }
                     });
                 } catch (IllegalStateException e)
@@ -97,9 +99,7 @@ public class SignInActivity extends Activity
     protected void onStart()
     {
         super.onStart();
-        mInitializeDialog = new ProgressDialog(this);
-        mInitializeDialog.setMessage(getString(R.string.initializingMessage));
-        mInitializeDialog.show();
+        setSupportProgressBarIndeterminateVisibility(true);
 
         try
         {
@@ -109,21 +109,7 @@ public class SignInActivity extends Activity
                 @Override
                 public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState)
                 {
-                    try{
-                        mInitializeDialog.dismiss();
-                    }catch (NullPointerException e)
-                    {
-                       /*
-                       At this point the view has most likely been recreated, and as such the mInitializeDialog
-                       here is no longer available for dismissal.
-
-                       Seeing as the authorization process is restarted on recreation, we just return and let this
-                       thread die and be handled by the collector.
-                       Same goes for onAuthError.
-                        */
-                        Log.e(Constants.LOGTAG, "Orientation change during sign-in");
-                        return;
-                    }
+                    setSupportProgressBarIndeterminateVisibility(false);
                     if (status == LiveStatus.CONNECTED)
                     {
                         startBrowserActivity(session);
@@ -138,14 +124,8 @@ public class SignInActivity extends Activity
                 @Override
                 public void onAuthError(LiveAuthException exception, Object userState)
                 {
-                    try{
-                        mInitializeDialog.dismiss();
-                    }catch (NullPointerException e)
-                    {
-                        Log.e(Constants.LOGTAG, "Orientation change during sign-in");
-                        return;
-                    }
-                    Log.e(Constants.LOGTAG, exception.getMessage());
+                    setSupportProgressBarIndeterminateVisibility(false);
+                    Log.e(Constants.LOGTAG, "Error: " + exception.getMessage());
                 }
             });
         } catch (IllegalStateException e)
@@ -306,10 +286,8 @@ public class SignInActivity extends Activity
                     finish();
                 }
             }
-            if (mInitializeDialog != null)
-            {
-                mInitializeDialog.dismiss();
-            }
+
+            setSupportProgressBarIndeterminateVisibility(false);
 
             return super.onKeyDown(keyCode, event);
         }

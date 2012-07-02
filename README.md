@@ -21,6 +21,7 @@ Changelog
 - Uploads where the file exists already now updates the file stored on SkyDrive. Download, edit and upload finally works!
 - Folders can now be downloaded
 - Users on Android 3.0 and higher will have a slight performance increase
+- Removed initial progress dialog, replaced with spinner in actionbar
 
 
 2.2

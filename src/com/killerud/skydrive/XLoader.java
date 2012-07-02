@@ -23,14 +23,14 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * User: William
  * Date: 09.05.12
  * Time: 17:26
  */
-public class XLoader
-{
+public class XLoader {
 
     private NotificationManager mNotificationManager;
     private Notification mNotificationProgress;
@@ -48,15 +48,12 @@ public class XLoader
             "wav", "webp", "wmv"};
 
 
-    public XLoader(BrowserActivity browserActivity)
-    {
+    public XLoader(BrowserActivity browserActivity) {
         mContext = browserActivity;
-        try
-        {
+        try {
             mNotificationManager = (NotificationManager) mContext.getSystemService(Service.NOTIFICATION_SERVICE);
             mNotificationAvailable = true;
-        } catch (IllegalStateException e)
-        {
+        } catch (IllegalStateException e) {
             mNotificationAvailable = false;
         }
         mIOUtil = new IOUtil();
@@ -70,18 +67,25 @@ public class XLoader
      * @param localFilePaths  The paths to the local file to be uploaded
      * @param currentFolderId The current SkyDrive folder, the one we upload to
      */
-    public void uploadFile(final LiveConnectClient client, final ArrayList<String> localFilePaths, final String currentFolderId)
-    {
-        if (localFilePaths.size() <= 0)
-        {
-            try
-            {
+    public void uploadFile(final LiveConnectClient client, final ArrayList<String> localFilePaths, final String currentFolderId) {
+        if (localFilePaths.size() <= 0) {
+            try {
                 mContext.reloadFolder();
-            } catch (NullPointerException e)
-            {
+            } catch (NullPointerException e) {
                 /* No longer have a valid context, so cannot reload... */
             }
             return;
+        }
+        if (localFilePaths.size() > 99) {
+            for (int i = localFilePaths.size() - 1; i > 99; i--) {
+                localFilePaths.remove(i);
+            }
+
+            try {
+                Toast.makeText(mContext, R.string.errorTooManyFilesAtOnce, Toast.LENGTH_SHORT).show();
+            } catch (NullPointerException e) {
+
+            }
         }
 
         String localFilePath = localFilePaths.get(localFilePaths.size() - 1);
@@ -89,16 +93,13 @@ public class XLoader
 
         String fileExtension = file.getName().substring(file.getName().lastIndexOf(".") + 1);
         boolean supported = false;
-        for (int i = 0; i < mSupportedFileTypes.length; i++)
-        {
-            if (fileExtension.equals(mSupportedFileTypes[i]))
-            {
+        for (int i = 0; i < mSupportedFileTypes.length; i++) {
+            if (fileExtension.equals(mSupportedFileTypes[i])) {
                 supported = true;
             }
         }
 
-        if (!supported)
-        {
+        if (!supported) {
             fileNotSupportedBySkyDriveNotification(file);
             localFilePaths.remove(localFilePaths.size() - 1);
             localFilePaths.trimToSize();
@@ -106,8 +107,7 @@ public class XLoader
             return;
         }
 
-        if (!file.exists())
-        {
+        if (!file.exists()) {
             localFilePaths.remove(localFilePaths.size() - 1);
             localFilePaths.trimToSize();
             uploadFile(client, localFilePaths, currentFolderId);
@@ -116,138 +116,79 @@ public class XLoader
 
         createProgressNotification(file.getName(), false);
 
-        final LiveOperation operation =
-                client.uploadAsync(currentFolderId,
-                        file.getName(),
-                        file, true,
-                        new LiveUploadOperationListener()
-                        {
-                            int lastPercent = 0;
+        try {
+            final LiveOperation operation =
+                    client.uploadAsync(currentFolderId,
+                            file.getName(),
+                            file, true,
+                            new LiveUploadOperationListener() {
+                                int lastPercent = 0;
 
-                            @Override
-                            public void onUploadProgress(int totalBytes,
-                                                         int bytesRemaining,
-                                                         LiveOperation operation)
-                            {
-                                int newPercent = computePercentCompleted(totalBytes, bytesRemaining);
-                                /* This is done to limit the amount of updates to the notification
-                                 * Restrictionles updating makes the system crash, so beware!
-                                 */
-                                if (newPercent > lastPercent + 5 && mNotificationAvailable)
-                                {
-                                    lastPercent = newPercent;
-                                    mNotificationProgress.contentView.setProgressBar(R.id.progressBar, 100,
-                                            lastPercent, false);
-                                    mNotificationManager.notify(NOTIFICATION_PROGRESS_ID, mNotificationProgress);
-                                }
-                            }
-
-                            @Override
-                            public void onUploadFailed(LiveOperationException exception,
-                                                       LiveOperation operation)
-                            {
-                                if (mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
-                                try
-                                {
-                                    Toast.makeText(mContext, mContext.getString(R.string.uploadError), Toast.LENGTH_SHORT).show();
-                                } catch (NullPointerException e)
-                                {
-                                    /* No longer have a valid context, so cannot toast... */
+                                @Override
+                                public void onUploadProgress(int totalBytes,
+                                                             int bytesRemaining,
+                                                             LiveOperation operation) {
+                                    int newPercent = computePercentCompleted(totalBytes, bytesRemaining);
+                                    /* This is done to limit the amount of updates to the notification
+                                    * Restrictionles updating makes the system crash, so beware!
+                                    */
+                                    if (newPercent > lastPercent + 5 && mNotificationAvailable) {
+                                        lastPercent = newPercent;
+                                        mNotificationProgress.contentView.setProgressBar(R.id.progressBar, 100,
+                                                lastPercent, false);
+                                        mNotificationManager.notify(NOTIFICATION_PROGRESS_ID, mNotificationProgress);
+                                    }
                                 }
 
-                                localFilePaths.remove(localFilePaths.size() - 1);
-                                localFilePaths.trimToSize();
-                                uploadFile(client, localFilePaths, currentFolderId);
-                            }
-
-                            @Override
-                            public void onUploadCompleted(LiveOperation operation)
-                            {
-                                if (mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
-                                JSONObject result = operation.getResult();
-                                if (result.has(JsonKeys.ERROR))
-                                {
-                                    JSONObject error = result.optJSONObject(JsonKeys.ERROR);
-                                    String message = error.optString(JsonKeys.MESSAGE);
-                                    String code = error.optString(JsonKeys.CODE);
-                                    try
-                                    {
-                                        Toast.makeText(mContext,
-                                                mContext.getString(R.string.uploadError), Toast.LENGTH_SHORT).show();
-                                    } catch (NullPointerException e)
-                                    {
+                                @Override
+                                public void onUploadFailed(LiveOperationException exception,
+                                                           LiveOperation operation) {
+                                    if (mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
+                                    try {
+                                        Toast.makeText(mContext, mContext.getString(R.string.uploadError), Toast.LENGTH_SHORT).show();
+                                    } catch (NullPointerException e) {
                                         /* No longer have a valid context, so cannot toast... */
                                     }
-                                    return;
+
+                                    try {
+                                        localFilePaths.remove(localFilePaths.size() - 1);
+                                        localFilePaths.trimToSize();
+                                        uploadFile(client, localFilePaths, currentFolderId);
+                                    } catch (IndexOutOfBoundsException e) {
+                                        return;
+                                    }
                                 }
-                                showFileXloadedNotification(file, false);
-                                localFilePaths.remove(localFilePaths.size() - 1);
-                                localFilePaths.trimToSize();
-                                uploadFile(client, localFilePaths, currentFolderId);
-                            }
-                        });
+
+                                @Override
+                                public void onUploadCompleted(LiveOperation operation) {
+                                    if (mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
+                                    JSONObject result = operation.getResult();
+                                    if (result.has(JsonKeys.ERROR)) {
+                                        JSONObject error = result.optJSONObject(JsonKeys.ERROR);
+                                        String message = error.optString(JsonKeys.MESSAGE);
+                                        String code = error.optString(JsonKeys.CODE);
+                                        try {
+                                            Toast.makeText(mContext,
+                                                    mContext.getString(R.string.uploadError), Toast.LENGTH_SHORT).show();
+                                        } catch (NullPointerException e) {
+                                            /* No longer have a valid context, so cannot toast... */
+                                        }
+                                        return;
+                                    }
+                                    showFileXloadedNotification(file, false);
+                                    try {
+                                        localFilePaths.remove(localFilePaths.size() - 1);
+                                        localFilePaths.trimToSize();
+                                        uploadFile(client, localFilePaths, currentFolderId);
+                                    } catch (IndexOutOfBoundsException e) {
+                                        return;
+                                    }
+                                }
+                            });
+        } catch (IllegalStateException e) {
+            handleIllegalConnectionState();
+        }
     }
-
-
-    /**
-     * A user might not want to download and save a file when clicking it, so cache it locally instead.
-     * Actual downloading is performed either in-dialog or with select -> download.
-     *
-     * @param client
-     * @param fileId
-     */
-    public void cacheFile(final LiveConnectClient client, SkyDriveObject fileId)
-    {
-        createProgressNotification(fileId.getName(), true);
-
-        final File fileToCreateLocally = checkForFileDuplicateAndCreateCopy(
-                new File(Environment.getExternalStorageDirectory() + "/Android/data/com.killerud.skydrive/cache/" + fileId.getName()));
-        final LiveDownloadOperation operation =
-                client.downloadAsync(fileId.getId() + "/content",
-                        fileToCreateLocally,
-                        new LiveDownloadOperationListener()
-                        {
-                            int lastPercent = 0;
-
-                            @Override
-                            public void onDownloadProgress(int totalBytes,
-                                                           int bytesRemaining,
-                                                           LiveDownloadOperation operation)
-                            {
-                                int newPercent = computePercentCompleted(totalBytes, bytesRemaining);
-                                if (newPercent > lastPercent + 5 && mNotificationAvailable)
-                                {
-                                    lastPercent = newPercent;
-                                    mNotificationProgress.contentView.setProgressBar(R.id.progressBar, 100,
-                                            lastPercent, false);
-                                    mNotificationManager.notify(NOTIFICATION_PROGRESS_ID, mNotificationProgress);
-                                }
-                            }
-
-                            @Override
-                            public void onDownloadFailed(LiveOperationException exception,
-                                                         LiveDownloadOperation operation)
-                            {
-                                if (mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
-                                Log.e("ASE", exception.getMessage());
-                                try
-                                {
-                                    Toast.makeText(mContext, mContext.getString(R.string.downloadError),
-                                            Toast.LENGTH_SHORT).show();
-                                } catch (NullPointerException e)
-                                {
-                                    /* No longer have a valid context, so cannot toast... */
-                                }
-                            }
-
-                            @Override
-                            public void onDownloadCompleted(LiveDownloadOperation operation)
-                            {
-                                if (mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
-                            }
-                        });
-    }
-
 
     /**
      * Handles the downloading of a file from SkyDrive. Manages a notification with a progressbar.
@@ -256,23 +197,31 @@ public class XLoader
      * @param client  The LiveConnectClient for communicating with SkyDrive
      * @param fileIds The ID of the file we wish to download
      */
-    public void downloadFiles(final LiveConnectClient client, final ArrayList<SkyDriveObject> fileIds)
-    {
-        if (fileIds.size() <= 0)
-        {
-            try
-            {
+    public void downloadFiles(final LiveConnectClient client, final ArrayList<SkyDriveObject> fileIds) {
+        if (fileIds.size() <= 0) {
+            try {
                 mContext.reloadFolder();
-            } catch (NullPointerException e)
-            {
+            } catch (NullPointerException e) {
                 /* No longer have a valid context, so cannot toast... */
             }
             return;
         }
 
+        if (fileIds.size() > 99) {
+            for (int i = fileIds.size() - 1; i > 99; i--) {
+                fileIds.remove(i);
+            }
+
+            try {
+                Toast.makeText(mContext, R.string.errorTooManyFilesAtOnce, Toast.LENGTH_SHORT).show();
+            } catch (NullPointerException e) {
+
+            }
+        }
+
+
         final SkyDriveObject skyDriveFile = fileIds.get(fileIds.size() - 1);
-        if(skyDriveFile.getType().equals("folder"))
-        {
+        if (skyDriveFile.getType().equals("folder")) {
             addFolderFilesToDownloadList(client, fileIds, skyDriveFile);
             fileIds.remove(skyDriveFile);
         }
@@ -280,67 +229,72 @@ public class XLoader
         createProgressNotification(skyDriveFile.getName(), true);
 
         final File fileToCreateLocally = checkForFileDuplicateAndCreateCopy(
-                new File(skyDriveFile.getLocalDownloadLocation()  + skyDriveFile.getName()));
+                new File(skyDriveFile.getLocalDownloadLocation() + skyDriveFile.getName()));
 
-        final LiveDownloadOperation operation =
-                client.downloadAsync(skyDriveFile.getId() + "/content",
-                        fileToCreateLocally,
-                        new LiveDownloadOperationListener()
-                        {
-                            int lastPercent = 0;
+        try {
+            final LiveDownloadOperation operation =
+                    client.downloadAsync(skyDriveFile.getId() + "/content",
+                            fileToCreateLocally,
+                            new LiveDownloadOperationListener() {
+                                int lastPercent = 0;
 
-                            @Override
-                            public void onDownloadProgress(int totalBytes,
-                                                           int bytesRemaining,
-                                                           LiveDownloadOperation operation)
-                            {
-                                int newPercent = computePercentCompleted(totalBytes, bytesRemaining);
-                                if (newPercent > lastPercent + 5 && mNotificationAvailable)
-                                {
-                                    lastPercent = newPercent;
-                                    mNotificationProgress.contentView.setProgressBar(R.id.progressBar, 100,
-                                            lastPercent, false);
-                                    mNotificationManager.notify(NOTIFICATION_PROGRESS_ID, mNotificationProgress);
+                                @Override
+                                public void onDownloadProgress(int totalBytes,
+                                                               int bytesRemaining,
+                                                               LiveDownloadOperation operation) {
+                                    int newPercent = computePercentCompleted(totalBytes, bytesRemaining);
+                                    if (newPercent > lastPercent + 5 && mNotificationAvailable) {
+                                        lastPercent = newPercent;
+                                        mNotificationProgress.contentView.setProgressBar(R.id.progressBar, 100,
+                                                lastPercent, false);
+                                        mNotificationManager.notify(NOTIFICATION_PROGRESS_ID, mNotificationProgress);
+                                    }
                                 }
-                            }
 
-                            @Override
-                            public void onDownloadFailed(LiveOperationException exception,
-                                                         LiveDownloadOperation operation)
-                            {
-                                if (mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
+                                @Override
+                                public void onDownloadFailed(LiveOperationException exception,
+                                                             LiveDownloadOperation operation) {
+                                    if (mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
 
-                                Log.e("ASE", exception.getMessage());
-                                if(!skyDriveFile.getType().equals("folder"))
-                                {
-                                    try
-                                    {
-                                        Toast.makeText(mContext, mContext.getString(R.string.downloadError),
-                                                Toast.LENGTH_SHORT).show();
+                                    Log.e("ASE", exception.getMessage());
+                                    if (!skyDriveFile.getType().equals("folder")) {
+                                        try {
+                                            Toast.makeText(mContext, mContext.getString(R.string.downloadError),
+                                                    Toast.LENGTH_SHORT).show();
 
-                                    } catch (NullPointerException e)
-                                    {
-                                        /* No longer have a valid context, so cannot toast... */
+                                        } catch (NullPointerException e) {
+                                            /* No longer have a valid context, so cannot toast... */
+                                        }
+
+                                        try{
+                                            fileIds.remove(fileIds.size() - 1);
+                                        }catch (IndexOutOfBoundsException e)
+                                        {
+                                            return;
+                                        }
                                     }
 
-                                    fileIds.remove(fileIds.size() - 1);
+                                    fileIds.trimToSize();
+                                    downloadFiles(client, fileIds);
                                 }
 
-                                fileIds.trimToSize();
-                                downloadFiles(client, fileIds);
-                            }
+                                @Override
+                                public void onDownloadCompleted(LiveDownloadOperation operation) {
+                                    if (mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
+                                    showFileXloadedNotification(fileToCreateLocally, true);
 
-                            @Override
-                            public void onDownloadCompleted(LiveDownloadOperation operation)
-                            {
-                                if (mNotificationAvailable) mNotificationManager.cancel(NOTIFICATION_PROGRESS_ID);
-                                showFileXloadedNotification(fileToCreateLocally, true);
-
-                                fileIds.remove(fileIds.size() - 1);
-                                fileIds.trimToSize();
-                                downloadFiles(client, fileIds);
-                            }
-                        });
+                                    try {
+                                        fileIds.remove(fileIds.size() - 1);
+                                        fileIds.trimToSize();
+                                        downloadFiles(client, fileIds);
+                                    } catch (IndexOutOfBoundsException e) {
+                                        return;
+                                    }
+                                }
+                            });
+        } catch (IllegalStateException e) {
+            handleIllegalConnectionState();
+        }
     }
 
     private void addFolderFilesToDownloadList(final LiveConnectClient client, final ArrayList<SkyDriveObject> fileIds,
@@ -350,38 +304,37 @@ public class XLoader
         final File folder = new File(skyDriveFolder.getLocalDownloadLocation());
         folder.mkdirs();
 
-        client.getAsync(skyDriveFolder.getId() + "/files?sort_by=" +
-                SortCriteria.NAME + "&sort_order=" + SortCriteria.ASCENDING, new LiveOperationListener()
-        {
-            @Override
-            public void onComplete(LiveOperation operation)
-            {
-                JSONObject result = operation.getResult();
-                if (result.has(JsonKeys.ERROR))
-                {
-                    JSONObject error = result.optJSONObject(JsonKeys.ERROR);
-                    String message = error.optString(JsonKeys.MESSAGE);
-                    String code = error.optString(JsonKeys.CODE);
-                    Log.e("ASE", code + ": " + message);
-                    return;
+        try {
+            client.getAsync(skyDriveFolder.getId() + "/files?sort_by=" +
+                    SortCriteria.NAME + "&sort_order=" + SortCriteria.ASCENDING, new LiveOperationListener() {
+                @Override
+                public void onComplete(LiveOperation operation) {
+                    JSONObject result = operation.getResult();
+                    if (result.has(JsonKeys.ERROR)) {
+                        JSONObject error = result.optJSONObject(JsonKeys.ERROR);
+                        String message = error.optString(JsonKeys.MESSAGE);
+                        String code = error.optString(JsonKeys.CODE);
+                        Log.e("ASE", code + ": " + message);
+                        return;
+                    }
+
+                    JSONArray data = result.optJSONArray(JsonKeys.DATA);
+                    for (int i = 0; i < data.length(); i++) {
+                        SkyDriveObject skyDriveObj = SkyDriveObject.create(data.optJSONObject(i));
+                        skyDriveObj.setLocalDownloadLocation(folder.getPath());
+                        fileIds.add(skyDriveObj);
+                    }
+
                 }
 
-                JSONArray data = result.optJSONArray(JsonKeys.DATA);
-                for (int i = 0; i < data.length(); i++)
-                {
-                    SkyDriveObject skyDriveObj = SkyDriveObject.create(data.optJSONObject(i));
-                    skyDriveObj.setLocalDownloadLocation(folder.getPath());
-                    fileIds.add(skyDriveObj);
+                @Override
+                public void onError(LiveOperationException exception, LiveOperation operation) {
+                    Log.e("ASE", exception.getMessage());
                 }
-
-            }
-
-            @Override
-            public void onError(LiveOperationException exception, LiveOperation operation)
-            {
-                Log.e("ASE", exception.getMessage());
-            }
-        });
+            });
+        } catch (IllegalStateException e) {
+            handleIllegalConnectionState();
+        }
     }
 
     /**
@@ -390,48 +343,58 @@ public class XLoader
      * @param client
      * @param fileIds
      */
-    public void deleteFiles(final LiveConnectClient client, final ArrayList<SkyDriveObject> fileIds)
-    {
-        if (fileIds.size() <= 0)
-        {
-            try
-            {
+    public void deleteFiles(final LiveConnectClient client, final ArrayList<SkyDriveObject> fileIds) {
+        if (fileIds.size() <= 0) {
+            try {
                 mContext.reloadFolder();
                 Toast.makeText(mContext,
-                       mContext.getString(R.string.deletedFiles), Toast.LENGTH_SHORT).show();
-            } catch (NullPointerException e)
-            {
+                        mContext.getString(R.string.deletedFiles), Toast.LENGTH_SHORT).show();
+            } catch (NullPointerException e) {
                 /* No longer have a valid context, so cannot toast... */
             }
             return;
         }
+        if (fileIds.size() > 99) {
+            for (int i = fileIds.size() - 1; i > 99; i--) {
+                fileIds.remove(i);
+            }
+
+            try {
+                Toast.makeText(mContext, R.string.errorTooManyFilesAtOnce, Toast.LENGTH_SHORT).show();
+            } catch (NullPointerException e) {
+
+            }
+        }
 
         final String fileId = fileIds.get(fileIds.size() - 1).getId();
-        client.deleteAsync(fileId, new LiveOperationListener()
-        {
-            public void onError(LiveOperationException exception, LiveOperation operation)
-            {
-                try
-                {
-                    Toast.makeText(mContext,
-                            mContext.getString(R.string.errorDeletingFile), Toast.LENGTH_SHORT).show();
-                } catch (NullPointerException e)
-                {
-                    /* No longer have a valid context, so cannot toast... */
+        try {
+            client.deleteAsync(fileId, new LiveOperationListener() {
+                public void onError(LiveOperationException exception, LiveOperation operation) {
+                    try {
+                        Toast.makeText(mContext,
+                                mContext.getString(R.string.errorDeletingFile), Toast.LENGTH_SHORT).show();
+                    } catch (NullPointerException e) {
+                        /* No longer have a valid context, so cannot toast... */
+                    }
+                    Log.e("ASE", exception.getMessage());
+                    try {
+                        fileIds.remove(fileIds.size() - 1);
+                        fileIds.trimToSize();
+                        deleteFiles(client, fileIds);
+                    } catch (IndexOutOfBoundsException e) {
+                        return;
+                    }
                 }
-                Log.e("ASE", exception.getMessage());
-                fileIds.remove(fileIds.size() - 1);
-                fileIds.trimToSize();
-                deleteFiles(client, fileIds);
-            }
 
-            public void onComplete(LiveOperation operation)
-            {
-                fileIds.remove(fileIds.size() - 1);
-                fileIds.trimToSize();
-                deleteFiles(client, fileIds);
-            }
-        });
+                public void onComplete(LiveOperation operation) {
+                    fileIds.remove(fileIds.size() - 1);
+                    fileIds.trimToSize();
+                    deleteFiles(client, fileIds);
+                }
+            });
+        } catch (IllegalStateException e) {
+            handleIllegalConnectionState();
+        }
     }
 
     /**
@@ -444,98 +407,109 @@ public class XLoader
      */
     public void pasteFiles(final LiveConnectClient client,
                            final ArrayList<SkyDriveObject> fileIds,
-                           final String currentFolder, final boolean cutNotCopy)
-    {
+                           final String currentFolder, final boolean cutNotCopy) {
 
-        if (fileIds.size() <= 0)
-        {
-            try
-            {
+        if (fileIds.size() <= 0) {
+            try {
                 Toast.makeText(mContext,
-                        (cutNotCopy?mContext.getString(R.string.movedFiles):mContext.getString(R.string.copiedFiles)),
+                        (cutNotCopy ? mContext.getString(R.string.movedFiles) : mContext.getString(R.string.copiedFiles)),
                         Toast.LENGTH_SHORT).show();
                 mContext.reloadFolder();
-            } catch (NullPointerException e)
-            {
+            } catch (NullPointerException e) {
                 /* No longer have a valid context, so cannot toast... */
             }
             return;
         }
 
-        final String fileId = fileIds.get(fileIds.size() - 1).getId();
-        if (cutNotCopy)
-        {
-            client.moveAsync(fileId, currentFolder, new LiveOperationListener()
-            {
-                public void onError(LiveOperationException exception, LiveOperation operation)
-                {
-                    try
-                    {
-                        Toast.makeText(mContext,
-                                mContext.getString(R.string.errorMovingFile), Toast.LENGTH_SHORT).show();
-                    } catch (NullPointerException e)
-                    {
-                        /* No longer have a valid context, so cannot toast... */
-                    }
-                    Log.e("ASE", exception.getMessage());
-                    fileIds.remove(fileIds.size() - 1);
-                    fileIds.trimToSize();
-                    pasteFiles(client, fileIds, currentFolder, cutNotCopy);
-                }
+        if (fileIds.size() > 99) {
+            for (int i = fileIds.size() - 1; i > 99; i--) {
+                fileIds.remove(i);
+            }
 
-                public void onComplete(LiveOperation operation)
-                {
-                    fileIds.remove(fileIds.size() - 1);
-                    fileIds.trimToSize();
-                    pasteFiles(client, fileIds, currentFolder, cutNotCopy);
-                }
-            });
+            try {
+                Toast.makeText(mContext, R.string.errorTooManyFilesAtOnce, Toast.LENGTH_SHORT).show();
+            } catch (NullPointerException e) {
+
+            }
         }
-        else
-        {
-            client.copyAsync(fileId, currentFolder, new LiveOperationListener()
-            {
-                public void onError(LiveOperationException exception, LiveOperation operation)
-                {
-                    try
-                    {
-                        Toast.makeText(mContext,
-                                mContext.getString(R.string.errorCopyingFile), Toast.LENGTH_SHORT).show();
-                    } catch (NullPointerException e)
-                    {
-                        /* No longer have a valid context, so cannot toast... */
-                    }
-                    Log.e("ASE", exception.getMessage());
-                    fileIds.remove(fileIds.size() - 1);
-                    fileIds.trimToSize();
-                    pasteFiles(client, fileIds, currentFolder, cutNotCopy);
-                }
 
-                public void onComplete(LiveOperation operation)
-                {
-                    try
-                    {
-                        fileIds.remove(fileIds.size() - 1);
-                        fileIds.trimToSize();
-                        pasteFiles(client, fileIds, currentFolder, cutNotCopy);
-                    } catch (IndexOutOfBoundsException e)
-                    {
-                        try
-                        {
+        final String fileId = fileIds.get(fileIds.size() - 1).getId();
+        if (cutNotCopy) {
+            try {
+                client.moveAsync(fileId, currentFolder, new LiveOperationListener() {
+                    public void onError(LiveOperationException exception, LiveOperation operation) {
+                        try {
                             Toast.makeText(mContext,
-                                    (cutNotCopy?mContext.getString(R.string.errorMovingFile):mContext.getString(R.string.errorCopyingFile)),
-                                    Toast.LENGTH_SHORT).show();
-                            mContext.reloadFolder();
-                        } catch (NullPointerException f)
-                        {
+                                    mContext.getString(R.string.errorMovingFile), Toast.LENGTH_SHORT).show();
+                        } catch (NullPointerException e) {
                             /* No longer have a valid context, so cannot toast... */
                         }
-
-                        return;
+                        Log.e("ASE", exception.getMessage());
+                        try {
+                            fileIds.remove(fileIds.size() - 1);
+                            fileIds.trimToSize();
+                            pasteFiles(client, fileIds, currentFolder, cutNotCopy);
+                        } catch (IndexOutOfBoundsException e) {
+                            return;
+                        }
                     }
 
-                }
-            });
+                    public void onComplete(LiveOperation operation) {
+                        try {
+                            fileIds.remove(fileIds.size() - 1);
+                            fileIds.trimToSize();
+                            pasteFiles(client, fileIds, currentFolder, cutNotCopy);
+                        } catch (IndexOutOfBoundsException e) {
+                            return;
+                        }
+                    }
+                });
+            } catch (IllegalStateException e) {
+                handleIllegalConnectionState();
+            }
+        } else {
+            try {
+                client.copyAsync(fileId, currentFolder, new LiveOperationListener() {
+                    public void onError(LiveOperationException exception, LiveOperation operation) {
+                        try {
+                            Toast.makeText(mContext,
+                                    mContext.getString(R.string.errorCopyingFile), Toast.LENGTH_SHORT).show();
+                        } catch (NullPointerException e) {
+                            /* No longer have a valid context, so cannot toast... */
+                        }
+                        Log.e("ASE", exception.getMessage());
+                        try {
+                            fileIds.remove(fileIds.size() - 1);
+                            fileIds.trimToSize();
+                            pasteFiles(client, fileIds, currentFolder, cutNotCopy);
+                        } catch (IndexOutOfBoundsException e) {
+                            return;
+                        }
+                    }
+
+                    public void onComplete(LiveOperation operation) {
+                        try {
+                            fileIds.remove(fileIds.size() - 1);
+                            fileIds.trimToSize();
+                            pasteFiles(client, fileIds, currentFolder, cutNotCopy);
+                        } catch (IndexOutOfBoundsException e) {
+                            try {
+                                Toast.makeText(mContext,
+                                        (cutNotCopy ? mContext.getString(R.string.errorMovingFile) : mContext.getString(R.string.errorCopyingFile)),
+                                        Toast.LENGTH_SHORT).show();
+                                mContext.reloadFolder();
+                            } catch (NullPointerException f) {
+                                /* No longer have a valid context, so cannot toast... */
+                            }
+
+                            return;
+                        }
+
+                    }
+                });
+            } catch (IllegalStateException e) {
+                handleIllegalConnectionState();
+            }
         }
     }
 
@@ -551,77 +525,89 @@ public class XLoader
      */
     public void renameFiles(final LiveConnectClient client, final ArrayList<String> fileIds,
                             final ArrayList<String> fileNames,
-                            final String baseName, final String baseDescription)
-    {
-        if (fileIds.size() <= 0)
-        {
-            try
-            {
+                            final String baseName, final String baseDescription) {
+        if (fileIds.size() <= 0) {
+            try {
                 mContext.setSupportProgressBarIndeterminateVisibility(false);
                 Toast.makeText(mContext, mContext.getString(R.string.renamedFiles), Toast.LENGTH_SHORT).show();
                 mContext.reloadFolder();
-            } catch (NullPointerException e)
-            {
+            } catch (NullPointerException e) {
                 /* No longer have a valid context, so cannot toast... */
             }
             return;
         }
 
+        if (fileIds.size() > 99) {
+            for (int i = fileIds.size() - 1; i > 99; i--) {
+                fileIds.remove(i);
+            }
 
-        final LiveOperationListener operationListener = new LiveOperationListener()
-        {
+            try {
+                Toast.makeText(mContext, R.string.errorTooManyFilesAtOnce, Toast.LENGTH_SHORT).show();
+            } catch (NullPointerException e) {
+
+            }
+        }
+
+
+        final LiveOperationListener operationListener = new LiveOperationListener() {
             @Override
-            public void onComplete(LiveOperation operation)
-            {
-                fileIds.remove(fileIds.size() - 1);
-                fileIds.trimToSize();
-                fileNames.remove(fileNames.size() - 1);
-                fileNames.trimToSize();
-                renameFiles(client, fileIds, fileNames, baseName, baseDescription);
-                Log.i("ASE", "File updated " + operation.getRawResult());
+            public void onComplete(LiveOperation operation) {
+                try {
+                    fileIds.remove(fileIds.size() - 1);
+                    fileIds.trimToSize();
+                    fileNames.remove(fileNames.size() - 1);
+                    fileNames.trimToSize();
+                    renameFiles(client, fileIds, fileNames, baseName, baseDescription);
+                    Log.i("ASE", "File updated " + operation.getRawResult());
+                } catch (IndexOutOfBoundsException e) {
+                    return;
+                }
             }
 
             @Override
-            public void onError(LiveOperationException exception, LiveOperation operation)
-            {
+            public void onError(LiveOperationException exception, LiveOperation operation) {
                 Log.e("ASE", exception.getMessage());
-                fileIds.remove(fileIds.size() - 1);
-                fileIds.trimToSize();
-                fileNames.remove(fileNames.size() - 1);
-                fileNames.trimToSize();
-                renameFiles(client, fileIds, fileNames, baseName, baseDescription);
-                try{
-                    Toast.makeText(mContext, mContext.getString(R.string.errorRenamingFile), Toast.LENGTH_SHORT).show();
-                } catch (NullPointerException e)
-                {
-                    /* No longer have a valid context, so cannot toast... */
+                try {
+                    fileIds.remove(fileIds.size() - 1);
+                    fileIds.trimToSize();
+                    fileNames.remove(fileNames.size() - 1);
+                    fileNames.trimToSize();
+                    renameFiles(client, fileIds, fileNames, baseName, baseDescription);
+                    try {
+                        Toast.makeText(mContext, mContext.getString(R.string.errorRenamingFile), Toast.LENGTH_SHORT).show();
+                    } catch (NullPointerException e) {
+                        /* No longer have a valid context, so cannot toast... */
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    return;
                 }
             }
         };
 
 
         String fileId = fileIds.get(fileIds.size() - 1);
-        try
-        {
+        try {
             JSONObject body = new JSONObject();
             String extension = "";
             String fileName = fileNames.get(fileNames.size() - 1);
             int index = fileName.lastIndexOf(".");
             /* If a file extension exists (not a folder) */
-            if (index != -1)
-            {
+            if (index != -1) {
                 extension = fileName.substring(index, fileName.length());
             }
             /* Give name with added file extension, if any */
             body.put("name", baseName + (fileIds.size() - 1 > 0 ? " " + (fileIds.size() - 1) : "") + extension);
             body.put("description", baseDescription + (fileIds.size() - 1 > 0 ? " " + (fileIds.size() - 1) : ""));
-            client.putAsync(fileId, body, operationListener);
-        } catch (JSONException e)
-        {
-            try{
+            try {
+                client.putAsync(fileId, body, operationListener);
+            } catch (IllegalStateException e) {
+                handleIllegalConnectionState();
+            }
+        } catch (JSONException e) {
+            try {
                 Toast.makeText(mContext, mContext.getString(R.string.errorRenamingFile), Toast.LENGTH_SHORT).show();
-            } catch (NullPointerException f)
-            {
+            } catch (NullPointerException f) {
                 /* No longer have a valid context, so cannot toast... */
             }
         }
@@ -634,10 +620,9 @@ public class XLoader
      * @param fileName
      * @param downloading Whether or not we are downloading. Determines text output.
      */
-    private void createProgressNotification(String fileName, boolean downloading)
-    {
+    private void createProgressNotification(String fileName, boolean downloading) {
         if (!mNotificationAvailable) return;
-        if(mContext == null) return;
+        if (mContext == null) return;
 
         mNotificationProgress = new Notification(R.drawable.notification_icon,
                 (downloading ? mContext.getString(R.string.downloading) : mContext.getString(R.string.uploading)) + " "
@@ -655,12 +640,9 @@ public class XLoader
         notificationView.setProgressBar(R.id.progressBar, 100, 0, false);
 
         Intent cancelOperation = new Intent(mContext, BrowserActivity.class);
-        if (downloading)
-        {
+        if (downloading) {
             cancelOperation.setAction(Constants.ACTION_CANCEL_DOWN);
-        }
-        else
-        {
+        } else {
             cancelOperation.setAction(Constants.ACTION_CANCEL_UP);
         }
 
@@ -672,8 +654,7 @@ public class XLoader
     }
 
 
-    private int computePercentCompleted(int totalBytes, int bytesRemaining)
-    {
+    private int computePercentCompleted(int totalBytes, int bytesRemaining) {
         return (int) (((float) (totalBytes - bytesRemaining)) / totalBytes * 100);
     }
 
@@ -684,36 +665,44 @@ public class XLoader
      * @param file The file to check for duplicates
      * @return The reference to the file with its available file name
      */
-    private File checkForFileDuplicateAndCreateCopy(File file)
-    {
-        if (!file.exists())
-        {
+    private File checkForFileDuplicateAndCreateCopy(File file) {
+        if (!file.exists()) {
             return file;
         }
         int index = file.getName().lastIndexOf(".");
         String extension = "";
         String fileName = file.getName();
-        if (index != -1)
-        {
+        if (index != -1) {
             extension = file.getName().substring(index, fileName.length());
             fileName = fileName.substring(0, index);
         }
         int copyNr = 1;
-        File result = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/" +
-                fileName + mContext.getString(R.string.savedFileCopy) + copyNr + extension);
+        File result;
+        try
+        {
+            result = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/" +
+                fileName + " " + mContext.getString(R.string.savedFileCopy) + " " + copyNr + extension);
+        }catch (NullPointerException e)
+        {
+            result = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/" +
+                    fileName + " Copy " + copyNr + extension);
+        }
         boolean availableFileNameFound = false;
 
-        while (availableFileNameFound)
-        {
-            if (result.exists())
-            {
+        while (availableFileNameFound) {
+            if (result.exists()) {
                 copyNr++;
-                result = new File(file.getName().substring(0, index) +
+                try
+                {
+                    result = new File(file.getName().substring(0, index) + " " +
                         mContext.getString(R.string.savedFileCopy) +
-                        copyNr + file.getName().substring(index, file.getName().length()));
-            }
-            else
-            {
+                        " " + copyNr + file.getName().substring(index, file.getName().length()));
+                }catch (NullPointerException e)
+                {
+                    result = new File(file.getName().substring(0, index) +
+                            " Copy " + copyNr +file.getName().substring(index, file.getName().length()));
+                }
+            } else {
                 availableFileNameFound = true;
             }
         }
@@ -728,10 +717,9 @@ public class XLoader
      * @param file     The file to be displayed
      * @param download Whether or not this is a download notification
      */
-    public void showFileXloadedNotification(File file, boolean download)
-    {
+    public void showFileXloadedNotification(File file, boolean download) {
         if (!mNotificationAvailable) return;
-        if(mContext == null) return;
+        if (mContext == null) return;
 
         int icon = R.drawable.notification_icon;
         CharSequence tickerText = file.getName() + " " + mContext.getString(R.string.saved) + " "
@@ -748,15 +736,12 @@ public class XLoader
 
         Intent notificationIntent;
 
-        if (download)
-        {
+        if (download) {
             Uri path = Uri.fromFile(file);
             notificationIntent = new Intent(Intent.ACTION_VIEW);
             notificationIntent.setDataAndType(path, mIOUtil.findMimeTypeOfFile(file));
             notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        }
-        else
-        {
+        } else {
             notificationIntent = new Intent(context, XLoader.class);
         }
 
@@ -773,10 +758,9 @@ public class XLoader
      *
      * @param file
      */
-    private void fileNotSupportedBySkyDriveNotification(File file)
-    {
+    private void fileNotSupportedBySkyDriveNotification(File file) {
         if (mNotificationAvailable) return;
-        if(mContext == null) return;
+        if (mContext == null) return;
 
         int icon = R.drawable.notification_icon;
         CharSequence tickerText = file.getName() + mContext.getString(R.string.thirdPartyError);
@@ -793,6 +777,35 @@ public class XLoader
         notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
 
         mNotificationManager.notify(NOTIFICATION_XLOADED_ID, notification);
+    }
+
+    private void handleIllegalConnectionState() {
+        if (mContext == null) return;
+
+        ((BrowserForSkyDriveApplication) mContext.getApplication())
+                .getAuthClient()
+                .initialize(Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener() {
+                    @Override
+                    public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState) {
+                        if (status == LiveStatus.CONNECTED) {
+                            mContext.reloadFolder();
+                        } else {
+                            informUserOfConnectionProblemAndDismiss();
+                        }
+                    }
+
+                    @Override
+                    public void onAuthError(LiveAuthException exception, Object userState) {
+                        Log.e(Constants.LOGTAG, "Error: " + exception.getMessage());
+                        informUserOfConnectionProblemAndDismiss();
+                    }
+                });
+    }
+
+    private void informUserOfConnectionProblemAndDismiss() {
+        Toast.makeText(mContext, R.string.errorLoggedOut, Toast.LENGTH_LONG).show();
+        mContext.startActivity(new Intent(mContext, SignInActivity.class));
+        mContext.finish();
     }
 
 }

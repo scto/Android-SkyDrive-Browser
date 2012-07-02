@@ -48,7 +48,14 @@ public class PlayAudioDialog extends SherlockActivity
         final LiveConnectClient client = app.getConnectClient();
 
         setContentView(R.layout.music_dialog);
-        setTitle(audio.getName());
+
+        try
+        {
+            setTitle(audio.getName());
+        }catch (NullPointerException e)
+        {
+            setTitle(R.string.play);
+        }
 
         final LinearLayout layout = (LinearLayout) findViewById(R.id.audioLayout);
         final LinearLayout buttonLayout = (LinearLayout) layout.findViewById(R.id.audioButtonLayout);
@@ -64,6 +71,8 @@ public class PlayAudioDialog extends SherlockActivity
             @Override
             public void onClick(View view)
             {
+                if(mPlayer == null) return;
+
                 if (mPlayer.isPlaying())
                 {
                     mPlayer.pause();

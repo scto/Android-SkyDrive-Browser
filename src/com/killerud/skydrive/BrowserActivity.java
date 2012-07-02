@@ -38,10 +38,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 
 /**
@@ -206,6 +203,7 @@ public class BrowserActivity extends SherlockListActivity
                 if (mActionMode != null)
                 {
                     boolean rowIsChecked = mSkyDriveListAdapter.isSelected(position);
+                    if(position >= mSkyDriveListAdapter.getCount()) return;
                     if (rowIsChecked)
                     {
                         mCurrentlySelectedFiles.remove(
@@ -470,22 +468,27 @@ public class BrowserActivity extends SherlockListActivity
         {
             Map<String, String> folder = new HashMap<String, String>();
             folder.put(JsonKeys.NAME, "me/skydrive/camera_roll");
-            mClient.postAsync(mCurrentFolderId,
-                    new JSONObject(folder),
-                    new LiveOperationListener()
-                    {
-                        @Override
-                        public void onError(LiveOperationException exception, LiveOperation operation)
+            try{
+                mClient.postAsync(mCurrentFolderId,
+                        new JSONObject(folder),
+                        new LiveOperationListener()
                         {
-                            Log.e(Constants.LOGTAG, exception.getMessage());
-                        }
+                            @Override
+                            public void onError(LiveOperationException exception, LiveOperation operation)
+                            {
+                                Log.e(Constants.LOGTAG, exception.getMessage());
+                            }
 
-                        @Override
-                        public void onComplete(LiveOperation operation)
-                        {
-                            ((BrowserForSkyDriveApplication) getApplication()).getCurrentBrowser().reloadFolder();
-                        }
-                    });
+                            @Override
+                            public void onComplete(LiveOperation operation)
+                            {
+                                ((BrowserForSkyDriveApplication) getApplication()).getCurrentBrowser().reloadFolder();
+                            }
+                        });
+            }catch (IllegalStateException e)
+            {
+                handleIllegalConnectionState();
+            }
 
             startService(new Intent(this, CameraImageAutoUploadService.class));
         }
@@ -493,6 +496,34 @@ public class BrowserActivity extends SherlockListActivity
         {
             stopService(new Intent(this, CameraImageAutoUploadService.class));
         }
+    }
+
+    private void handleIllegalConnectionState() {
+        ((BrowserForSkyDriveApplication) getApplication())
+                .getAuthClient()
+                .initialize(Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener() {
+                    @Override
+                    public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState) {
+                        if (status == LiveStatus.CONNECTED) {
+                            reloadFolder();
+                        }else
+                        {
+                            informUserOfConnectionProblemAndDismiss();
+                        }
+                    }
+
+                    @Override
+                    public void onAuthError(LiveAuthException exception, Object userState) {
+                        Log.e(Constants.LOGTAG, "Error: " + exception.getMessage());
+                        informUserOfConnectionProblemAndDismiss();
+                    }
+                });
+    }
+
+    private void informUserOfConnectionProblemAndDismiss() {
+        Toast.makeText(this, R.string.errorLoggedOut, Toast.LENGTH_LONG).show();
+        startActivity(new Intent(this, SignInActivity.class));
+        finish();
     }
 
 
@@ -624,53 +655,61 @@ public class BrowserActivity extends SherlockListActivity
             ((SkyDriveListAdapter) getListAdapter()).clearChecked();
         }
 
-        if (mClient != null) mClient.getAsync(folderId + "/files?sort_by=" +
-                SortCriteria.NAME + "&sort_order=" + SortCriteria.ASCENDING, new LiveOperationListener()
+        try
         {
-            @Override
-            public void onComplete(LiveOperation operation)
+            if (mClient != null) mClient.getAsync(folderId + "/files?sort_by=" +
+                    SortCriteria.NAME + "&sort_order=" + SortCriteria.ASCENDING, new LiveOperationListener()
             {
-                setSupportProgressBarIndeterminateVisibility(false);
-
-                JSONObject result = operation.getResult();
-                if (result.has(JsonKeys.ERROR))
+                @Override
+                public void onComplete(LiveOperation operation)
                 {
-                    JSONObject error = result.optJSONObject(JsonKeys.ERROR);
-                    String message = error.optString(JsonKeys.MESSAGE);
-                    String code = error.optString(JsonKeys.CODE);
-                    Log.e("ASE", code + ": " + message);
-                    return;
+                    setSupportProgressBarIndeterminateVisibility(false);
+
+                    JSONObject result = operation.getResult();
+                    if (result.has(JsonKeys.ERROR))
+                    {
+                        JSONObject error = result.optJSONObject(JsonKeys.ERROR);
+                        String message = error.optString(JsonKeys.MESSAGE);
+                        String code = error.optString(JsonKeys.CODE);
+                        Log.e("ASE", code + ": " + message);
+                        return;
+                    }
+
+                    ArrayList<SkyDriveObject> skyDriveObjs = mSkyDriveListAdapter.getSkyDriveObjects();
+                    skyDriveObjs.clear();
+
+                    JSONArray data = result.optJSONArray(JsonKeys.DATA);
+                    for (int i = 0; i < data.length(); i++)
+                    {
+                        SkyDriveObject skyDriveObj = SkyDriveObject.create(data.optJSONObject(i));
+                        skyDriveObjs.add(skyDriveObj);
+                    }
+
+                    mSkyDriveListAdapter.notifyDataSetChanged();
+
+                    SparseBooleanArray checkedPositions = mSkyDriveListAdapter.getCheckedPositions();
+                    for (int i = 0; i < checkedPositions.size(); i++)
+                    {
+                        int adapterPosition = checkedPositions.keyAt(i);
+                        if(adapterPosition >= mSkyDriveListAdapter.getCount()) continue;
+
+                        SkyDriveObject objectSelected = mSkyDriveListAdapter.getItem(adapterPosition);
+                        mCurrentlySelectedFiles.add(objectSelected);
+                    }
                 }
 
-                ArrayList<SkyDriveObject> skyDriveObjs = mSkyDriveListAdapter.getSkyDriveObjects();
-                skyDriveObjs.clear();
 
-                JSONArray data = result.optJSONArray(JsonKeys.DATA);
-                for (int i = 0; i < data.length(); i++)
+                @Override
+                public void onError(LiveOperationException exception, LiveOperation operation)
                 {
-                    SkyDriveObject skyDriveObj = SkyDriveObject.create(data.optJSONObject(i));
-                    skyDriveObjs.add(skyDriveObj);
+                    setSupportProgressBarIndeterminateVisibility(false);
+                    Log.e("ASE", exception.getMessage());
                 }
-
-                mSkyDriveListAdapter.notifyDataSetChanged();
-
-                SparseBooleanArray checkedPositions = mSkyDriveListAdapter.getCheckedPositions();
-                for (int i = 0; i < checkedPositions.size(); i++)
-                {
-                    int adapterPosition = checkedPositions.keyAt(i);
-                    SkyDriveObject objectSelected = mSkyDriveListAdapter.getItem(adapterPosition);
-                    mCurrentlySelectedFiles.add(objectSelected);
-                }
-            }
-
-
-            @Override
-            public void onError(LiveOperationException exception, LiveOperation operation)
-            {
-                setSupportProgressBarIndeterminateVisibility(false);
-                Log.e("ASE", exception.getMessage());
-            }
-        });
+            });
+        }catch (IllegalStateException e)
+        {
+            handleIllegalConnectionState();
+        }
     }
 
     private boolean connectionIsUnavailable()
@@ -776,7 +815,7 @@ public class BrowserActivity extends SherlockListActivity
                         setSupportProgressBarIndeterminateVisibility(false);
                         startActivity(new Intent(getApplicationContext(), SignInActivity.class));
                         finish();
-                        Log.e(Constants.LOGTAG, exception.getMessage());
+                        Log.e(Constants.LOGTAG, "Error: " + exception.getMessage());
                     }
                 });
                 return true;
@@ -861,6 +900,11 @@ public class BrowserActivity extends SherlockListActivity
         @Override
         public SkyDriveObject getItem(int position)
         {
+            if(position >= mSkyDriveObjs.size())
+            {
+                return null;
+            }
+
             return mSkyDriveObjs.get(position);
         }
 
@@ -962,148 +1006,154 @@ public class BrowserActivity extends SherlockListActivity
 
                     if (!setThumbnailFromCacheIfExists(view, photo))
                     {
-                        mClient.downloadAsync(photo.getId() + "/picture?type=thumbnail", new LiveDownloadOperationListener()
+                        try
                         {
-                            @Override
-                            public void onDownloadProgress(int totalBytes,
-                                                           int bytesRemaining,
-                                                           LiveDownloadOperation operation)
+                            mClient.downloadAsync(photo.getId() + "/picture?type=thumbnail", new LiveDownloadOperationListener()
                             {
-                            }
-
-                            @Override
-                            public void onDownloadFailed(LiveOperationException exception,
-                                                         LiveDownloadOperation operation)
-                            {
-                                Log.i(Constants.LOGTAG, "Thumb download failed for " + photo.getName()
-                                        + ". " + exception.getMessage());
-                                setIcon(R.drawable.image_x_generic);
-                            }
-
-                            @Override
-                            public void onDownloadCompleted(LiveDownloadOperation operation)
-                            {
-                                Log.i(Constants.LOGTAG, "Thumb loaded from web for image " + photo.getName());
-                                if (Build.VERSION.SDK_INT >= 11)
+                                @Override
+                                public void onDownloadProgress(int totalBytes,
+                                                               int bytesRemaining,
+                                                               LiveDownloadOperation operation)
                                 {
-                                    try
+                                }
+
+                                @Override
+                                public void onDownloadFailed(LiveOperationException exception,
+                                                             LiveDownloadOperation operation)
+                                {
+                                    Log.i(Constants.LOGTAG, "Thumb download failed for " + photo.getName()
+                                            + ". " + exception.getMessage());
+                                    setIcon(R.drawable.image_x_generic);
+                                }
+
+                                @Override
+                                public void onDownloadCompleted(LiveDownloadOperation operation)
+                                {
+                                    Log.i(Constants.LOGTAG, "Thumb loaded from web for image " + photo.getName());
+                                    if (Build.VERSION.SDK_INT >= 11)
                                     {
-                                        AsyncTask task = new AsyncTask<Object, Void, Bitmap>()
+                                        try
                                         {
-
-                                            @Override
-                                            protected Bitmap doInBackground(Object... inputStreams)
+                                            AsyncTask task = new AsyncTask<Object, Void, Bitmap>()
                                             {
-                                                Bitmap bm = null;
 
-                                                try
+                                                @Override
+                                                protected Bitmap doInBackground(Object... inputStreams)
                                                 {
-                                                    bm = BitmapFactory.decodeStream(
-                                                            ((LiveDownloadOperation) inputStreams[0]).getStream());
-                                                } catch (Exception e)
-                                                {
-                                                    Log.i(Constants.LOGTAG, "doInBackground failed for "
-                                                            + photo.getName() + ". " + e.getMessage());
+                                                    Bitmap bm = null;
+
+                                                    try
+                                                    {
+                                                        bm = BitmapFactory.decodeStream(
+                                                                ((LiveDownloadOperation) inputStreams[0]).getStream());
+                                                    } catch (Exception e)
+                                                    {
+                                                        Log.i(Constants.LOGTAG, "doInBackground failed for "
+                                                                + photo.getName() + ". " + e.getMessage());
+                                                    }
+
+                                                    return bm;
                                                 }
 
-                                                return bm;
-                                            }
-
-                                            protected void onPostExecute(Bitmap bm)
-                                            {
-                                                File cacheFolder = new File(Environment.getExternalStorageDirectory()
-                                                        + "/Android/data/com.killerud.skydrive/thumbs/");
-
-                                                if (!cacheFolder.exists())
+                                                protected void onPostExecute(Bitmap bm)
                                                 {
-                                                    cacheFolder.mkdirs();
-                                                    /*
-                                                    VERY important that this is mkdirS, not mkdir,
-                                                    or just the last folder will be created, which won't
-                                                    work with the other folders absent...
-                                                    */
+                                                    File cacheFolder = new File(Environment.getExternalStorageDirectory()
+                                                            + "/Android/data/com.killerud.skydrive/thumbs/");
+
+                                                    if (!cacheFolder.exists())
+                                                    {
+                                                        cacheFolder.mkdirs();
+                                                        /*
+                                                        VERY important that this is mkdirS, not mkdir,
+                                                        or just the last folder will be created, which won't
+                                                        work with the other folders absent...
+                                                        */
+                                                    }
+
+                                                    File thumb = new File(cacheFolder, photo.getName());
+                                                    OutputStream out;
+                                                    try
+                                                    {
+                                                        out = new BufferedOutputStream(new FileOutputStream(thumb));
+                                                        bm.compress(Bitmap.CompressFormat.PNG, 85, out);
+                                                        out.flush();
+                                                        out.close();
+                                                        Log.i(Constants.LOGTAG, "Thumb cached for image " + photo.getName());
+                                                    } catch (Exception e)
+                                                    {
+                                                        /* Couldn't save thumbnail. No biggie.
+                                                       * Exception here rather than IOException
+                                                       * doe to rare cases of crashes when activity
+                                                       * loses focus during load.
+                                                       * */
+                                                        Log.e(Constants.LOGTAG, "Could not cache thumbnail for " + photo.getName()
+                                                                + ". " + e.toString());
+                                                    }
+
+                                                    ImageView imgView = (ImageView) view.findViewById(R.id.skyDriveItemIcon);
+                                                    imgView.setImageBitmap(bm);
                                                 }
 
-                                                File thumb = new File(cacheFolder, photo.getName());
-                                                OutputStream out;
-                                                try
-                                                {
-                                                    out = new BufferedOutputStream(new FileOutputStream(thumb));
-                                                    bm.compress(Bitmap.CompressFormat.PNG, 85, out);
-                                                    out.flush();
-                                                    out.close();
-                                                    Log.i(Constants.LOGTAG, "Thumb cached for image " + photo.getName());
-                                                } catch (Exception e)
-                                                {
-                                                    /* Couldn't save thumbnail. No biggie.
-                                                   * Exception here rather than IOException
-                                                   * doe to rare cases of crashes when activity
-                                                   * loses focus during load.
-                                                   * */
-                                                    Log.e(Constants.LOGTAG, "Could not cache thumbnail for " + photo.getName()
-                                                            + ". " + e.toString());
-                                                }
+                                            };
 
-                                                ImageView imgView = (ImageView) view.findViewById(R.id.skyDriveItemIcon);
-                                                imgView.setImageBitmap(bm);
-                                            }
+                                            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, operation);
+                                        } catch (Exception e)
+                                        {
+                                            Log.i(Constants.LOGTAG, "OnDownloadCompleted failed for "
+                                                    + photo.getName() + ". " + e.getMessage());
 
-                                        };
+                                            setIcon(R.drawable.image_x_generic);
 
-                                        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, operation);
-                                    } catch (Exception e)
+                                        }
+
+                                    }
+                                    else
                                     {
-                                        Log.i(Constants.LOGTAG, "OnDownloadCompleted failed for "
-                                                + photo.getName() + ". " + e.getMessage());
+                                        Bitmap bm = BitmapFactory.decodeStream(operation.getStream());
 
-                                        setIcon(R.drawable.image_x_generic);
+                                        File cacheFolder = new File(Environment.getExternalStorageDirectory()
+                                                + "/Android/data/com.killerud.skydrive/thumbs/");
 
+                                        if (!cacheFolder.exists())
+                                        {
+                                            cacheFolder.mkdirs();
+                                            /*
+                                            VERY important that this is mkdirS, not mkdir,
+                                            or just the last folder will be created, which won't
+                                            work with the other folders absent...
+                                            */
+                                        }
+
+                                        File thumb = new File(cacheFolder, photo.getName());
+                                        try
+                                        {
+                                            FileOutputStream fileOut = new FileOutputStream(thumb);
+                                            bm.compress(Bitmap.CompressFormat.PNG, 85, fileOut);
+                                            fileOut.flush();
+                                            fileOut.close();
+                                            Log.i(Constants.LOGTAG, "Thumb cached for image " + photo.getName());
+                                        } catch (Exception e)
+                                        {
+                                            /* Couldn't save thumbnail. No biggie.
+                                           * Exception here rather than IOException
+                                           * doe to rare cases of crashes when activity
+                                           * loses focus during load.
+                                           * */
+                                            Log.e(Constants.LOGTAG, "Could not cache thumbnail for " + photo.getName()
+                                                    + ". " + e.getMessage());
+                                        }
+
+                                        ImageView imgView = (ImageView) view.findViewById(R.id.skyDriveItemIcon);
+                                        imgView.setImageBitmap(bm);
                                     }
 
                                 }
-                                else
-                                {
-                                    Bitmap bm = BitmapFactory.decodeStream(operation.getStream());
 
-                                    File cacheFolder = new File(Environment.getExternalStorageDirectory()
-                                            + "/Android/data/com.killerud.skydrive/thumbs/");
-
-                                    if (!cacheFolder.exists())
-                                    {
-                                        cacheFolder.mkdirs();
-                                        /*
-                                        VERY important that this is mkdirS, not mkdir,
-                                        or just the last folder will be created, which won't
-                                        work with the other folders absent...
-                                        */
-                                    }
-
-                                    File thumb = new File(cacheFolder, photo.getName());
-                                    try
-                                    {
-                                        FileOutputStream fileOut = new FileOutputStream(thumb);
-                                        bm.compress(Bitmap.CompressFormat.PNG, 85, fileOut);
-                                        fileOut.flush();
-                                        fileOut.close();
-                                        Log.i(Constants.LOGTAG, "Thumb cached for image " + photo.getName());
-                                    } catch (Exception e)
-                                    {
-                                        /* Couldn't save thumbnail. No biggie.
-                                       * Exception here rather than IOException
-                                       * doe to rare cases of crashes when activity
-                                       * loses focus during load.
-                                       * */
-                                        Log.e(Constants.LOGTAG, "Could not cache thumbnail for " + photo.getName()
-                                                + ". " + e.getMessage());
-                                    }
-
-                                    ImageView imgView = (ImageView) view.findViewById(R.id.skyDriveItemIcon);
-                                    imgView.setImageBitmap(bm);
-                                }
-
-                            }
-
-                        });
+                            });
+                        }catch (IllegalStateException e)
+                        {
+                            handleIllegalConnectionState();
+                        }
                     }
                 }
 

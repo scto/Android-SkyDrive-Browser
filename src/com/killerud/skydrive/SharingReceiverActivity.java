@@ -81,7 +81,7 @@ public class SharingReceiverActivity extends Activity
                     @Override
                     public void onAuthError(LiveAuthException exception, Object userState)
                     {
-                        Log.e(Constants.LOGTAG, exception.getMessage());
+                        Log.e(Constants.LOGTAG, "Error: " + exception.getMessage());
                         finish();
                     }
                 });
@@ -115,7 +115,7 @@ public class SharingReceiverActivity extends Activity
             public void onAuthError(LiveAuthException exception, Object userState)
             {
                 mInitializeDialog.dismiss();
-                Log.e(Constants.LOGTAG, exception.getMessage());
+                Log.e(Constants.LOGTAG, "Error: " + exception.getMessage());
                 finish();
             }
         });
@@ -167,7 +167,14 @@ public class SharingReceiverActivity extends Activity
                 Uri uri = (Uri) extras.getParcelable(Intent.EXTRA_STREAM);
 
                 ArrayList<String> filePath = new ArrayList<String>();
-                filePath.add(parseUriToFilePath(uri));
+                try{
+                    filePath.add(parseUriToFilePath(uri));
+                }catch (UnsupportedOperationException e)
+                {
+                    Toast.makeText(this, R.string.errorCouldNotFetchFileForSharing, Toast.LENGTH_SHORT).show();
+                    finish();
+                    return;
+                }
 
                 startIntent.setAction("killerud.skydrive.UPLOAD_PICK_FOLDER");
                 startIntent.putExtra(UploadFileActivity.EXTRA_FILES_LIST, filePath);
@@ -181,10 +188,18 @@ public class SharingReceiverActivity extends Activity
             {
                 ArrayList<Uri> fileList = intentThatStartedMe.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
                 ArrayList<String> filePaths = new ArrayList<String>();
-                for (int i = 0; i < fileList.size(); i++)
+                try{
+                    for (int i = 0; i < fileList.size(); i++)
+                    {
+                        filePaths.add(parseUriToFilePath(fileList.get(i)));
+                    }
+                }catch (UnsupportedOperationException e)
                 {
-                    filePaths.add(parseUriToFilePath(fileList.get(i)));
+                    Toast.makeText(this, R.string.errorCouldNotFetchFileForSharing, Toast.LENGTH_SHORT).show();
+                    finish();
+                    return;
                 }
+
                 startIntent.setAction("killerud.skydrive.UPLOAD_PICK_FOLDER");
                 startIntent.putExtra(UploadFileActivity.EXTRA_FILES_LIST, filePaths);
             }

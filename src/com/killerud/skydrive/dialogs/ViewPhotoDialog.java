@@ -81,8 +81,18 @@ public class ViewPhotoDialog extends SherlockActivity
 
         if (mFile.exists())
         {
-            imageView.setImageBitmap(BitmapFactory.decodeFile(mFile.getPath()));
-            layout.removeView(textView);
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inSampleSize = 2;
+            options.inTempStorage = new byte[16*1024];
+
+            imageView.setImageBitmap(BitmapFactory.decodeFile(mFile.getPath(), options));
+            try
+            {
+                layout.removeView(textView);
+            }catch (NullPointerException e)
+            {
+                //View does not exist
+            }
         }
         else
         {
