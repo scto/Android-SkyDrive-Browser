@@ -101,6 +101,10 @@
     <string name="confirmExitSummary">Hindrer deg i å lukke appen ved et uhell ved å åpne en dialogboks for bekreftelse</string>
 
     <string name="sharedFiles">Delte filer</string>
+    <string name="sharingLinks">Delingslenker</string>
+    <string name="sharingLinksSummary">Alle med lenken vil kunne se og laste ned filen</string>
+    <string name="sharingGeneratingLinks">Genererer delingslenker...</string>
+    <string name="sharingEnableEditing">Tillat at de med lenken endrer filen</string>
 
     <string name="buffering">Buffrer</string>
     <string name="playing">Spiller</string>

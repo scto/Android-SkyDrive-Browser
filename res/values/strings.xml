@@ -109,7 +109,7 @@
     <string name="sharingLinks">Sharing links</string>
     <string name="sharingLinksSummary">Anyone with these links will be able to see the file</string>
     <string name="sharingGeneratingLinks">Generating sharing links...</string>
-    <string name="sharingEnableEditing">Also allow file editing</string>
+    <string name="sharingEnableEditing">Allow file editing</string>
 
     <string name="buffering">Buffering</string>
     <string name="playing">Playing</string>

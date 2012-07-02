@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.killerud.skydrive.BrowserForSkyDriveApplication;
@@ -30,6 +32,8 @@ public class SharingDialog extends SherlockActivity{
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.share_file);
+        setTitle(R.string.sharingLinks);
+
         mResultBuilder = new StringBuilder();
         mResultView = (EditText) findViewById(R.id.sharingLinks);
         mLinkCounter = 0;
@@ -65,7 +69,32 @@ public class SharingDialog extends SherlockActivity{
                 finish();
             }
         });
+
+        ((CheckBox) findViewById(R.id.sharingEditable)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
+                mResultView.setText(R.string.sharingGeneratingLinks);
+                mResultBuilder = new StringBuilder();
+                mLinkCounter = 0;
+
+                if(checked)
+                {
+                    for(int i=0;i<mFileIds.size();i++)
+                    {
+                        getLinkToEditFile(mFileIds.get(i));
+                    }
+                }else
+                {
+                    for(int i=0;i<mFileIds.size();i++)
+                    {
+                        getLinkToFile(mFileIds.get(i));
+                    }
+                }
+            }
+        });
     }
+
+
 
     private void getLinkToFile(String fileId) {
         final String path = fileId + "/shared_read_link";
