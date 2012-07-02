@@ -54,7 +54,7 @@
     <string name="downloadError">Noe gikk galt under nedlastingen. Filen ble ikke lagret.</string>
     <string name="fileAlreadySaved">Filen finnes allerede</string>
     <string name="fileAlreadySavedMessage">Den filen har blitt lastet ned før, men kan ha blitt endret siden da. Last ned på nytt?</string>
-    <string name="savedFileCopy"> Kopi </string>
+    <string name="savedFileCopy">Kopi</string>
     <string name="saved">lagret</string>
     <string name="from">fra</string>
     <string name="to">til</string>
@@ -74,6 +74,8 @@
     <string name="uploadSelected">Last opp valgte</string>
     <string name="noFilesInFolder">Ingen filer i denne mappen</string>
 
+    <string name="selectedOne">Ett element valgt</string>
+    <string name="selectedSeveral">elementer valgt</string>
 
     <string name="selectAll">Velg alle</string>
     <string name="selectNone">Velg ingen</string>

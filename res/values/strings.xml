@@ -77,6 +77,10 @@
     <string name="uploadSelected">Upload selected</string>
     <string name="noFilesInFolder">No files in this folder</string>
 
+    <string name="selectedOne">One item selected</string>
+    <string name="selectedSeveral">items selected</string>
+
+
 
     <string name="selectAll">Select all</string>
     <string name="selectNone">Select none</string>

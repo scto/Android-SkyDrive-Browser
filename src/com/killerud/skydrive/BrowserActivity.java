@@ -39,6 +39,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 
 
@@ -122,33 +124,30 @@ public class BrowserActivity extends SherlockListActivity
         mCurrentFolderId = HOME_FOLDER;
 
         determineBrowserStateAndLayout(getIntent());
+        createLocalSkyDriveFolderIfNotExists();
+        setupListView(getListView());
 
+        mFolderHierarchyView = (TextView) findViewById(R.id.folder_hierarchy);
+        mFolderHierarchy = new Stack<String>();
+        mFolderHierarchy.push(getString(R.string.rootFolderTitle));
 
-        /* Makes sure that a local SkyDrive folder exists */
+        updateFolderHierarchy(null);
+        app.setCurrentBrowser(this);
+
+        mActionBar = getSupportActionBar();
+        if (savedInstanceState != null)
+        {
+            restoreSavedInstanceState(savedInstanceState);
+        }
+        loadFolder(mCurrentFolderId);
+    }
+
+    private void createLocalSkyDriveFolderIfNotExists() {
         File sdcard = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/");
         if (!sdcard.exists())
         {
             sdcard.mkdir();
         }
-
-        ListView lv = getListView();
-        setupListView(lv);
-
-        mFolderHierarchyView = (TextView) findViewById(R.id.folder_hierarchy);
-        mFolderHierarchy = new Stack<String>();
-        mFolderHierarchy.push(getString(R.string.rootFolderTitle));
-        updateFolderHierarchy(null);
-
-        app.setCurrentBrowser(this);
-
-        mActionBar = getSupportActionBar();
-
-        if (savedInstanceState != null)
-        {
-            restoreSavedInstanceState(savedInstanceState);
-        }
-
-        loadFolder(mCurrentFolderId);
     }
 
     private void restoreSavedInstanceState(Bundle savedInstanceState)
@@ -218,6 +217,8 @@ public class BrowserActivity extends SherlockListActivity
                                 ((SkyDriveListAdapter) getListAdapter()).getItem(position));
                     }
                     mSkyDriveListAdapter.setChecked(position, !rowIsChecked);
+
+                    updateActionModeTitleWithSelectedCount();
                 }
                 else
                 {
@@ -239,10 +240,26 @@ public class BrowserActivity extends SherlockListActivity
                     mSkyDriveListAdapter.setChecked(position, true);
                     mCurrentlySelectedFiles.add(
                             ((SkyDriveListAdapter) getListAdapter()).getItem(position));
+                    updateActionModeTitleWithSelectedCount();
                 }
                 return true;
             }
         });
+    }
+
+    private void updateActionModeTitleWithSelectedCount() {
+        final int checkedCount = mCurrentlySelectedFiles.size();
+        switch (checkedCount) {
+            case 0:
+                mActionMode.setTitle(null);
+                break;
+            case 1:
+                mActionMode.setTitle(getString(R.string.selectedOne));
+                break;
+            default:
+                mActionMode.setTitle("" + checkedCount + " " + getString(R.string.selectedSeveral));
+                break;
+        }
     }
 
 
@@ -451,6 +468,25 @@ public class BrowserActivity extends SherlockListActivity
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         if (preferences.getBoolean("automatic_camera_upload", false))
         {
+            Map<String, String> folder = new HashMap<String, String>();
+            folder.put(JsonKeys.NAME, "me/skydrive/camera_roll");
+            mClient.postAsync(mCurrentFolderId,
+                    new JSONObject(folder),
+                    new LiveOperationListener()
+                    {
+                        @Override
+                        public void onError(LiveOperationException exception, LiveOperation operation)
+                        {
+                            Log.e(Constants.LOGTAG, exception.getMessage());
+                        }
+
+                        @Override
+                        public void onComplete(LiveOperation operation)
+                        {
+                            ((BrowserForSkyDriveApplication) getApplication()).getCurrentBrowser().reloadFolder();
+                        }
+                    });
+
             startService(new Intent(this, CameraImageAutoUploadService.class));
         }
         else
@@ -554,6 +590,7 @@ public class BrowserActivity extends SherlockListActivity
     private void loadSharedFiles()
     {
         setTitle(R.string.sharedFiles);
+        mPreviousFolderIds.push(mCurrentFolderId);
         loadFolder("me/skydrive/shared");
     }
 
@@ -1150,7 +1187,6 @@ public class BrowserActivity extends SherlockListActivity
 
     private class SkyDriveActionMode implements com.actionbarsherlock.view.ActionMode.Callback
     {
-
         @Override
         public boolean onCreateActionMode(com.actionbarsherlock.view.ActionMode mode, Menu menu)
         {
@@ -1254,6 +1290,8 @@ public class BrowserActivity extends SherlockListActivity
             mActionMode = null;
             supportInvalidateOptionsMenu();
         }
+
+
     }
 
     private void copySelectedFiles(ActionMode mode) {
