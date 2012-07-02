@@ -73,6 +73,9 @@
         <activity android:name=".dialogs.RenameDialog"
                   android:theme="@style/LightThemeDialog"/>
 
+        <activity android:name=".dialogs.SharingDialog"
+                  android:theme="@style/LightThemeDialog"/>
+
         <activity android:name=".SettingsActivity"
                   android:theme="@style/LightTheme"/>
 

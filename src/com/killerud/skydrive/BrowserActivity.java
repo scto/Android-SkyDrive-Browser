@@ -26,10 +26,7 @@ import com.actionbarsherlock.app.SherlockListActivity;
 import com.actionbarsherlock.view.*;
 import com.killerud.skydrive.constants.Constants;
 import com.killerud.skydrive.constants.SortCriteria;
-import com.killerud.skydrive.dialogs.NewFolderDialog;
-import com.killerud.skydrive.dialogs.PlayAudioDialog;
-import com.killerud.skydrive.dialogs.RenameDialog;
-import com.killerud.skydrive.dialogs.ViewPhotoDialog;
+import com.killerud.skydrive.dialogs.*;
 import com.killerud.skydrive.objects.*;
 import com.killerud.skydrive.util.IOUtil;
 import com.killerud.skydrive.util.JsonKeys;
@@ -1206,81 +1203,27 @@ public class BrowserActivity extends SherlockListActivity
             }
             else if (title.equalsIgnoreCase(getString(R.string.copy)))
             {
-                mCopyCutFiles = (ArrayList<SkyDriveObject>) mCurrentlySelectedFiles.clone();
-                mCutNotPaste = false;
-
-                Toast.makeText(getApplicationContext(), R.string.copyCutSelectedFiles, Toast.LENGTH_SHORT).show();
-
-                ((SkyDriveListAdapter) getListAdapter()).clearChecked();
-                mCurrentlySelectedFiles.clear();
-                mode.finish();
+                copySelectedFiles(mode);
                 return true;
             }
             else if (title.equalsIgnoreCase(getString(R.string.cut)))
             {
-                mCopyCutFiles = (ArrayList<SkyDriveObject>) mCurrentlySelectedFiles.clone();
-                mCutNotPaste = true;
-
-                Toast.makeText(getApplicationContext(), R.string.copyCutSelectedFiles, Toast.LENGTH_SHORT).show();
-
-                ((SkyDriveListAdapter) getListAdapter()).clearChecked();
-                mCurrentlySelectedFiles.clear();
-                mode.finish();
+                cutSelectedFiles(mode);
                 return true;
             }
             else if (title.equalsIgnoreCase(getString(R.string.delete)))
             {
-                final AlertDialog dialog = new AlertDialog.Builder(getSupportActionBar().getThemedContext()).create();
-                dialog.setTitle(getString(R.string.deleteConfirmationTitle));
-                dialog.setIcon(R.drawable.warning_triangle);
-                StringBuilder deleteMessage = new StringBuilder();
-                deleteMessage.append(getString(R.string.deleteConfirmationBody));
-                for (int i = 0; i < mCurrentlySelectedFiles.size(); i++)
-                {
-                    deleteMessage.append(mCurrentlySelectedFiles.get(i).getName());
-                    deleteMessage.append("\n");
-                }
-                deleteMessage.append(getString(R.string.deleteConfirmationQuestion));
-
-                dialog.setMessage(deleteMessage.toString());
-                dialog.setButton(getString(R.string.yes), new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i)
-                    {
-                        setSupportProgressBarIndeterminateVisibility(true);
-                        if (!connectionIsUnavailable())
-                            mXloader.deleteFiles(mClient, (ArrayList<SkyDriveObject>) mCurrentlySelectedFiles.clone());
-                        ((SkyDriveListAdapter) getListAdapter()).clearChecked();
-                        mCurrentlySelectedFiles.clear();
-                        mode.finish();
-
-                    }
-                });
-                dialog.setButton2(getString(R.string.no), new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i)
-                    {
-                        dialog.dismiss();
-                    }
-                });
-                dialog.show();
+                createDeleteDialog(mode);
                 return true;
             }
             else if (title.equalsIgnoreCase(getString(R.string.rename)))
             {
-                Intent startRenameDialog = new Intent(getSupportActionBar().getThemedContext(), RenameDialog.class);
-                ArrayList<String> fileIds = new ArrayList<String>();
-                ArrayList<String> fileNames = new ArrayList<String>();
-                for (int i = 0; i < mCurrentlySelectedFiles.size(); i++)
-                {
-                    fileIds.add(mCurrentlySelectedFiles.get(i).getId());
-                    fileNames.add(mCurrentlySelectedFiles.get(i).getName());
-                }
-                startRenameDialog.putExtra(RenameDialog.EXTRAS_FILE_IDS, fileIds);
-                startRenameDialog.putExtra(RenameDialog.EXTRAS_FILE_NAMES, fileNames);
-                if (!connectionIsUnavailable()) startActivity(startRenameDialog);
+                createRenameDialog();
+                return true;
+            }
+            else if(title.equalsIgnoreCase(getString((R.string.share))))
+            {
+                createSharingDialog();
                 return true;
             }
             else if (title.equalsIgnoreCase(getString(R.string.selectAll)))
@@ -1311,6 +1254,93 @@ public class BrowserActivity extends SherlockListActivity
             mActionMode = null;
             supportInvalidateOptionsMenu();
         }
+    }
+
+    private void copySelectedFiles(ActionMode mode) {
+        mCopyCutFiles = (ArrayList<SkyDriveObject>) mCurrentlySelectedFiles.clone();
+        mCutNotPaste = false;
+
+        Toast.makeText(getApplicationContext(), R.string.copyCutSelectedFiles, Toast.LENGTH_SHORT).show();
+
+        ((SkyDriveListAdapter) getListAdapter()).clearChecked();
+        mCurrentlySelectedFiles.clear();
+        mode.finish();
+    }
+
+    private void cutSelectedFiles(ActionMode mode) {
+        mCopyCutFiles = (ArrayList<SkyDriveObject>) mCurrentlySelectedFiles.clone();
+        mCutNotPaste = true;
+
+        Toast.makeText(getApplicationContext(), R.string.copyCutSelectedFiles, Toast.LENGTH_SHORT).show();
+
+        ((SkyDriveListAdapter) getListAdapter()).clearChecked();
+        mCurrentlySelectedFiles.clear();
+        mode.finish();
+    }
+
+    private void createDeleteDialog(final ActionMode mode) {
+        final AlertDialog dialog = new AlertDialog.Builder(getSupportActionBar().getThemedContext()).create();
+        dialog.setTitle(getString(R.string.deleteConfirmationTitle));
+        dialog.setIcon(R.drawable.warning_triangle);
+        StringBuilder deleteMessage = new StringBuilder();
+        deleteMessage.append(getString(R.string.deleteConfirmationBody));
+        for (int i = 0; i < mCurrentlySelectedFiles.size(); i++)
+        {
+            deleteMessage.append(mCurrentlySelectedFiles.get(i).getName());
+            deleteMessage.append("\n");
+        }
+        deleteMessage.append(getString(R.string.deleteConfirmationQuestion));
+
+        dialog.setMessage(deleteMessage.toString());
+        dialog.setButton(getString(R.string.yes), new DialogInterface.OnClickListener()
+        {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i)
+            {
+                setSupportProgressBarIndeterminateVisibility(true);
+                if (!connectionIsUnavailable())
+                    mXloader.deleteFiles(mClient, (ArrayList<SkyDriveObject>) mCurrentlySelectedFiles.clone());
+                ((SkyDriveListAdapter) getListAdapter()).clearChecked();
+                mCurrentlySelectedFiles.clear();
+                mode.finish();
+
+            }
+        });
+        dialog.setButton2(getString(R.string.no), new DialogInterface.OnClickListener()
+        {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i)
+            {
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
+    }
+
+    private void createRenameDialog() {
+        Intent startRenameDialog = new Intent(getSupportActionBar().getThemedContext(), RenameDialog.class);
+        ArrayList<String> fileIds = new ArrayList<String>();
+        ArrayList<String> fileNames = new ArrayList<String>();
+        for (int i = 0; i < mCurrentlySelectedFiles.size(); i++)
+        {
+            fileIds.add(mCurrentlySelectedFiles.get(i).getId());
+            fileNames.add(mCurrentlySelectedFiles.get(i).getName());
+        }
+        startRenameDialog.putExtra(RenameDialog.EXTRAS_FILE_IDS, fileIds);
+        startRenameDialog.putExtra(RenameDialog.EXTRAS_FILE_NAMES, fileNames);
+        if (!connectionIsUnavailable()) startActivity(startRenameDialog);
+    }
+
+    private void createSharingDialog()
+    {
+        Intent startSharingDialog = new Intent(getSupportActionBar().getThemedContext(), SharingDialog.class);
+        ArrayList<String> fileIds = new ArrayList<String>();
+        for (int i = 0; i < mCurrentlySelectedFiles.size(); i++)
+        {
+            fileIds.add(mCurrentlySelectedFiles.get(i).getId());
+        }
+        startSharingDialog.putExtra(RenameDialog.EXTRAS_FILE_IDS, fileIds);
+        if (!connectionIsUnavailable()) startActivity(startSharingDialog);
     }
 }
 
