@@ -7,6 +7,7 @@ package com.killerud.skydrive.dialogs;
  */
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
@@ -81,10 +82,7 @@ public class ViewPhotoDialog extends SherlockActivity
 
         if (mFile.exists())
         {
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inSampleSize = 2;
-            options.inTempStorage = new byte[16*1024];
-
+            BitmapFactory.Options options = determineBitmapDecodeOptions();
             imageView.setImageBitmap(BitmapFactory.decodeFile(mFile.getPath(), options));
             try
             {
@@ -119,13 +117,36 @@ public class ViewPhotoDialog extends SherlockActivity
                                 @Override
                                 public void onDownloadCompleted(LiveDownloadOperation operation)
                                 {
-                                    BitmapFactory.Options options = new BitmapFactory.Options();
-                                    options.inSampleSize = 2;
+                                    BitmapFactory.Options options = determineBitmapDecodeOptions();
                                     imageView.setImageBitmap(BitmapFactory.decodeFile(mFile.getPath(), options));
                                     layout.removeView(textView);
                                 }
                             });
         }
+    }
+
+    private BitmapFactory.Options determineBitmapDecodeOptions() {
+        BitmapFactory.Options scoutOptions = new BitmapFactory.Options();
+        scoutOptions.inJustDecodeBounds = true;
+
+        Bitmap bitmapBounds = BitmapFactory.decodeFile(mFile.getPath(), scoutOptions);
+
+        int bitmapHeight = scoutOptions.outHeight;
+        int bitmapWidth = scoutOptions.outWidth;
+
+        int dividend  = bitmapWidth;
+
+        if(bitmapHeight > bitmapWidth)
+        {
+            dividend = bitmapHeight;
+        }
+
+        int sampleSize = bitmapHeight / 800;
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = sampleSize;
+        options.inPurgeable = true;
+
+        return options;
     }
 
 
