@@ -814,19 +814,20 @@ containing a value of this type.
         public static final int ic_menu_refresh=0x7f020070;
         public static final int ic_menu_save=0x7f020071;
         public static final int ic_menu_set_as=0x7f020072;
-        public static final int ic_menu_upload=0x7f020073;
-        public static final int ic_social_share=0x7f020074;
-        public static final int icon=0x7f020075;
-        public static final int image_x_generic=0x7f020076;
-        public static final int notification_icon=0x7f020077;
-        public static final int office_document=0x7f020078;
-        public static final int office_presentation=0x7f020079;
-        public static final int office_spreadsheet=0x7f02007a;
-        public static final int text_css=0x7f02007b;
-        public static final int text_html=0x7f02007c;
-        public static final int text_x_preview=0x7f02007d;
-        public static final int video_x_generic=0x7f02007e;
-        public static final int warning_triangle=0x7f02007f;
+        public static final int ic_menu_share=0x7f020073;
+        public static final int ic_menu_upload=0x7f020074;
+        public static final int ic_social_share=0x7f020075;
+        public static final int icon=0x7f020076;
+        public static final int image_x_generic=0x7f020077;
+        public static final int notification_icon=0x7f020078;
+        public static final int office_document=0x7f020079;
+        public static final int office_presentation=0x7f02007a;
+        public static final int office_spreadsheet=0x7f02007b;
+        public static final int text_css=0x7f02007c;
+        public static final int text_html=0x7f02007d;
+        public static final int text_x_preview=0x7f02007e;
+        public static final int video_x_generic=0x7f02007f;
+        public static final int warning_triangle=0x7f020080;
     }
     public static final class id {
         public static final int abs__action_bar=0x7f050022;
@@ -950,13 +951,14 @@ containing a value of this type.
         public static final int notification_xload=0x7f030019;
         public static final int photo_dialog=0x7f03001a;
         public static final int rename_file=0x7f03001b;
-        public static final int sherlock_spinner_dropdown_item=0x7f03001c;
-        public static final int sherlock_spinner_item=0x7f03001d;
-        public static final int sign_in=0x7f03001e;
-        public static final int skydrive=0x7f03001f;
-        public static final int skydrive_list_item=0x7f030020;
-        public static final int skydrive_upload_picker=0x7f030021;
-        public static final int video_activity=0x7f030022;
+        public static final int share_file=0x7f03001c;
+        public static final int sherlock_spinner_dropdown_item=0x7f03001d;
+        public static final int sherlock_spinner_item=0x7f03001e;
+        public static final int sign_in=0x7f03001f;
+        public static final int skydrive=0x7f030020;
+        public static final int skydrive_list_item=0x7f030021;
+        public static final int skydrive_upload_picker=0x7f030022;
+        public static final int video_activity=0x7f030023;
     }
     public static final class menu {
         public static final int browser_menu=0x7f0c0000;

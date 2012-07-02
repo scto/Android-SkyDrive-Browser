@@ -7,6 +7,7 @@
 package com.microsoft.live;
 
 import android.os.AsyncTask;
+import android.os.Build;
 import android.text.TextUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -37,6 +38,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * {@code LiveConnectClient} is a class that is responsible for making requests over to the
@@ -1886,10 +1889,6 @@ public class LiveConnectClient
     /**
      * Creates a new LiveOperation and executes it synchronously.
      *
-     * @param request
-     * @param listener
-     * @param userState arbitrary object that is used to determine the caller of the method.
-     * @return a new LiveOperation.
      */
     private LiveOperation execute(ApiRequest<JSONObject> request) throws LiveOperationException
     {
@@ -1928,7 +1927,18 @@ public class LiveConnectClient
 
         request.addObserver(new ContentLengthObserver(operation));
         asyncRequest.addObserver(new DownloadObserver(operation, listener));
-        asyncRequest.execute();
+        if(Build.VERSION.SDK_INT >= 11)
+        {
+            asyncRequest.executeOnExecutor(new Executor() {
+                @Override
+                public void execute(Runnable runnable) {
+                    new Thread(runnable).start();
+                }
+            }, null);
+        }else
+        {
+            asyncRequest.execute();
+        }
 
         return operation;
     }
@@ -1955,8 +1965,18 @@ public class LiveConnectClient
                 .build();
 
         asyncRequest.addObserver(new OperationObserver(operation, listener));
-        asyncRequest.execute();
-
+        if(Build.VERSION.SDK_INT >= 11)
+        {
+            asyncRequest.executeOnExecutor(new Executor() {
+                @Override
+                public void execute(Runnable runnable) {
+                    new Thread(runnable).start();
+                }
+            }, null);
+        }else
+        {
+            asyncRequest.execute();
+        }
         return operation;
     }
 }

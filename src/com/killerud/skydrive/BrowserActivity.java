@@ -556,6 +556,7 @@ public class BrowserActivity extends SherlockListActivity
 
     private void loadSharedFiles()
     {
+        setTitle(R.string.sharedFiles);
         loadFolder("me/skydrive/shared");
     }
 
@@ -686,7 +687,10 @@ public class BrowserActivity extends SherlockListActivity
         switch (item.getItemId())
         {
             case android.R.id.home:
-                canNavigateBack();
+                if(canNavigateBack())
+                {
+                    navigateBack();
+                }
                 return true;
 
             case R.id.newFolder:
@@ -1168,6 +1172,9 @@ public class BrowserActivity extends SherlockListActivity
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             menu.add(getString(R.string.delete))
                     .setIcon(R.drawable.ic_menu_delete)
+                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+            menu.add((getString(R.string.share)))
+                    .setIcon(R.drawable.ic_menu_share)
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             menu.add(getString(R.string.selectAll))
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);

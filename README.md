@@ -20,6 +20,8 @@ Changelog
 - Confirmation dialog on exit can be enabled in Settings
 - Uploads where the file exists already now updates the file stored on SkyDrive. Download, edit and upload finally works!
 - Folders can now be downloaded
+- Users on Android 3.0 and higher will have a slight performance increase
+
 
 2.2
 - Settings to limit data to WiFi appwide and for auto uploading of camera images
