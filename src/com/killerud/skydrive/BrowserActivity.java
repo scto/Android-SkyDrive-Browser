@@ -189,6 +189,11 @@ public class BrowserActivity extends SherlockListActivity
         ((SkyDriveListAdapter) getListAdapter()).setCheckedPositions(((BrowserForSkyDriveApplication) getApplication())
                 .getCurrentlyCheckedPositions());
 
+        if(mActionMode != null)
+        {
+            updateActionModeTitleWithSelectedCount();
+        }
+
     }
 
 

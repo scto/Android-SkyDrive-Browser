@@ -64,6 +64,8 @@ public class UploadFileActivity extends SherlockListActivity
         mFileBrowserAdapter = new UploadFileListAdapter(getApplicationContext());
         setListAdapter(mFileBrowserAdapter);
 
+        mCurrentFolder = new File("/");
+
         ListView lv = getListView();
         lv.setTextFilterEnabled(true);
         lv.setOnItemClickListener(new OnItemClickListener()
@@ -188,6 +190,11 @@ public class UploadFileActivity extends SherlockListActivity
 
         ((UploadFileListAdapter) getListAdapter()).setCheckedPositions(((BrowserForSkyDriveApplication) getApplication())
                 .getCurrentlyCheckedPositions());
+
+        if(mActionMode != null)
+        {
+            updateActionModeTitleWithSelectedCount();
+        }
     }
 
     @Override
@@ -229,14 +236,7 @@ public class UploadFileActivity extends SherlockListActivity
     protected void onStart()
     {
         super.onStart();
-        if (mActionMode == null)
-        {
-            loadFolder(new File("/"));
-        }
-        else
-        {
-            loadFolder(mCurrentFolder);
-        }
+        loadFolder(mCurrentFolder);
     }
 
     public boolean onOptionsItemSelected(MenuItem item)
@@ -406,7 +406,6 @@ public class UploadFileActivity extends SherlockListActivity
             int fileDrawable = determineFileDrawable(file);
             if(fileDrawable == R.drawable.image_x_generic)
             {
-                type.setImageResource(fileDrawable);
                 AsyncTask getThumb = new AsyncTask<File, Void, Bitmap>()
                 {
                     @Override
@@ -482,33 +481,6 @@ public class UploadFileActivity extends SherlockListActivity
                 mView.setBackgroundResource(android.R.color.white);
             }
         }
-
-        private Bitmap getThumbnail(File fileToThumb)
-        {
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(fileToThumb.getPath());
-
-            int sampleSize = (options.outHeight>options.outWidth?options.outHeight/60:options.outWidth/60);
-
-            options = new BitmapFactory.Options();
-            options.inSampleSize = sampleSize;
-
-            return Bitmap.createScaledBitmap(BitmapFactory.decodeFile(fileToThumb.getPath()), 50, 50, true);
-        }
-
-        private class ThumbGeneratingJob extends AsyncTask<File, Void, Bitmap>
-        {
-            @Override
-            protected Bitmap doInBackground(File... files) {
-                return getThumbnail(files[0]);
-            }
-
-            protected void onPostExecute(Bitmap thumb)
-            {
-                ((ImageView) mView.findViewById(R.id.skyDriveItemIcon)).setImageBitmap(thumb);
-            }
-        }
     }
 
 
@@ -574,6 +546,8 @@ public class UploadFileActivity extends SherlockListActivity
         public void onDestroyActionMode(com.actionbarsherlock.view.ActionMode mode)
         {
             mActionMode = null;
+            ((UploadFileListAdapter) getListAdapter()).clearChecked();
+            ((UploadFileListAdapter) getListAdapter()).notifyDataSetChanged();
             supportInvalidateOptionsMenu();
         }
     }
