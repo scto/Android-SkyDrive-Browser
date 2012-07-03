@@ -3,11 +3,13 @@ Android Explorer for SkyDrive
 
 A cleaner, simpler Microsoft SkyDrive experience!
 
-Based on the Android Live SDK, Android Explorer for SkyDrive is a clean, free and ad-free client for SkyDrive.
+Using the Android Live SDK and ActionBarSherlock, Android Explorer for SkyDrive is a clean, free and ad-free client for SkyDrive.
 
 Supports batch uploading and downloading, renaming, deleting, copying and moving.
 
-Play audio and view images in-app and download everything else to open in a supported installed app with a click of the notification.
+Play audio, video and view images in-app and download everything else to open in a supported installed app with a click of the notification.
+
+SkyDrive sharing functionality is also supported. Files shared with the user can be reached via a menu option, and sharing links for both read and read+write can be generated and shard through any supported app.
 
 App icon by Tom Emery
 
@@ -15,14 +17,13 @@ App icon by Tom Emery
 Changelog
 ---------
 2.3
-- Files shared with you can now be reached via a menu option
+- Files shared with you can now be reached via a menu option, and selected files can be shared through any app that can send text content (like GMail, Twitter, Facebook)
 - New SkyDrive permission required for the above. This does not affect your phone.
 - Confirmation dialog on exit can be enabled in Settings
 - Uploads where the file exists already now updates the file stored on SkyDrive. Download, edit and upload finally works!
 - Folders can now be downloaded
-- Users on Android 3.0 and higher will have a slight performance increase
 - Removed initial progress dialog, replaced with spinner in actionbar
-
+- Improved the local file browsers. Thumbs, proper handling of selections and orientation changes. 
 
 2.2
 - Settings to limit data to WiFi appwide and for auto uploading of camera images
