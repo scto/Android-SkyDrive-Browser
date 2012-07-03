@@ -5,8 +5,13 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -22,7 +27,10 @@ import com.actionbarsherlock.view.Window;
 import com.killerud.skydrive.constants.Constants;
 import com.killerud.skydrive.util.IOUtil;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Stack;
@@ -303,10 +311,11 @@ public class FileBrowserActivity extends SherlockListActivity
 
         public void setChecked(int pos, boolean checked)
         {
-            if(checked != isChecked(pos) && checked)
+            if(checked && !isChecked(pos))
             {
                 mChecked++;
-            }else if(checked != isChecked(pos)){
+            }else if(isChecked(pos) && !checked)
+            {
                 mChecked--;
             }
 
@@ -318,6 +327,7 @@ public class FileBrowserActivity extends SherlockListActivity
         {
             mChecked = 0;
             mCheckedPositions = new SparseBooleanArray();
+            mCurrentlySelectedFiles.clear();
             notifyDataSetChanged();
         }
 
@@ -368,11 +378,77 @@ public class FileBrowserActivity extends SherlockListActivity
             TextView name = (TextView) mView.findViewById(R.id.nameTextView);
             ImageView type = (ImageView) mView.findViewById(R.id.skyDriveItemIcon);
 
+            final View view = mView; //Changes all the time, so we need a reference
             File file = getItem(position);
             name.setText(file.getName());
-            type.setImageResource(determineFileDrawable(file));
+            int fileDrawable = determineFileDrawable(file);
+            if(fileDrawable == R.drawable.image_x_generic)
+            {
+                type.setImageResource(fileDrawable);
+                AsyncTask getThumb = new AsyncTask<File, Void, Bitmap>()
+                {
+                    @Override
+                    protected Bitmap doInBackground(File... files) {
+                        File thumbCacheFile = new File(Environment.getExternalStorageDirectory()
+                                + "/Android/data/com.killerud.skydrive/thumbs/" + files[0].getPath());
+                        if(thumbCacheFile.exists())
+                        {
+                            return BitmapFactory.decodeFile(thumbCacheFile.getPath());
+                        }
+
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        options.inJustDecodeBounds = true;
+                        BitmapFactory.decodeFile(files[0].getPath(), options);
+
+                        int sampleSize = (options.outHeight>options.outWidth?options.outHeight/60:options.outWidth/60);
+
+                        options = new BitmapFactory.Options();
+                        options.inSampleSize = sampleSize;
+
+                        Bitmap thumb = BitmapFactory.decodeFile(files[0].getPath(), options);
+
+                        cacheThumb(thumbCacheFile, thumb);
+                        return thumb;
+                    }
+
+                    protected void onPostExecute(Bitmap thumb)
+                    {
+                        ((ImageView) view.findViewById(R.id.skyDriveItemIcon)).setImageBitmap(thumb);
+                    }
+                };
+                if(Build.VERSION.SDK_INT>=11){
+                    getThumb.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new File[]{file});
+                }else{
+                    getThumb.execute(new File[]{file});
+                }
+            }else{
+                type.setImageResource(fileDrawable);
+            }
             setChecked(isChecked(position));
             return mView;
+        }
+
+        private void cacheThumb(File thumbCacheFile, Bitmap thumb) {
+            File cacheFolder = new File(Environment.getExternalStorageDirectory()
+                    + "/Android/data/com.killerud.skydrive/thumbs/");
+            if (!cacheFolder.exists())
+            {
+                cacheFolder.mkdirs();
+            }
+
+            OutputStream out;
+            try
+            {
+                out = new BufferedOutputStream(new FileOutputStream(thumbCacheFile));
+                thumb.compress(Bitmap.CompressFormat.PNG, 85, out);
+                out.flush();
+                out.close();
+                Log.i(Constants.LOGTAG, "Thumb cached for image " + thumbCacheFile.getName());
+            } catch (Exception e)
+            {
+                Log.e(Constants.LOGTAG, "Could not cache thumbnail for " + thumbCacheFile.getName()
+                        + ". " + e.toString());
+            }
         }
 
 
@@ -425,7 +501,6 @@ public class FileBrowserActivity extends SherlockListActivity
             else if (title.equalsIgnoreCase(getString(R.string.selectNone)))
             {
                 mFileBrowserAdapter.clearChecked();
-                mCurrentlySelectedFiles.clear();
                 item.setTitle(getString(R.string.selectAll));
                 updateActionModeTitleWithSelectedCount();
                 return true;

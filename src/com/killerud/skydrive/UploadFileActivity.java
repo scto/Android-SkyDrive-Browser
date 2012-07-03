@@ -3,7 +3,13 @@ package com.killerud.skydrive;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -17,9 +23,13 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.killerud.skydrive.constants.Constants;
+import com.killerud.skydrive.dialogs.NewFolderDialog;
 import com.killerud.skydrive.util.IOUtil;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Stack;
@@ -81,9 +91,19 @@ public class UploadFileActivity extends SherlockListActivity
                 }
                 else
                 {
-                    mFileBrowserAdapter.setChecked(position, true);
-                    mCurrentlySelectedFiles.add(
-                            ((UploadFileListAdapter) getListAdapter()).getItem(position).getPath());
+                    boolean isChecked = mFileBrowserAdapter.isChecked(position);
+                    if(isChecked)
+                    {
+                        mFileBrowserAdapter.setChecked(position, false);
+                        mCurrentlySelectedFiles.remove(
+                                ((UploadFileListAdapter) getListAdapter()).getItem(position).getPath());
+                    }else
+                    {
+                        mFileBrowserAdapter.setChecked(position, true);
+                        mCurrentlySelectedFiles.add(
+                                ((UploadFileListAdapter) getListAdapter()).getItem(position).getPath());
+                    }
+                    updateActionModeTitleWithSelectedCount();
                 }
             }
         });
@@ -98,6 +118,7 @@ public class UploadFileActivity extends SherlockListActivity
                     mFileBrowserAdapter.setChecked(position, true);
                     mCurrentlySelectedFiles.add(
                             ((UploadFileListAdapter) getListAdapter()).getItem(position).getPath());
+                    updateActionModeTitleWithSelectedCount();
                 }
                 return true;
             }
@@ -269,24 +290,28 @@ public class UploadFileActivity extends SherlockListActivity
         setSupportProgressBarIndeterminateVisibility(false);
     }
 
+
+
     private class UploadFileListAdapter extends BaseAdapter
     {
         private final LayoutInflater mInflater;
         private final ArrayList<File> mFiles;
         private View mView;
         private SparseBooleanArray mCheckedPositions;
-        private int mPosition;
+        private int mChecked;
 
         public UploadFileListAdapter(Context context)
         {
             mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             mFiles = new ArrayList<File>();
             mCheckedPositions = new SparseBooleanArray();
+            mChecked = 0;
         }
 
 
         public void setCheckedPositions(SparseBooleanArray checkedPositions)
         {
+            mChecked = checkedPositions.size();
             this.mCheckedPositions = checkedPositions;
             notifyDataSetChanged();
         }
@@ -296,6 +321,11 @@ public class UploadFileActivity extends SherlockListActivity
             return this.mCheckedPositions;
         }
 
+        public int getCheckedCount()
+        {
+            return this.mChecked;
+        }
+
         public boolean isChecked(int pos)
         {
             return mCheckedPositions.get(pos, false);
@@ -303,13 +333,22 @@ public class UploadFileActivity extends SherlockListActivity
 
         public void setChecked(int pos, boolean checked)
         {
+            if(checked && !isChecked(pos))
+            {
+                mChecked++;
+            }else if(isChecked(pos) && !checked)
+            {
+                mChecked--;
+            }
             mCheckedPositions.put(pos, checked);
             notifyDataSetChanged();
         }
 
         public void clearChecked()
         {
+            mChecked = 0;
             mCheckedPositions = new SparseBooleanArray();
+            mCurrentlySelectedFiles.clear();
             notifyDataSetChanged();
         }
 
@@ -317,7 +356,12 @@ public class UploadFileActivity extends SherlockListActivity
         {
             for (int i = 0; i < mFiles.size(); i++)
             {
+                if(!isChecked(i))
+                {
+                    mChecked++;
+                }
                 mCheckedPositions.put(i, true);
+                mCurrentlySelectedFiles.add(mFiles.get(i).getPath());
             }
             notifyDataSetChanged();
         }
@@ -354,11 +398,76 @@ public class UploadFileActivity extends SherlockListActivity
             TextView name = (TextView) mView.findViewById(R.id.nameTextView);
             ImageView type = (ImageView) mView.findViewById(R.id.skyDriveItemIcon);
 
+            final View view = mView; //Changes all the time, so we need a reference
+
             File file = getItem(position);
             name.setText(file.getName());
-            type.setImageResource(determineFileDrawable(file));
+
+            int fileDrawable = determineFileDrawable(file);
+            if(fileDrawable == R.drawable.image_x_generic)
+            {
+                type.setImageResource(fileDrawable);
+                AsyncTask getThumb = new AsyncTask<File, Void, Bitmap>()
+                {
+                    @Override
+                    protected Bitmap doInBackground(File... files) {
+                        File thumbCacheFile = new File(Environment.getExternalStorageDirectory()
+                                + "/Android/data/com.killerud.skydrive/thumbs/" + files[0].getPath());
+                        if(thumbCacheFile.exists())
+                        {
+                            return BitmapFactory.decodeFile(thumbCacheFile.getPath());
+                        }
+
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        options.inJustDecodeBounds = true;
+                        BitmapFactory.decodeFile(files[0].getPath(), options);
+
+                        int sampleSize = (options.outHeight>options.outWidth?options.outHeight/60:options.outWidth/60);
+                        Log.i(Constants.LOGTAG, "Sample size is " + sampleSize);
+                        options = new BitmapFactory.Options();
+                        options.inSampleSize = sampleSize;
+
+                        Bitmap thumb = BitmapFactory.decodeFile(files[0].getPath(), options);
+
+                        cacheThumb(thumbCacheFile, thumb);
+                        return thumb;
+                    }
+
+                    protected void onPostExecute(Bitmap thumb)
+                    {
+                        ((ImageView) view.findViewById(R.id.skyDriveItemIcon)).setImageBitmap(thumb);
+                    }
+                };
+
+                getThumb.execute(new File[]{file});
+            }else{
+                type.setImageResource(fileDrawable);
+            }
             setChecked(isChecked(position));
             return mView;
+        }
+
+        private void cacheThumb(File thumbCacheFile, Bitmap thumb) {
+            File cacheFolder = new File(Environment.getExternalStorageDirectory()
+                    + "/Android/data/com.killerud.skydrive/thumbs/");
+            if (!cacheFolder.exists())
+            {
+                cacheFolder.mkdirs();
+            }
+
+            OutputStream out;
+            try
+            {
+                out = new BufferedOutputStream(new FileOutputStream(thumbCacheFile));
+                thumb.compress(Bitmap.CompressFormat.PNG, 85, out);
+                out.flush();
+                out.close();
+                Log.i(Constants.LOGTAG, "Thumb cached for image " + thumbCacheFile.getName());
+            } catch (Exception e)
+            {
+                Log.e(Constants.LOGTAG, "Could not cache thumbnail for " + thumbCacheFile.getName()
+                        + ". " + e.toString());
+            }
         }
 
 
@@ -371,6 +480,33 @@ public class UploadFileActivity extends SherlockListActivity
             else
             {
                 mView.setBackgroundResource(android.R.color.white);
+            }
+        }
+
+        private Bitmap getThumbnail(File fileToThumb)
+        {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(fileToThumb.getPath());
+
+            int sampleSize = (options.outHeight>options.outWidth?options.outHeight/60:options.outWidth/60);
+
+            options = new BitmapFactory.Options();
+            options.inSampleSize = sampleSize;
+
+            return Bitmap.createScaledBitmap(BitmapFactory.decodeFile(fileToThumb.getPath()), 50, 50, true);
+        }
+
+        private class ThumbGeneratingJob extends AsyncTask<File, Void, Bitmap>
+        {
+            @Override
+            protected Bitmap doInBackground(File... files) {
+                return getThumbnail(files[0]);
+            }
+
+            protected void onPostExecute(Bitmap thumb)
+            {
+                ((ImageView) mView.findViewById(R.id.skyDriveItemIcon)).setImageBitmap(thumb);
             }
         }
     }
@@ -406,7 +542,7 @@ public class UploadFileActivity extends SherlockListActivity
                 setResult(Activity.RESULT_OK, data);
 
                 mFileBrowserAdapter.clearChecked();
-                mCurrentlySelectedFiles.clear();
+                updateActionModeTitleWithSelectedCount();
 
                 mode.finish();
                 finish();
@@ -415,14 +551,14 @@ public class UploadFileActivity extends SherlockListActivity
             else if (title.equalsIgnoreCase(getString(R.string.selectAll)))
             {
                 mFileBrowserAdapter.checkAll();
+                updateActionModeTitleWithSelectedCount();
                 item.setTitle(getString(R.string.selectNone));
                 return true;
             }
             else if (title.equalsIgnoreCase(getString(R.string.selectNone)))
             {
                 mFileBrowserAdapter.clearChecked();
-                mCurrentlySelectedFiles.clear();
-
+                updateActionModeTitleWithSelectedCount();
                 item.setTitle(getString(R.string.selectAll));
                 return true;
             }
@@ -439,6 +575,21 @@ public class UploadFileActivity extends SherlockListActivity
         {
             mActionMode = null;
             supportInvalidateOptionsMenu();
+        }
+    }
+
+    private void updateActionModeTitleWithSelectedCount() {
+        final int checkedCount = ((UploadFileListAdapter) getListAdapter()).getCheckedCount();
+        switch (checkedCount) {
+            case 0:
+                mActionMode.setTitle(null);
+                break;
+            case 1:
+                mActionMode.setTitle(getString(R.string.selectedOne));
+                break;
+            default:
+                mActionMode.setTitle("" + checkedCount + " " + getString(R.string.selectedSeveral));
+                break;
         }
     }
 }

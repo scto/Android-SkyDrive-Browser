@@ -3,7 +3,7 @@
 
     <string name="appName">Utforsker for SkyDrive</string>
     <string name="initializingMessage">Logger på Windows Live...</string>
-    <string name="firstWelcomeMessage">Velkommen til Android Utforsker for SkyDrive!!\n\nLogg inn med din Windows Live-konto
+    <string name="firstWelcomeMessage">Velkommen til Android Utforsker for SkyDrive!\n\nLogg inn med din Windows Live-konto
         og få sømløs tilgang til SkyDrive.
     </string>
     <string name="signInToWindowsLive">Logg inn på Windows Live</string>

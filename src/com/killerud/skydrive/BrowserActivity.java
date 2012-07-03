@@ -872,10 +872,11 @@ public class BrowserActivity extends SherlockListActivity
 
         public void setChecked(int pos, boolean checked)
         {
-            if(checked != isChecked(pos) && checked)
+            if(checked && !isChecked(pos))
             {
                 mChecked++;
-            }else if(checked != isChecked(pos)){
+            }else if(isChecked(pos) && !checked)
+            {
                 mChecked--;
             }
 
