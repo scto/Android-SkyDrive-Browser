@@ -1452,7 +1452,6 @@ public class BrowserActivity extends SherlockListActivity
             fileIds.add(mCurrentlySelectedFiles.get(i).getId());
         }
         startSharingDialog.putExtra(RenameDialog.EXTRAS_FILE_IDS, fileIds);
-        resetSelection();
         if (!connectionIsUnavailable()) startActivity(startSharingDialog);
     }
 
