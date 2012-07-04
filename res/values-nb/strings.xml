@@ -60,6 +60,10 @@
     <string name="to">til</string>
     <string name="skyDrive">SkyDrive</string>
 
+    <string name="downloadNoPreview">Kan ikke forhåndsvise</string>
+    <string name="downloadFileCannotBeViewed">Kan ikke forhåndsvise. Last ned istedet?</string>
+    <string name="openWebBrowser">Åpne i...</string>
+
 
     <string name="createFolder">Lag ny mappe</string>
     <string name="cancel">Avbryt</string>

@@ -83,6 +83,7 @@
                   android:theme="@style/LightTheme"/>
 
         <activity android:name=".WebActivity"
+                  android:uiOptions="none"
                   android:theme="@style/LightTheme"/>
 
         <service android:name=".CameraImageAutoUploadService"

@@ -62,9 +62,10 @@
     <string name="from">from</string>
     <string name="to">to</string>
     <string name="skyDrive">SkyDrive</string>
-    <string name="downloadNoPreview">No preview available</string>
-    <string name="downloadFileCannotBeViewed">Cannot open file for preview. Download?</string>
 
+    <string name="downloadNoPreview">No preview available</string>
+    <string name="downloadFileCannotBeViewed">Cannot open file for preview. Download instead?</string>
+    <string name="openWebBrowser">Open in...</string>
 
     <string name="createFolder">Create folder</string>
     <string name="cancel">Cancel</string>
