@@ -39,6 +39,7 @@ public class UploadFileActivity extends SherlockListActivity
 
     public static final int PICK_FILE_REQUEST = 0;
     public static final String EXTRA_FILES_LIST = "filePaths";
+    public static final String EXTRA_CURRENT_FOLDER_NAME = "currentFolderName";
 
     private File mCurrentFolder;
     private Stack<File> mPreviousFolders;
@@ -52,7 +53,7 @@ public class UploadFileActivity extends SherlockListActivity
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
 
-        setTitle(getString(R.string.uploadToSkyDrive));
+        setTitle(getString(R.string.uploadTo) + " " + getIntent().getStringExtra(EXTRA_CURRENT_FOLDER_NAME));
         setContentView(R.layout.saved_files_activity);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 

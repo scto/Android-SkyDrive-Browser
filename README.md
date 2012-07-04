@@ -16,6 +16,11 @@ App icon by Tom Emery
 
 Changelog
 ---------
+2.4
+- File preview added for Office- and Open Documents (text documents, spreadsheets, and presentations)
+- Thumbnail preview for SkyDrive videos
+
+	
 2.3
 - Files shared with you can now be reached via a menu option, and selected files can be shared through any app that can send text content (like GMail, Twitter, Facebook)
 - New SkyDrive permission required for the above. This does not affect your phone.

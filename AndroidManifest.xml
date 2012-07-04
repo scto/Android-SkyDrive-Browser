@@ -61,8 +61,8 @@
                   android:theme="@style/LightThemeDialog"
                 />
 
-        <activity android:name=".dialogs.PlayAudioDialog"
-                  android:theme="@style/LightThemeDialog"/>
+        <activity android:name=".AudioControlActivity"
+                  android:theme="@style/LightTheme"/>
 
         <activity android:name=".PlayVideoActivity"
                   android:theme="@style/LightTheme"/>

@@ -74,6 +74,7 @@
     <string name="renameTitle">Rename files and folders</string>
 
     <string name="uploadToSkyDrive">Upload to SkyDrive</string>
+    <string name="uploadTo">Upload to</string>
     <string name="uploadingToSkyDrive">Uploading to your SkyDrive...</string>
     <string name="uploadError">Something happened while uploading. The file was not saved in your SkyDrive.</string>
     <string name="uploadToThisFolder">Upload here</string>
