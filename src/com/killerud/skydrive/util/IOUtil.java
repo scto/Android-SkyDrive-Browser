@@ -190,4 +190,13 @@ public class IOUtil
         extension = fileName.substring(positionOfLastDot + 1, fileName.length());
         return extension;
     }
+
+    public static String getFileExtension(String file)
+    {
+        String fileName = file;
+        String extension = "";
+        int positionOfLastDot = fileName.lastIndexOf(".");
+        extension = fileName.substring(positionOfLastDot + 1, fileName.length());
+        return extension;
+    }
 }

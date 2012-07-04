@@ -52,7 +52,7 @@ public class FileBrowserActivity extends SherlockListActivity {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
         setTitle(getString(R.string.savedFilesTitle));
-        setContentView(R.layout.file_picker);
+        setContentView(R.layout.saved_files_activity);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mCurrentlySelectedFiles = new ArrayList<String>();

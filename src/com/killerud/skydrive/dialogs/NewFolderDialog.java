@@ -40,7 +40,7 @@ public class NewFolderDialog extends SherlockActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.create_folder);
+        setContentView(R.layout.create_folder_dialog);
         setTitle(getString(R.string.newFolderTitle));
 
         mCurrentFolderId = getIntent().getStringExtra("killerud.skydrive.CURRENT_FOLDER");

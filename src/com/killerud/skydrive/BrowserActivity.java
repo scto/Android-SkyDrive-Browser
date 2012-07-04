@@ -97,6 +97,17 @@ public class BrowserActivity extends SherlockListActivity
                         data.getStringArrayListExtra(UploadFileActivity.EXTRA_FILES_LIST),
                         mCurrentFolderId);
             }
+        }else if(requestCode == DownloadDialog.DOWNLOAD_REQUEST)
+        {
+            if(requestCode == RESULT_OK)
+            {
+                XLoader loader = new XLoader(this);
+                ArrayList<SkyDriveObject> file = new ArrayList<SkyDriveObject>();
+                file.add(
+                        ((SkyDriveListAdapter) getListAdapter())
+                                .getItem(data.getIntExtra(DownloadDialog.EXTRA_FILE_POSITION, 0)));
+                loader.downloadFiles(((BrowserForSkyDriveApplication) getApplication()).getConnectClient(), file);
+            }
         }
     }
 
@@ -377,7 +388,7 @@ public class BrowserActivity extends SherlockListActivity
         }
     }
 
-    private void handleListItemClick(AdapterView<?> parent, int position)
+    private void handleListItemClick(AdapterView<?> parent, final int position)
     {
         SkyDriveObject skyDriveObj = (SkyDriveObject) parent.getItemAtPosition(position);
 
@@ -413,11 +424,19 @@ public class BrowserActivity extends SherlockListActivity
             @Override
             public void visit(SkyDriveFile file)
             {
-                if (mUploadDialog) return;
-                ArrayList<SkyDriveObject> toDownload = new ArrayList<SkyDriveObject>();
-                toDownload.add(file);
-                toDownload.trimToSize();
-                if (!connectionIsUnavailable()) mXloader.downloadFiles(mClient, toDownload);
+                if (mUploadDialog || connectionIsUnavailable()) return;
+
+                if(isDisplayableByWebBrowser(file))
+                {
+                    Intent startWebBrowser = new Intent(getApplicationContext(), WebActivity.class);
+                    startWebBrowser.putExtra(WebActivity.EXTRA_FILE_LINK, file.getLink());
+                    startActivity(startWebBrowser);
+                    return;
+                }
+
+                Intent confirmDownload = new Intent(getApplicationContext(), DownloadDialog.class);
+                confirmDownload.putExtra(DownloadDialog.EXTRA_FILE_POSITION, position);
+                startActivityForResult(confirmDownload, DownloadDialog.DOWNLOAD_REQUEST);
             }
 
             @Override
@@ -438,6 +457,43 @@ public class BrowserActivity extends SherlockListActivity
                 if (!connectionIsUnavailable()) startActivity(startAudioDialog);
             }
         });
+    }
+
+    private boolean isDisplayableByWebBrowser(SkyDriveFile file) {
+        String fileExtension = IOUtil.getFileExtension(file.getName());
+        if (fileExtension.equalsIgnoreCase("doc") ||
+                fileExtension.equalsIgnoreCase("odt") ||
+                fileExtension.equalsIgnoreCase("fodt") ||
+                fileExtension.equalsIgnoreCase("docx") ||
+                fileExtension.equalsIgnoreCase("odf"))
+        {
+            return true;
+        }
+        else if (fileExtension.equalsIgnoreCase("ppt") ||
+                fileExtension.equalsIgnoreCase("pps") ||
+                fileExtension.equalsIgnoreCase("pptx") ||
+                fileExtension.equalsIgnoreCase("ppsx") ||
+                fileExtension.equalsIgnoreCase("odp") ||
+                fileExtension.equalsIgnoreCase("fodp"))
+        {
+            return true;
+        }
+        else if (fileExtension.equalsIgnoreCase("ods") ||
+                fileExtension.equalsIgnoreCase("xls") ||
+                fileExtension.equalsIgnoreCase("xlr") ||
+                fileExtension.equalsIgnoreCase("xlsx") ||
+                fileExtension.equalsIgnoreCase("ots"))
+        {
+            return true;
+        }
+        else if(fileExtension.equalsIgnoreCase("pdf"))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     @Override

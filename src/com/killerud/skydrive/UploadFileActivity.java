@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -23,7 +22,6 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.killerud.skydrive.constants.Constants;
-import com.killerud.skydrive.dialogs.NewFolderDialog;
 import com.killerud.skydrive.util.IOUtil;
 
 import java.io.BufferedOutputStream;
@@ -55,7 +53,7 @@ public class UploadFileActivity extends SherlockListActivity
 
 
         setTitle(getString(R.string.uploadToSkyDrive));
-        setContentView(R.layout.file_picker);
+        setContentView(R.layout.saved_files_activity);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
