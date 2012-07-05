@@ -64,6 +64,9 @@
         <activity android:name=".AudioControlActivity"
                   android:theme="@style/LightTheme"/>
 
+        <activity android:name=".AudioPlayQueueActivity"
+                  android:theme="@style/LightTheme"/>
+
         <activity android:name=".PlayVideoActivity"
                   android:theme="@style/LightTheme"/>
 
@@ -77,6 +80,7 @@
                   android:theme="@style/LightThemeDialog"/>
 
         <activity android:name=".dialogs.DownloadDialog"
+                  android:label="@string/downloadFileCannotBeViewed"
                   android:theme="@style/LightThemeDialog"/>
 
         <activity android:name=".SettingsActivity"
@@ -85,6 +89,11 @@
         <activity android:name=".WebActivity"
                   android:uiOptions="none"
                   android:theme="@style/LightTheme"/>
+
+        <service android:label="@string/audioServiceName"
+                android:name=".AudioPlaybackService"
+                android:permission="android.permission.INTERNET"
+                android:exported="false" />
 
         <service android:name=".CameraImageAutoUploadService"
                  android:exported="false"

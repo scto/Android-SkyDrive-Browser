@@ -142,12 +142,13 @@
     <string name="errorLoggedOut">You have been logged out and need to log in again to continue using the app</string>
 
 
-    <string name="audioServiceName">AES Audio Playback service</string>
+    <string name="audioServiceName">Explorer for SkyDrive Music</string>
     <string name="audioBuffering">Buffering song</string>
     <string name="audioBufferingSummary">Buffering the song from your SkyDrive</string>
     <string name="audioNotPlaying">Not playing</string>
     <string name="audioNotPlayingSummary">No songs in playlist. To play some songs tap them in Android Explorer for SkyDrive.</string>
     <string name="audioPlaying">Playing</string>
+    <string name="audioReturnToControls">Tap this notification to open music controls.</string>
     <string name="audioStopped">Stopped</string>
     <string name="audioStarted">Started</string>
     <string name="audioPaused">Paused</string>
@@ -160,6 +161,9 @@
     <string name="audioPlay">Play</string>
     <string name="audioPause">Pause</string>
     <string name="audioSkip">Skip</string>
+    <string name="audioAddedToPlayingQueue">added to playing queue</string>
+    <string name="audioTapASong">Tap a song</string>
+    <string name="audioTapToAddToQueue">Tap a song to add it to the playing queue</string>
 
     <string name="disableThumb">Disable thumbnails</string>
     <string name="disableThumbSummary">Conserves memory and bandwidth. Disable thumbnails if you experience crashes.</string>

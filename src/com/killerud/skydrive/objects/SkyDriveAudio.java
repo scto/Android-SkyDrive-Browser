@@ -47,5 +47,18 @@ public class SkyDriveAudio extends SkyDriveObject
         return mObject.optBoolean("is_embeddable");
     }
 
+    public String getArtist()
+    {
+        return mObject.optString("artist");
+    }
 
+    public String getAlbum()
+    {
+        return mObject.optString("album");
+    }
+
+    public String getTitle()
+    {
+        return mObject.optString("title");
+    }
 }

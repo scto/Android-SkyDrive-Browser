@@ -36,18 +36,20 @@ public class AudioPlaybackService extends Service
     private MediaPlayer mediaPlayer;
     private LiveConnectClient connectClient;
 
+    private boolean notPlaying;
     private Notification foregroundNotification;
     private PendingIntent foregroundNotificationPendingIntent;
+
 
     @Override
     public void onCreate()
     {
         super.onCreate();
+        notPlaying = true;
         foregroundNotification = createForegroundNotification();
+        startForeground(FOREGROUND_NOTIFICATION_ID, foregroundNotification);
         mediaPlayer = createMediaPlayer();
         connectClient = ((BrowserForSkyDriveApplication) getApplication()).getConnectClient();
-
-        startForeground(FOREGROUND_NOTIFICATION_ID, foregroundNotification);
     }
 
     private Notification createForegroundNotification()
@@ -58,13 +60,12 @@ public class AudioPlaybackService extends Service
         foregroundNotificationPendingIntent = PendingIntent
                 .getActivity(this, 1, foregroundNotificationIntent, 0);
 
-        Notification notification = new Notification(R.drawable.ic_media_play,
-                getString(R.string.app_name), System.currentTimeMillis());
+        Notification notification = new Notification(R.drawable.ic_media_play_notification,
+                getString(R.string.audioServiceName), System.currentTimeMillis());
         notification.flags |= Notification.FLAG_ONGOING_EVENT;
-
         notification.setLatestEventInfo(getApplicationContext(),
-                getString(R.string.audioBuffering),
-                getString(R.string.audioBufferingSummary),
+                getString(R.string.audioTapToAddToQueue),
+                getString(R.string.audioReturnToControls),
                 foregroundNotificationPendingIntent);
         return notification;
     }
@@ -98,6 +99,7 @@ public class AudioPlaybackService extends Service
 
     private void onPlayerCompletion()
     {
+        mediaPlayer.reset();
         NOW_PLAYING_QUEUE.poll();
         updateUI(NOW_PLAYING_QUEUE.peek());
         startPlayback(NOW_PLAYING_QUEUE.peek());
@@ -110,12 +112,14 @@ public class AudioPlaybackService extends Service
 
     public void updateUI(SkyDriveAudio skyDriveAudio)
     {
+        if(skyDriveAudio == null) return;
         updateNotificationWithNewAudio(skyDriveAudio);
         broadcastNewSongForActivityUpdate(skyDriveAudio);
     }
 
     private void broadcastNewSongForActivityUpdate(SkyDriveAudio skyDriveAudio)
     {
+        if(skyDriveAudio == null) return;
         Intent broadcast = new Intent();
         broadcast.setAction(Constants.ACTION_SONG_CHANGE);
         broadcast.putExtra(Constants.EXTRA_SONG_TITLE, skyDriveAudio.getName());
@@ -124,11 +128,13 @@ public class AudioPlaybackService extends Service
 
     private void updateNotificationWithNewAudio(SkyDriveAudio skyDriveAudio)
     {
-          foregroundNotification.setLatestEventInfo(getApplicationContext(),
-                  (skyDriveAudio.getName()!=null?skyDriveAudio.getName():""),
+        if(skyDriveAudio == null) return;
+        foregroundNotification.setLatestEventInfo(getApplicationContext(),
                   getString(R.string.audioPlaying) + " " +
-                          (skyDriveAudio.getName()!=null?skyDriveAudio.getName():""),
+                          audioTitle(skyDriveAudio),
+                getString(R.string.audioReturnToControls),
                   foregroundNotificationPendingIntent);
+        startForeground(FOREGROUND_NOTIFICATION_ID, foregroundNotification);
     }
 
 
@@ -141,17 +147,25 @@ public class AudioPlaybackService extends Service
     {
         SkyDriveAudio skyDriveAudio = NOW_PLAYING_QUEUE.peek();
         foregroundNotification.setLatestEventInfo(getApplicationContext(),
-                songState + " " + (skyDriveAudio.getName()!=null?skyDriveAudio.getName():""),
-                songState + " " + (skyDriveAudio.getName()!=null?skyDriveAudio.getName():""),
+                songState + " " + audioTitle(skyDriveAudio),
+                getString(R.string.audioReturnToControls),
                 foregroundNotificationPendingIntent);
+        startForeground(FOREGROUND_NOTIFICATION_ID, foregroundNotification);
+    }
+
+    public String audioTitle(SkyDriveAudio skyDriveAudio)
+    {
+        return (skyDriveAudio.getTitle()!=null?skyDriveAudio.getTitle():
+            (skyDriveAudio.getName()!=null?skyDriveAudio.getName():"audio"));
     }
 
     private void updateNotificationNotPlaying()
     {
         foregroundNotification.setLatestEventInfo(getApplicationContext(),
-                getString(R.string.audioNotPlaying),
                 getString(R.string.audioNotPlayingSummary),
+                getString(R.string.audioReturnToControls),
                 foregroundNotificationPendingIntent);
+        startForeground(FOREGROUND_NOTIFICATION_ID, foregroundNotification);
     }
 
     private void startPlayback(SkyDriveAudio skyDriveAudio)
@@ -159,8 +173,11 @@ public class AudioPlaybackService extends Service
         if(skyDriveAudio == null)
         {
             updateNotificationNotPlaying();
+            notPlaying = true;
             return;
         }
+
+        notPlaying = false;
 
         try
         {
@@ -197,6 +214,7 @@ public class AudioPlaybackService extends Service
         try
         {
             mediaPlayer.stop();
+            mediaPlayer.reset();
             updateNotificationPlayState(R.string.audioStopped);
         }catch (IllegalStateException e)
         {
@@ -206,13 +224,18 @@ public class AudioPlaybackService extends Service
     public void playSong()
     {
         try{
-            mediaPlayer.start();
+            startPlayback(NOW_PLAYING_QUEUE.peek());
             updateNotificationPlayState(R.string.audioPlaying);
         }catch (IllegalStateException e)
         {
         }
     }
 
+    public boolean isPlaying()
+    {
+        assert mediaPlayer != null;
+        return mediaPlayer.isPlaying();
+    }
 
     public void pauseSong()
     {
@@ -222,6 +245,13 @@ public class AudioPlaybackService extends Service
         }catch (IllegalStateException e)
         {
         }
+    }
+
+    public void nextSong()
+    {
+        mediaPlayer.reset();
+        NOW_PLAYING_QUEUE.poll();
+        startPlayback(NOW_PLAYING_QUEUE.peek());
     }
 
     public final Queue<SkyDriveAudio> NOW_PLAYING_QUEUE = new Queue<SkyDriveAudio>()
@@ -406,5 +436,10 @@ public class AudioPlaybackService extends Service
             mediaPlayer.release();
             mediaPlayer = null;
         }
+    }
+
+    public boolean notPlaying()
+    {
+        return this.notPlaying;
     }
 }

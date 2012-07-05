@@ -1,17 +1,11 @@
 package com.killerud.skydrive;
 
 import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
-import android.os.AsyncTask;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.Environment;
+import android.os.*;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.SparseBooleanArray;
@@ -338,6 +332,17 @@ public class BrowserActivity extends SherlockListActivity
 
                     return true;
                 }else{
+                    try{
+                        if(audioPlaybackService != null)
+                        {
+                            if(audioPlaybackService.notPlaying()){
+                                audioPlaybackService.stopSelf();
+                            }
+                            unbindService(audioPlaybackServiceConnection);
+                        }
+                    }catch (Exception e)
+                    {
+                    }
                     return super.onKeyDown(keyCode, event);
                 }
             }
@@ -452,9 +457,17 @@ public class BrowserActivity extends SherlockListActivity
             public void visit(SkyDriveAudio audio)
             {
                 if (mUploadDialog) return;
-                ((BrowserForSkyDriveApplication) getApplication()).setCurrentMusic(audio);
-                Intent startAudioDialog = new Intent(getApplicationContext(), AudioControlActivity.class);
-                if (!connectionIsUnavailable()) startActivity(startAudioDialog);
+                if(connectionIsUnavailable()) return;
+                if(audioPlaybackService != null){
+                    if(!audioPlaybackService.isPlaying())
+                    {
+                        startActivity(new Intent(getApplicationContext(), AudioControlActivity.class));
+                    }
+                    audioPlaybackService.NOW_PLAYING_QUEUE.add(audio);
+                    Toast.makeText(getApplicationContext(),
+                            audioPlaybackService.audioTitle(audio) + " " + getString(R.string.audioAddedToPlayingQueue),
+                            Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -483,10 +496,6 @@ public class BrowserActivity extends SherlockListActivity
                 fileExtension.equalsIgnoreCase("xlr") ||
                 fileExtension.equalsIgnoreCase("xlsx") ||
                 fileExtension.equalsIgnoreCase("ots"))
-        {
-            return true;
-        }
-        else if(fileExtension.equalsIgnoreCase("pdf"))
         {
             return true;
         }
@@ -1230,6 +1239,9 @@ public class BrowserActivity extends SherlockListActivity
                         mView = inflateNewSkyDriveListItem();
                     }
 
+                    startService(new Intent(getApplicationContext(), AudioPlaybackService.class));
+                    bindService(new Intent(getApplicationContext(), AudioPlaybackService.class),
+                            audioPlaybackServiceConnection, Context.BIND_ABOVE_CLIENT);
                     setIcon(R.drawable.audio_x_generic);
                     setName(audio);
                     setSelected(isChecked(mPosition));
@@ -1539,5 +1551,21 @@ public class BrowserActivity extends SherlockListActivity
         mCurrentlySelectedFiles.clear();
         updateActionModeTitleWithSelectedCount();
     }
+
+    private AudioPlaybackService audioPlaybackService;
+    private ServiceConnection audioPlaybackServiceConnection = new ServiceConnection()
+    {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder)
+        {
+            audioPlaybackService = ((AudioPlaybackService.AudioPlaybackServiceBinder) iBinder).getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName)
+        {
+            audioPlaybackService = null;
+        }
+    };
 }
 
