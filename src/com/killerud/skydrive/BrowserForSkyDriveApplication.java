@@ -89,7 +89,7 @@ public class BrowserForSkyDriveApplication extends Application
         this.mCurrentMusic = audio;
     }
 
-    public SkyDriveAudio getCurrentMusic()
+    public SkyDriveAudio getAudioClicked()
     {
         return this.mCurrentMusic;
     }

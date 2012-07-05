@@ -1027,6 +1027,12 @@ public class BrowserActivity extends SherlockListActivity
                 }
 
                 private void handleThumbnail(final SkyDriveObject skyDriveObject, final View view) {
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                    if (preferences.getBoolean(Constants.THUMBNAILS_DISABLED, false))
+                    {
+                        return;
+                    }
+
                     try
                     {
                         mClient.downloadAsync(skyDriveObject.getId() + "/picture?type=thumbnail", new LiveDownloadOperationListener()
@@ -1283,6 +1289,12 @@ public class BrowserActivity extends SherlockListActivity
 
                 private boolean setThumbnailFromCacheIfExists(View view, SkyDriveObject file)
                 {
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                    if (preferences.getBoolean(Constants.THUMBNAILS_DISABLED, false))
+                    {
+                        return false;
+                    }
+
                     /* Store stuff in app data folder, so it is deleted on uninstall */
                     File cacheFolder = new File(Environment.getExternalStorageDirectory()
                             + "/Android/data/com.killerud.skydrive/thumbs/");

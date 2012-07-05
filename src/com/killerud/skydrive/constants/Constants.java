@@ -25,6 +25,10 @@ final public class Constants
     /* Actions */
     public static final String ACTION_CANCEL_DOWN = "com.killerud.skydrive.CANCEL_DOWN";
     public static final String ACTION_CANCEL_UP = "com.killerud.skydrive.CANCEL_UP";
+    public static final String ACTION_SONG_CHANGE = "com.killerud.skydrive.SONG_CHANGE";
+
+    /* Extras */
+    public static final String EXTRA_SONG_TITLE = "songTitle";
 
     /* Saved state */
     public static final String STATE_CURRENT_FOLDER = "currentFolderState";
@@ -39,6 +43,7 @@ final public class Constants
 
     /* Settings */
     public static final String  CONFIRM_EXIT = "confirm_exit";
+    public static final String THUMBNAILS_DISABLED = "thumbnails_disabled";
 
 
     private Constants()

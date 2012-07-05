@@ -3,11 +3,13 @@ package com.killerud.skydrive;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
@@ -405,39 +407,43 @@ public class UploadFileActivity extends SherlockListActivity
             int fileDrawable = determineFileDrawable(file);
             if(fileDrawable == R.drawable.image_x_generic)
             {
-                AsyncTask getThumb = new AsyncTask<File, Void, Bitmap>()
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                if (!preferences.getBoolean(Constants.THUMBNAILS_DISABLED, false))
                 {
-                    @Override
-                    protected Bitmap doInBackground(File... files) {
-                        File thumbCacheFile = new File(Environment.getExternalStorageDirectory()
-                                + "/Android/data/com.killerud.skydrive/thumbs/" + files[0].getPath());
-                        if(thumbCacheFile.exists())
-                        {
-                            return BitmapFactory.decodeFile(thumbCacheFile.getPath());
+                    AsyncTask getThumb = new AsyncTask<File, Void, Bitmap>()
+                    {
+                        @Override
+                        protected Bitmap doInBackground(File... files) {
+                            File thumbCacheFile = new File(Environment.getExternalStorageDirectory()
+                                    + "/Android/data/com.killerud.skydrive/thumbs/" + files[0].getPath());
+                            if(thumbCacheFile.exists())
+                            {
+                                return BitmapFactory.decodeFile(thumbCacheFile.getPath());
+                            }
+
+                            BitmapFactory.Options options = new BitmapFactory.Options();
+                            options.inJustDecodeBounds = true;
+                            BitmapFactory.decodeFile(files[0].getPath(), options);
+
+                            int sampleSize = (options.outHeight>options.outWidth?options.outHeight/60:options.outWidth/60);
+                            Log.i(Constants.LOGTAG, "Sample size is " + sampleSize);
+                            options = new BitmapFactory.Options();
+                            options.inSampleSize = sampleSize;
+
+                            Bitmap thumb = BitmapFactory.decodeFile(files[0].getPath(), options);
+
+                            cacheThumb(thumbCacheFile, thumb);
+                            return thumb;
                         }
 
-                        BitmapFactory.Options options = new BitmapFactory.Options();
-                        options.inJustDecodeBounds = true;
-                        BitmapFactory.decodeFile(files[0].getPath(), options);
+                        protected void onPostExecute(Bitmap thumb)
+                        {
+                            ((ImageView) view.findViewById(R.id.skyDriveItemIcon)).setImageBitmap(thumb);
+                        }
+                    };
 
-                        int sampleSize = (options.outHeight>options.outWidth?options.outHeight/60:options.outWidth/60);
-                        Log.i(Constants.LOGTAG, "Sample size is " + sampleSize);
-                        options = new BitmapFactory.Options();
-                        options.inSampleSize = sampleSize;
-
-                        Bitmap thumb = BitmapFactory.decodeFile(files[0].getPath(), options);
-
-                        cacheThumb(thumbCacheFile, thumb);
-                        return thumb;
-                    }
-
-                    protected void onPostExecute(Bitmap thumb)
-                    {
-                        ((ImageView) view.findViewById(R.id.skyDriveItemIcon)).setImageBitmap(thumb);
-                    }
-                };
-
-                getThumb.execute(new File[]{file});
+                    getThumb.execute(new File[]{file});
+                }
             }else{
                 type.setImageResource(fileDrawable);
             }
