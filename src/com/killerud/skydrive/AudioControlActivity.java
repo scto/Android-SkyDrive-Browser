@@ -9,7 +9,6 @@ package com.killerud.skydrive;
 import android.content.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
@@ -19,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 import com.killerud.skydrive.constants.Constants;
 import com.killerud.skydrive.objects.SkyDriveAudio;
 import com.microsoft.live.LiveDownloadOperation;
@@ -32,41 +32,41 @@ import java.io.File;
  * and allows the user to pause, play, stop, and save the song, or
  * dismiss the dialog
  */
-public class AudioControlActivity extends SherlockActivity  implements View.OnClickListener
+public class AudioControlActivity extends SherlockActivity implements View.OnClickListener
 {
     private AudioPlaybackService audioPlaybackService;
-    private TextView audioStatusText;
     private TextView audioTitleText;
     private TextView audioArtistText;
-    private TextView audioAlbumText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+
         setContentView(R.layout.audio_activity);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         findViewById(R.id.audioPlayPause).setOnClickListener(this);
-        findViewById(R.id.audioCancel).setOnClickListener(this);
         findViewById(R.id.audioStop).setOnClickListener(this);
         findViewById(R.id.audioNext).setOnClickListener(this);
+        findViewById(R.id.audioPrevious).setOnClickListener(this);
+        findViewById(R.id.audioRepeat).setOnClickListener(this);
+        findViewById(R.id.audioShuffle).setOnClickListener(this);
 
-        audioAlbumText = (TextView) findViewById(R.id.audioAlbumText);
-        audioArtistText= (TextView) findViewById(R.id.audioArtistText);
+        audioArtistText = (TextView) findViewById(R.id.audioArtistText);
         audioTitleText = (TextView) findViewById(R.id.audioTitleText);
-        audioStatusText = (TextView) findViewById(R.id.audioStatusText);
-
     }
 
     @Override
     protected void onResume()
     {
         super.onResume();
+        setProgressBarIndeterminateVisibility(true);
+        registerBroadcastReceiver();
         startService(new Intent(this, AudioPlaybackService.class));
         bindService(new Intent(this, AudioPlaybackService.class),
                 audioPlaybackServiceConnection, Context.BIND_ABOVE_CLIENT);
-        registerBroadcastReceiver();
     }
 
     @Override
@@ -74,7 +74,7 @@ public class AudioControlActivity extends SherlockActivity  implements View.OnCl
     {
         super.onPause();
         unregisterReceiver(broadcastReceiver);
-        if(audioPlaybackService.NOW_PLAYING_QUEUE.isEmpty())
+        if (audioPlaybackService.NOW_PLAYING.isEmpty())
         {
             audioPlaybackService.onDestroy();
         }
@@ -107,21 +107,33 @@ public class AudioControlActivity extends SherlockActivity  implements View.OnCl
         switch (view.getId())
         {
             case R.id.audioPlayPause:
-                if(audioPlaybackService.isPlaying())
+                if (audioPlaybackService.isPlaying())
                 {
                     audioPlaybackService.pauseSong();
                     setToSongPausedUI();
-                }else {
-                    audioPlaybackService.playSong();
+                } else
+                {
+                    audioPlaybackService.resumeSong();
                     setToSongPlayingUI();
                 }
                 return;
-            case R.id.audioCancel:
-                finish();
-                return;
             case R.id.audioNext:
+                setProgressBarIndeterminateVisibility(true);
                 audioPlaybackService.nextSong();
                 setToSongPlayingUI();
+                return;
+            case R.id.audioPrevious:
+                setProgressBarIndeterminateVisibility(true);
+                audioPlaybackService.previousSong();
+                setToSongPlayingUI();
+                return;
+            case R.id.audioShuffle:
+                audioPlaybackService.toggleShuffle();
+                updateShuffleState();
+                return;
+            case R.id.audioRepeat:
+                audioPlaybackService.toggleRepeat();
+                updateRepeatState();
                 return;
             case R.id.audioStop:
                 audioPlaybackService.stopSong();
@@ -132,21 +144,52 @@ public class AudioControlActivity extends SherlockActivity  implements View.OnCl
         }
     }
 
+    private void updateRepeatState()
+    {
+        if (audioPlaybackService != null)
+        {
+            if (audioPlaybackService.isOnRepeat())
+            {
+                ((ImageButton) findViewById(R.id.audioRepeat)).setImageResource(R.drawable.ic_media_repeat_highlight);
+            } else
+            {
+                ((ImageButton) findViewById(R.id.audioRepeat)).setImageResource(R.drawable.ic_media_repeat);
+            }
+        } else
+        {
+            ((ImageButton) findViewById(R.id.audioRepeat)).setImageResource(R.drawable.ic_media_repeat);
+        }
+    }
+
+    private void updateShuffleState()
+    {
+        if (audioPlaybackService != null)
+        {
+            if (audioPlaybackService.isShuffled())
+            {
+                ((ImageButton) findViewById(R.id.audioShuffle)).setImageResource(R.drawable.ic_media_shuffle_highlight);
+            } else
+            {
+                ((ImageButton) findViewById(R.id.audioShuffle)).setImageResource(R.drawable.ic_media_shuffle);
+            }
+        } else
+        {
+            ((ImageButton) findViewById(R.id.audioShuffle)).setImageResource(R.drawable.ic_media_shuffle);
+        }
+    }
+
     private void setToSongStoppedUI()
     {
-        audioStatusText.setText(R.string.audioStopped);
         ((ImageButton) findViewById(R.id.audioPlayPause)).setImageResource(R.drawable.ic_media_play);
     }
 
     private void setToSongPlayingUI()
     {
-        audioStatusText.setText(R.string.audioPlaying);
         ((ImageButton) findViewById(R.id.audioPlayPause)).setImageResource(R.drawable.ic_media_pause);
     }
 
     private void setToSongPausedUI()
     {
-        audioStatusText.setText(R.string.audioPaused);
         ((ImageButton) findViewById(R.id.audioPlayPause)).setImageResource(R.drawable.ic_media_play);
     }
 
@@ -156,52 +199,69 @@ public class AudioControlActivity extends SherlockActivity  implements View.OnCl
         @Override
         public void onReceive(Context context, Intent intent)
         {
-        if(intent.getAction().equals(Constants.ACTION_SONG_CHANGE))
-        {
-            updateUI(audioPlaybackService.NOW_PLAYING_QUEUE.peek());
-        }
+            if (intent.getAction().equals(Constants.ACTION_SONG_CHANGE))
+            {
+                updateUI(audioPlaybackService.NOW_PLAYING.peek());
+                setProgressBarIndeterminateVisibility(false);
+            }
         }
     };
 
 
-
     private void updateUI(SkyDriveAudio skyDriveAudio)
     {
-        if(skyDriveAudio == null) return;
-
+        if (skyDriveAudio == null)
+        {
+            setToSongStoppedUI();
+            setTitle(R.string.audioNotPlaying);
+        } else
+        {
+            setToSongPlayingUI();
+            setTitle(audioPlaybackService.getAudioTitle(skyDriveAudio));
+        }
         updateCoverPhoto(skyDriveAudio);
-        setToSongPlayingUI();
         updateSongDetails(skyDriveAudio);
-        setTitle(audioPlaybackService.audioTitle(skyDriveAudio));
+        updateRepeatState();
+        updateShuffleState();
     }
 
     private void updateSongDetails(SkyDriveAudio skyDriveAudio)
     {
-        if(skyDriveAudio == null) return;
-        audioArtistText.setText(skyDriveAudio.getArtist());
-        audioAlbumText.setText(skyDriveAudio.getAlbum());
-        audioTitleText.setText(audioPlaybackService.audioTitle(skyDriveAudio));
+        if (skyDriveAudio == null)
+        {
+            audioArtistText.setText("");
+            audioTitleText.setText(R.string.audioNotPlaying);
+        } else
+        {
+            audioArtistText.setText(skyDriveAudio.getArtist());
+            audioTitleText.setText(audioPlaybackService.getAudioTitle(skyDriveAudio));
+        }
     }
 
     private void updateCoverPhoto(SkyDriveAudio skyDriveAudio)
     {
-        if(skyDriveAudio == null) return;
-        if(albumArtExistsInCache(skyDriveAudio))
+        if (skyDriveAudio == null)
         {
-            loadAlbumArtFromCache(skyDriveAudio);
+            ((ImageView) findViewById(R.id.audioAlbumArt))
+                    .setImageResource(R.drawable.audio_album_generic);
         }else{
-            loadAlbumArtFromSkyDrive(skyDriveAudio);
+            if (albumArtExistsInCache(skyDriveAudio))
+            {
+                loadAlbumArtFromCache(skyDriveAudio);
+            } else
+            {
+                loadAlbumArtFromSkyDrive(skyDriveAudio);
+            }
         }
     }
 
     private void loadAlbumArtFromSkyDrive(SkyDriveAudio skyDriveAudio)
     {
-
-        if(skyDriveAudio == null) return;
+        assert skyDriveAudio != null;
         final File albumArtFile = new File(Environment.getExternalStorageDirectory()
                 + "/Android/data/com.killerud.skydrive/thumbs/" + skyDriveAudio.getName() + ".jpg");
         final LiveDownloadOperation operation =
-                ((BrowserForSkyDriveApplication)getApplication()).getConnectClient().downloadAsync(
+                ((BrowserForSkyDriveApplication) getApplication()).getConnectClient().downloadAsync(
                         skyDriveAudio.getId() + "/picture",
                         albumArtFile,
                         new LiveDownloadOperationListener()
@@ -231,7 +291,8 @@ public class AudioControlActivity extends SherlockActivity  implements View.OnCl
                         });
     }
 
-    private BitmapFactory.Options determineBitmapDecodeOptions(File file) {
+    private BitmapFactory.Options determineBitmapDecodeOptions(File file)
+    {
         BitmapFactory.Options scoutOptions = new BitmapFactory.Options();
         scoutOptions.inJustDecodeBounds = true;
 
@@ -240,9 +301,9 @@ public class AudioControlActivity extends SherlockActivity  implements View.OnCl
         int bitmapHeight = scoutOptions.outHeight;
         int bitmapWidth = scoutOptions.outWidth;
 
-        int dividend  = bitmapWidth;
+        int dividend = bitmapWidth;
 
-        if(bitmapHeight > bitmapWidth)
+        if (bitmapHeight > bitmapWidth)
         {
             dividend = bitmapHeight;
         }
@@ -257,7 +318,7 @@ public class AudioControlActivity extends SherlockActivity  implements View.OnCl
 
     private void loadAlbumArtFromCache(SkyDriveAudio skyDriveAudio)
     {
-        if(skyDriveAudio == null) return;
+        assert skyDriveAudio != null;
         final File albumArtFile = new File(Environment.getExternalStorageDirectory()
                 + "/Android/data/com.killerud.skydrive/thumbs/" + skyDriveAudio.getName() + ".jpg");
         BitmapFactory.Options options = determineBitmapDecodeOptions(albumArtFile);
@@ -267,7 +328,7 @@ public class AudioControlActivity extends SherlockActivity  implements View.OnCl
 
     private boolean albumArtExistsInCache(SkyDriveAudio skyDriveAudio)
     {
-        if(skyDriveAudio == null) return false;
+        assert skyDriveAudio != null;
         final File albumArtFile = new File(Environment.getExternalStorageDirectory()
                 + "/Android/data/com.killerud.skydrive/thumbs/" + skyDriveAudio.getName() + ".jpg");
         return albumArtFile.exists();
@@ -280,7 +341,6 @@ public class AudioControlActivity extends SherlockActivity  implements View.OnCl
         {
             audioPlaybackService = ((AudioPlaybackService.AudioPlaybackServiceBinder) iBinder).getService();
             audioPlaybackService.updateUI();
-            updateUI(audioPlaybackService.NOW_PLAYING_QUEUE.peek());
         }
 
         @Override

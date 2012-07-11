@@ -332,17 +332,6 @@ public class BrowserActivity extends SherlockListActivity
 
                     return true;
                 }else{
-                    try{
-                        if(audioPlaybackService != null)
-                        {
-                            if(audioPlaybackService.notPlaying()){
-                                audioPlaybackService.stopSelf();
-                            }
-                            unbindService(audioPlaybackServiceConnection);
-                        }
-                    }catch (Exception e)
-                    {
-                    }
                     return super.onKeyDown(keyCode, event);
                 }
             }
@@ -463,9 +452,9 @@ public class BrowserActivity extends SherlockListActivity
                     {
                         startActivity(new Intent(getApplicationContext(), AudioControlActivity.class));
                     }
-                    audioPlaybackService.NOW_PLAYING_QUEUE.add(audio);
+                    audioPlaybackService.NOW_PLAYING.add(audio);
                     Toast.makeText(getApplicationContext(),
-                            audioPlaybackService.audioTitle(audio) + " " + getString(R.string.audioAddedToPlayingQueue),
+                            audioPlaybackService.getAudioTitle(audio) + " " + getString(R.string.audioAddedToPlayingQueue),
                             Toast.LENGTH_SHORT).show();
                 }
             }

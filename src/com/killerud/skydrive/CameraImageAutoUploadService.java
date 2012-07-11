@@ -57,7 +57,7 @@ public class CameraImageAutoUploadService extends Service
         if(connectionIsUnavailable()){
             onDestroy();
         }else{
-            final String cameraFilePath = Environment.getExternalStorageDirectory() + "/DCIM/Camera/";
+            final String cameraFilePath = Environment.getExternalStorageDirectory() + "/" + Environment.DIRECTORY_DCIM;
             final XLoader skyDriveFileLoader = new XLoader(
                     ((BrowserForSkyDriveApplication) getApplication()).getCurrentBrowser());
 

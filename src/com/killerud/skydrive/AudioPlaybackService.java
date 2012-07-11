@@ -9,17 +9,15 @@ import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.IBinder;
+import android.util.Log;
 import android.widget.Toast;
 import com.killerud.skydrive.constants.Constants;
 import com.killerud.skydrive.objects.SkyDriveAudio;
-import com.microsoft.live.LiveConnectClient;
+import com.killerud.skydrive.util.Utility;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -34,22 +32,21 @@ public class AudioPlaybackService extends Service
     private final IBinder mBinder = new AudioPlaybackServiceBinder();
     private final static int FOREGROUND_NOTIFICATION_ID = 837;
     private MediaPlayer mediaPlayer;
-    private LiveConnectClient connectClient;
-
-    private boolean notPlaying;
     private Notification foregroundNotification;
     private PendingIntent foregroundNotificationPendingIntent;
+    private boolean repeatPlaylist;
+
+    private LinkedList<SkyDriveAudio> unshuffledPlaylist;
+    private boolean shuffled;
 
 
     @Override
     public void onCreate()
     {
         super.onCreate();
-        notPlaying = true;
+        repeatPlaylist = false;
         foregroundNotification = createForegroundNotification();
-        startForeground(FOREGROUND_NOTIFICATION_ID, foregroundNotification);
         mediaPlayer = createMediaPlayer();
-        connectClient = ((BrowserForSkyDriveApplication) getApplication()).getConnectClient();
     }
 
     private Notification createForegroundNotification()
@@ -81,6 +78,20 @@ public class AudioPlaybackService extends Service
                 onPlayerPrepared(mediaPlayer);
             }
         });
+        player.setOnErrorListener(new MediaPlayer.OnErrorListener()
+        {
+            @Override
+            public boolean onError(MediaPlayer mediaPlayer, int i, int i1)
+            {
+                mediaPlayer.reset();
+                if (NOW_PLAYING.size() > 0)
+                {
+                    NOW_PLAYING.poll();
+                    startPlayback(NOW_PLAYING.peek());
+                }
+                return true;
+            }
+        });
         player.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
         {
             @Override
@@ -95,45 +106,51 @@ public class AudioPlaybackService extends Service
     private void onPlayerPrepared(MediaPlayer mediaPlayer)
     {
         mediaPlayer.start();
+        updateUI();
     }
 
     private void onPlayerCompletion()
     {
         mediaPlayer.reset();
-        NOW_PLAYING_QUEUE.poll();
-        updateUI(NOW_PLAYING_QUEUE.peek());
-        startPlayback(NOW_PLAYING_QUEUE.peek());
+        PLAYED.push(NOW_PLAYING.poll());
+        updateUI(NOW_PLAYING.peek());
+        startPlayback(NOW_PLAYING.peek());
     }
 
     public void updateUI()
     {
-        updateUI(NOW_PLAYING_QUEUE.peek());
+        updateUI(NOW_PLAYING.peek());
     }
 
     public void updateUI(SkyDriveAudio skyDriveAudio)
     {
-        if(skyDriveAudio == null) return;
+        if (skyDriveAudio == null)
+        {
+            stopForeground(true);
+        }
         updateNotificationWithNewAudio(skyDriveAudio);
         broadcastNewSongForActivityUpdate(skyDriveAudio);
     }
 
     private void broadcastNewSongForActivityUpdate(SkyDriveAudio skyDriveAudio)
     {
-        if(skyDriveAudio == null) return;
         Intent broadcast = new Intent();
         broadcast.setAction(Constants.ACTION_SONG_CHANGE);
-        broadcast.putExtra(Constants.EXTRA_SONG_TITLE, skyDriveAudio.getName());
         sendBroadcast(broadcast);
     }
 
     private void updateNotificationWithNewAudio(SkyDriveAudio skyDriveAudio)
     {
-        if(skyDriveAudio == null) return;
+        if (skyDriveAudio == null)
+        {
+            return;
+        }
+
         foregroundNotification.setLatestEventInfo(getApplicationContext(),
-                  getString(R.string.audioPlaying) + " " +
-                          audioTitle(skyDriveAudio),
+                getString(R.string.audioPlaying) + " " +
+                        getAudioTitle(skyDriveAudio),
                 getString(R.string.audioReturnToControls),
-                  foregroundNotificationPendingIntent);
+                foregroundNotificationPendingIntent);
         startForeground(FOREGROUND_NOTIFICATION_ID, foregroundNotification);
     }
 
@@ -145,39 +162,39 @@ public class AudioPlaybackService extends Service
 
     private void updateNotificationPlayState(String songState)
     {
-        SkyDriveAudio skyDriveAudio = NOW_PLAYING_QUEUE.peek();
+        SkyDriveAudio skyDriveAudio = NOW_PLAYING.peek();
         foregroundNotification.setLatestEventInfo(getApplicationContext(),
-                songState + " " + audioTitle(skyDriveAudio),
+                songState + " " + getAudioTitle(skyDriveAudio),
                 getString(R.string.audioReturnToControls),
                 foregroundNotificationPendingIntent);
         startForeground(FOREGROUND_NOTIFICATION_ID, foregroundNotification);
     }
 
-    public String audioTitle(SkyDriveAudio skyDriveAudio)
+    public String getAudioTitle(SkyDriveAudio skyDriveAudio)
     {
-        return (skyDriveAudio.getTitle()!=null?skyDriveAudio.getTitle():
-            (skyDriveAudio.getName()!=null?skyDriveAudio.getName():"audio"));
-    }
-
-    private void updateNotificationNotPlaying()
-    {
-        foregroundNotification.setLatestEventInfo(getApplicationContext(),
-                getString(R.string.audioNotPlayingSummary),
-                getString(R.string.audioReturnToControls),
-                foregroundNotificationPendingIntent);
-        startForeground(FOREGROUND_NOTIFICATION_ID, foregroundNotification);
+        return (skyDriveAudio.getTitle() != null ? skyDriveAudio.getTitle() :
+                (skyDriveAudio.getName() != null ? skyDriveAudio.getName() : "audio"));
     }
 
     private void startPlayback(SkyDriveAudio skyDriveAudio)
     {
-        if(skyDriveAudio == null)
+        if(mediaPlayer == null)
         {
-            updateNotificationNotPlaying();
-            notPlaying = true;
-            return;
+            mediaPlayer = createMediaPlayer();
         }
 
-        notPlaying = false;
+        if (skyDriveAudio == null && repeatPlaylist)
+        {
+            populateNowPlayingWithPlayed();
+            startPlayback(NOW_PLAYING.peek());
+            return;
+        } else if (skyDriveAudio == null)
+        {
+            stopForeground(true);
+            updateUI();
+            clearPlaylist();
+            return;
+        }
 
         try
         {
@@ -193,20 +210,30 @@ public class AudioPlaybackService extends Service
             mediaPlayer.prepareAsync();
         } catch (IllegalArgumentException e)
         {
-            showToast(e.getMessage());
+            Log.e(Constants.LOGTAG, "Illegal argument exception for media player in audio playback service");
         } catch (IllegalStateException e)
         {
-            showToast(e.getMessage());
+            Log.e(Constants.LOGTAG, "Media player in audio playback service in illegal state");
         } catch (IOException e)
         {
-            showToast(e.getMessage());
+            Log.e(Constants.LOGTAG, "IOException for media player in audio playback service");
         }
+
+        updateNotificationPlayState(R.string.audioPlaying);
     }
 
-    private void startFirstSongPlayback(SkyDriveAudio skyDriveAudio)
+    private void clearPlaylist()
     {
-        updateUI(skyDriveAudio);
-        startPlayback(skyDriveAudio);
+        NOW_PLAYING.clear();
+        PLAYED.clear();
+    }
+
+    private void populateNowPlayingWithPlayed()
+    {
+        for (int i = 0; i < PLAYED.size(); i++)
+        {
+            NOW_PLAYING.addFirst(PLAYED.pop());
+        }
     }
 
     public void stopSong()
@@ -215,191 +242,215 @@ public class AudioPlaybackService extends Service
         {
             mediaPlayer.stop();
             mediaPlayer.reset();
-            updateNotificationPlayState(R.string.audioStopped);
-        }catch (IllegalStateException e)
+            stopForeground(true);
+        } catch (IllegalStateException e)
         {
-        }
-    }
-
-    public void playSong()
-    {
-        try{
-            startPlayback(NOW_PLAYING_QUEUE.peek());
-            updateNotificationPlayState(R.string.audioPlaying);
-        }catch (IllegalStateException e)
-        {
+            Log.e(Constants.LOGTAG, "" + e.getMessage());
         }
     }
 
     public boolean isPlaying()
     {
-        assert mediaPlayer != null;
-        return mediaPlayer.isPlaying();
+        if (mediaPlayer == null)
+        {
+            return false;
+        }
+        try
+        {
+            return mediaPlayer.isPlaying();
+        } catch (IllegalStateException e)
+        {
+            return false;
+        }
+    }
+
+    public void resumeSong()
+    {
+        if (NOW_PLAYING.peek() == null)
+        {
+            return;
+        }
+
+        try
+        {
+            mediaPlayer.start();
+            updateNotificationPlayState(R.string.audioPlaying);
+        } catch (IllegalStateException e)
+        {
+            Log.e(Constants.LOGTAG, "" + e.getMessage());
+        }
     }
 
     public void pauseSong()
     {
-        try{
+        if (NOW_PLAYING.peek() == null)
+        {
+            return;
+        }
+
+        try
+        {
             mediaPlayer.pause();
             updateNotificationPlayState(R.string.audioPaused);
-        }catch (IllegalStateException e)
+        } catch (IllegalStateException e)
         {
+            Log.e(Constants.LOGTAG, "" + e.getMessage());
         }
     }
 
     public void nextSong()
     {
-        mediaPlayer.reset();
-        NOW_PLAYING_QUEUE.poll();
-        startPlayback(NOW_PLAYING_QUEUE.peek());
+        if (mediaPlayer == null)
+        {
+            stopForeground(true);
+            return;
+        }
+
+        if (NOW_PLAYING.peek() == null)
+        {
+            Toast.makeText(getApplicationContext(), R.string.audioNothingToSkipTo, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try
+        {
+            mediaPlayer.stop();
+            mediaPlayer.reset();
+            PLAYED.push(NOW_PLAYING.poll());
+            startPlayback(NOW_PLAYING.peek());
+        } catch (IllegalStateException e)
+        {
+            Log.e(Constants.LOGTAG, "" + e.getMessage());
+        }
     }
 
-    public final Queue<SkyDriveAudio> NOW_PLAYING_QUEUE = new Queue<SkyDriveAudio>()
+    public void previousSong()
     {
-        private LinkedList<SkyDriveAudio> nowPlayingList = new LinkedList<SkyDriveAudio>();
+        if (mediaPlayer == null || PLAYED.isEmpty())
+        {
+            Toast.makeText(getApplicationContext(), R.string.audioNothingToSkipTo, Toast.LENGTH_SHORT).show();
+            return;
+        }
 
+        try
+        {
+            mediaPlayer.stop();
+            mediaPlayer.reset();
+            NOW_PLAYING.addFirst(PLAYED.pop());
+            startPlayback(NOW_PLAYING.peek());
+        } catch (IllegalStateException e)
+        {
+            Log.e(Constants.LOGTAG, "" + e.getMessage());
+        }
+    }
+
+
+    public void toggleShuffle()
+    {
+        if (this.shuffled)
+        {
+            restoreUnshuffledPlaylist();
+            this.shuffled = false;
+        } else
+        {
+            shufflePlaylist();
+            this.shuffled = true;
+        }
+    }
+
+    private void shufflePlaylist()
+    {
+        unshuffledPlaylist = (LinkedList<SkyDriveAudio>) NOW_PLAYING.clone();
+        for (int i = NOW_PLAYING.size() - 1; i > 0; i--)
+        {
+            int j = Utility.getRandomNuberFromRange(0, i);
+            exchangeNowPlayingQueueItemsAt(j, i);
+        }
+    }
+
+    private void restoreUnshuffledPlaylist()
+    {
+        NOW_PLAYING.clear();
+        for (SkyDriveAudio skyDriveAudio : unshuffledPlaylist)
+        {
+            if (skyDriveAudio == null)
+            {
+                continue;
+            }
+
+            NOW_PLAYING.add(skyDriveAudio);
+        }
+    }
+
+    private void exchangeNowPlayingQueueItemsAt(int j, int i)
+    {
+        SkyDriveAudio temp = NOW_PLAYING.get(i);
+        NOW_PLAYING.set(i, NOW_PLAYING.get(j));
+        NOW_PLAYING.set(j, temp);
+    }
+
+    public void toggleRepeat()
+    {
+        repeatPlaylist = !repeatPlaylist;
+    }
+
+    public boolean isShuffled()
+    {
+        return shuffled;
+    }
+
+    public boolean isOnRepeat()
+    {
+        return repeatPlaylist;
+    }
+
+    public final LinkedList<SkyDriveAudio> NOW_PLAYING = new LinkedList<SkyDriveAudio>()
+    {
         @Override
         public boolean add(SkyDriveAudio skyDriveAudio)
         {
-            boolean success = nowPlayingList.add(skyDriveAudio);
-            if (success && firstAudioAdded())
+            if (skyDriveAudio == null)
             {
-                startFirstSongPlayback(nowPlayingList.peek());
+                return false;
             }
+
+            boolean success = super.add(skyDriveAudio);
+            if (success && isFirstAudioAdded())
+            {
+                updateUI(this.peek());
+                startPlayback(this.peek());
+            }
+
             return success;
         }
 
-        private boolean firstAudioAdded()
+        private boolean isFirstAudioAdded()
         {
-            return nowPlayingList.size() == 1;
-        }
-
-        @Override
-        public boolean offer(SkyDriveAudio skyDriveAudio)
-        {
-            boolean success;
-            try
-            {
-                success = nowPlayingList.add(skyDriveAudio);
-            } catch (Exception e)
-            {
-                success = false;
-            }
-            return success;
-        }
-
-        @Override
-        public SkyDriveAudio remove()
-        {
-            return nowPlayingList.removeFirst();
-        }
-
-        @Override
-        public SkyDriveAudio poll()
-        {
-            return nowPlayingList.pollFirst();
-        }
-
-        @Override
-        public SkyDriveAudio element()
-        {
-            return nowPlayingList.element();
-        }
-
-        @Override
-        public SkyDriveAudio peek()
-        {
-            return nowPlayingList.peekFirst();
-        }
-
-        @Override
-        public boolean addAll(Collection<? extends SkyDriveAudio> skyDriveAudios)
-        {
-            return nowPlayingList.addAll(skyDriveAudios);
-        }
-
-        @Override
-        public void clear()
-        {
-            nowPlayingList.clear();
-        }
-
-        @Override
-        public boolean contains(Object o)
-        {
-            return nowPlayingList.contains(o);
-        }
-
-        @Override
-        public boolean containsAll(Collection<?> objects)
-        {
-            return nowPlayingList.containsAll(objects);
-        }
-
-        @Override
-        public boolean isEmpty()
-        {
-            return nowPlayingList.isEmpty();
-        }
-
-        @Override
-        public Iterator<SkyDriveAudio> iterator()
-        {
-            return nowPlayingList.iterator();
-        }
-
-        @Override
-        public boolean remove(Object o)
-        {
-            return nowPlayingList.remove(o);
-        }
-
-        @Override
-        public boolean removeAll(Collection<?> objects)
-        {
-            return nowPlayingList.removeAll(objects);
-        }
-
-        @Override
-        public boolean retainAll(Collection<?> objects)
-        {
-            return nowPlayingList.retainAll(objects);
-        }
-
-        @Override
-        public int size()
-        {
-            return nowPlayingList.size();
-        }
-
-        @Override
-        public Object[] toArray()
-        {
-            return nowPlayingList.toArray();
-        }
-
-        @Override
-        public <T> T[] toArray(T[] ts)
-        {
-            return nowPlayingList.toArray(ts);
+            return this.size() == 1;
         }
     };
+
+    private final Stack<SkyDriveAudio> PLAYED = new Stack<SkyDriveAudio>();
 
 
     private boolean hasLocalCache(SkyDriveAudio skyDriveAudio)
     {
-        final File file = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/", skyDriveAudio.getName());
+        String skyDriveAudioName = "";
+        try
+        {
+            skyDriveAudioName = skyDriveAudio.getName();
+        } catch (NullPointerException e)
+        {
+            return false;
+        }
+
+        final File file = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/", skyDriveAudioName);
         return file.exists();
     }
 
     private File getLocalCache(SkyDriveAudio skyDriveAudio)
     {
         return new File(Environment.getExternalStorageDirectory() + "/SkyDrive/", skyDriveAudio.getName());
-    }
-
-    private void showToast(String message)
-    {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
 
@@ -422,6 +473,9 @@ public class AudioPlaybackService extends Service
     {
         super.onDestroy();
 
+        NOW_PLAYING.clear();
+        PLAYED.clear();
+
         if (mediaPlayer == null)
         {
             return;
@@ -429,17 +483,12 @@ public class AudioPlaybackService extends Service
         try
         {
             mediaPlayer.stop();
-        } catch (IllegalStateException e)
-        {
-        } finally
-        {
+            mediaPlayer.reset();
             mediaPlayer.release();
             mediaPlayer = null;
+        } catch (IllegalStateException e)
+        {
+            Log.e(Constants.LOGTAG, "" + e.getMessage());
         }
-    }
-
-    public boolean notPlaying()
-    {
-        return this.notPlaying;
     }
 }

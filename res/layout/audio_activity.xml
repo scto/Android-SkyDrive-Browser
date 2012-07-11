@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:orientation="vertical"
+              android:gravity="center_horizontal"
+              android:id="@+id/audioLayout">
+
+    <ImageView android:id="@+id/audioAlbumArt"
+            android:layout_height="wrap_content"
+               android:layout_width="fill_parent"
+               android:padding="15dp"
+                android:src="@drawable/audio_album_generic"
+            />
+
+    <TextView android:id="@+id/audioTitleText"
+              android:layout_height="wrap_content"
+              android:layout_width="wrap_content"
+              android:padding="2dp"
+              android:textSize="20dp"
+              android:text="@string/audioNotPlaying"/>
+
+    <TextView android:id="@+id/audioArtistText"
+              android:layout_height="wrap_content"
+              android:layout_width="wrap_content"
+              android:padding="2dp"
+              android:text=""/>
+
+    <LinearLayout android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:orientation="horizontal"
+                  android:paddingTop="15dp"
+                  android:id="@+id/audioButtonLayout">
+
+        <ImageButton android:id="@+id/audioPrevious"
+                     android:background="@null"
+                     android:padding="10dp"
+                     android:src="@drawable/ic_media_previous"
+                     android:layout_height="wrap_content"
+                     android:layout_width="wrap_content"/>
+        <ImageButton android:id="@+id/audioPlayPause"
+                     android:background="@null"
+                     android:padding="10dp"
+                     android:src="@drawable/ic_media_pause"
+                     android:layout_height="wrap_content"
+                     android:layout_width="wrap_content"/>
+        <ImageButton android:id="@+id/audioStop"
+                     android:background="@null"
+                     android:padding="10dp"
+                     android:src="@drawable/ic_media_stop"
+                     android:layout_height="wrap_content"
+                     android:layout_width="wrap_content"/>
+        <ImageButton android:id="@+id/audioNext"
+                     android:background="@null"
+                     android:padding="10dp"
+                     android:src="@drawable/ic_media_next"
+                     android:layout_height="wrap_content"
+                     android:layout_width="wrap_content"/>
+
+    </LinearLayout>
+    <LinearLayout android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:orientation="horizontal"
+                  android:id="@+id/audioButtonSecondaryLayout">
+        <ImageButton android:id="@+id/audioShuffle"
+                     android:background="@null"
+                     android:src="@drawable/ic_media_shuffle"
+                     android:layout_height="wrap_content"
+                     android:layout_gravity="center_vertical"
+                     android:padding="10dp"
+                     android:layout_width="wrap_content"/>
+        <ImageButton android:id="@+id/audioRepeat"
+                     android:background="@null"
+                     android:padding="10dp"
+                     android:layout_gravity="center_vertical"
+                     android:src="@drawable/ic_media_repeat"
+                     android:layout_height="wrap_content"
+                     android:layout_width="wrap_content"/>
+    </LinearLayout>
+
+</LinearLayout>
