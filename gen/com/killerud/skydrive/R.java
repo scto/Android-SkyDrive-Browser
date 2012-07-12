@@ -1028,17 +1028,16 @@ containing a value of this type.
         public static final int photo_dialog=0x7f03001a;
         public static final int rename_file=0x7f03001b;
         public static final int row=0x7f03001c;
-        public static final int row2=0x7f03001d;
-        public static final int saved_files_activity=0x7f03001e;
-        public static final int share_file=0x7f03001f;
-        public static final int sherlock_spinner_dropdown_item=0x7f030020;
-        public static final int sherlock_spinner_item=0x7f030021;
-        public static final int sign_in=0x7f030022;
-        public static final int skydrive=0x7f030023;
-        public static final int skydrive_list_item=0x7f030024;
-        public static final int skydrive_upload_picker=0x7f030025;
-        public static final int video_activity=0x7f030026;
-        public static final int web_activity=0x7f030027;
+        public static final int saved_files_activity=0x7f03001d;
+        public static final int share_file=0x7f03001e;
+        public static final int sherlock_spinner_dropdown_item=0x7f03001f;
+        public static final int sherlock_spinner_item=0x7f030020;
+        public static final int sign_in=0x7f030021;
+        public static final int skydrive=0x7f030022;
+        public static final int skydrive_list_item=0x7f030023;
+        public static final int skydrive_upload_picker=0x7f030024;
+        public static final int video_activity=0x7f030025;
+        public static final int web_activity=0x7f030026;
     }
     public static final class menu {
         public static final int audio_controls_menu=0x7f0c0000;
@@ -1093,6 +1092,7 @@ containing a value of this type.
         public static final int audioPlay=0x7f0a008c;
         public static final int audioPlaying=0x7f0a0081;
         public static final int audioQueue=0x7f0a0087;
+        public static final int audioQueueInstructions=0x7f0a0093;
         public static final int audioRemove=0x7f0a008a;
         public static final int audioRepeat=0x7f0a0089;
         public static final int audioReturnToControls=0x7f0a0082;
@@ -1126,8 +1126,8 @@ containing a value of this type.
         public static final int deleteConfirmationTitle=0x7f0a005b;
         public static final int deletedFiles=0x7f0a001d;
         public static final int description=0x7f0a0042;
-        public static final int disableThumb=0x7f0a0093;
-        public static final int disableThumbSummary=0x7f0a0094;
+        public static final int disableThumb=0x7f0a0094;
+        public static final int disableThumbSummary=0x7f0a0095;
         public static final int download=0x7f0a0055;
         public static final int downloadError=0x7f0a0034;
         public static final int downloadFileCannotBeViewed=0x7f0a003d;

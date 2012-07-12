@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -34,12 +35,14 @@ public class AudioPlayQueueActivity extends SherlockActivity
         listView = (TouchListView) findViewById(R.id.audioQueueList);
         listView.setDropListener(onDrop);
         listView.setRemoveListener(onRemove);
+
     }
 
     @Override
     protected void onResume()
     {
         super.onResume();
+        Toast.makeText(getApplicationContext(), R.string.audioQueueInstructions, Toast.LENGTH_SHORT).show();
         registerBroadcastReceiver();
         startService(new Intent(this, AudioPlaybackService.class));
         bindService(new Intent(this, AudioPlaybackService.class),
@@ -230,7 +233,7 @@ public class AudioPlayQueueActivity extends SherlockActivity
             if (row == null)
             {
                 LayoutInflater inflater = getLayoutInflater();
-                row = inflater.inflate(R.layout.row2, parent, false);
+                row = inflater.inflate(R.layout.row, parent, false);
             }
 
             TextView label = (TextView) row.findViewById(R.id.label);

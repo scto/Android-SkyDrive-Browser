@@ -164,6 +164,7 @@
     <string name="audioTapASong">Tap a song</string>
     <string name="audioTapToAddToQueue">Tap a song to add it to the playing queue</string>
     <string name="audioNothingToSkipTo">No song to skip to</string>
+    <string name="audioQueueInstructions">Drag and drop to change the queue. Slide left to remove.</string>
 
 
     <string name="disableThumb">Disable thumbnails</string>

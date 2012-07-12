@@ -4,11 +4,14 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 import com.killerud.skydrive.constants.Constants;
@@ -38,6 +41,7 @@ public class AudioPlaybackService extends Service
 
     private LinkedList<SkyDriveAudio> unshuffledPlaylist;
     private boolean shuffled;
+    private boolean isLimitedToWiFi;
 
 
     @Override
@@ -203,6 +207,11 @@ public class AudioPlaybackService extends Service
                 mediaPlayer.setDataSource(getLocalCache(skyDriveAudio).getPath());
             } else
             {
+
+                if(connectionIsUnavailable()){
+                    stopSong();
+                    return;
+                }
                 mediaPlayer.setDataSource(skyDriveAudio.getSource());
             }
 
@@ -427,6 +436,21 @@ public class AudioPlaybackService extends Service
             return success;
         }
     };
+
+    private void getPreferences()
+    {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
+        isLimitedToWiFi = preferences.getBoolean("limit_all_to_wifi", false);
+    }
+
+    private boolean connectionIsUnavailable()
+    {
+        getPreferences();
+        boolean unavailable = (isLimitedToWiFi &&
+                ((ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE)).getActiveNetworkInfo().getType()
+                        != ConnectivityManager.TYPE_WIFI);
+        return unavailable;
+    }
 
     public void startFirstSong()
     {
