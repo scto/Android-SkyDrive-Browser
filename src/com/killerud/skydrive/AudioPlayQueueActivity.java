@@ -147,7 +147,7 @@ public class AudioPlayQueueActivity extends SherlockActivity
         {
             if (intent.getAction().equals(Constants.ACTION_SONG_CHANGE))
             {
-                ((AudioQueueAdapter) listView.getAdapter()).notifyDataSetChanged();
+                ((AudioQueueAdapter) listView.getAdapter()).updateDataSetOnSongPlayed();
             }
         }
     };
@@ -185,6 +185,18 @@ public class AudioPlayQueueActivity extends SherlockActivity
             this.queue = (ArrayList<SkyDriveAudio>) temp.clone();
             temp.clear();
         }
+
+        public void updateDataSetOnSongPlayed()
+        {
+            SkyDriveAudio[] container = new SkyDriveAudio[audioPlaybackService.NOW_PLAYING.size()];
+            this.queue = new ArrayList<SkyDriveAudio>(
+                    Arrays.asList(
+                            audioPlaybackService.NOW_PLAYING.toArray(container)
+                    )
+            );
+            notifyDataSetChanged();
+        }
+
 
         public void remove(int position)
         {
