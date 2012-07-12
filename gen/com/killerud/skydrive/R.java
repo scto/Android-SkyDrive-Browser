@@ -211,6 +211,15 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
          */
         public static final int dividerVertical=0x7f010029;
+        /** <p>Must be a color value, in the form of "<code>#<i>rgb</i></code>", "<code>#<i>argb</i></code>",
+"<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+         */
+        public static final int dragndrop_background=0x7f010054;
         /** <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
          */
@@ -235,6 +244,20 @@ containing a value of this type.
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
          */
         public static final int expandActivityOverflowButtonDrawable=0x7f010050;
+        /** <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+         */
+        public static final int expanded_height=0x7f010052;
+        /** <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+         */
+        public static final int grabber=0x7f010053;
         /**  Default background for the menu header. 
          <p>May be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
@@ -373,6 +396,16 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 </table>
          */
         public static final int navigationMode=0x7f01003a;
+        /** <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+         */
+        public static final int normal_height=0x7f010051;
         /** <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
          */
@@ -402,6 +435,20 @@ containing a value of this type.
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
          */
         public static final int progressBarStyle=0x7f010043;
+        /** <p>Must be one of the following constant values.</p>
+<table>
+<colgroup align="left" />
+<colgroup align="left" />
+<colgroup align="left" />
+<tr><th>Constant</th><th>Value</th><th>Description</th></tr>
+<tr><td><code>none</code></td><td>-1</td><td></td></tr>
+<tr><td><code>fling</code></td><td>0</td><td></td></tr>
+<tr><td><code>slide</code></td><td>1</td><td></td></tr>
+<tr><td><code>slideRight</code></td><td>1</td><td></td></tr>
+<tr><td><code>slideLeft</code></td><td>2</td><td></td></tr>
+</table>
+         */
+        public static final int remove_mode=0x7f010055;
         /** <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
          */
@@ -803,139 +850,149 @@ containing a value of this type.
         public static final int executable_rpm=0x7f020065;
         public static final int folder=0x7f020066;
         public static final int folder_image=0x7f020067;
-        public static final int ic_media_next=0x7f020068;
-        public static final int ic_media_pause=0x7f020069;
-        public static final int ic_media_play=0x7f02006a;
-        public static final int ic_media_play_notification=0x7f02006b;
-        public static final int ic_media_previous=0x7f02006c;
-        public static final int ic_media_repeat=0x7f02006d;
-        public static final int ic_media_repeat_highlight=0x7f02006e;
-        public static final int ic_media_shuffle=0x7f02006f;
-        public static final int ic_media_shuffle_highlight=0x7f020070;
-        public static final int ic_media_stop=0x7f020071;
-        public static final int ic_menu_add_folder=0x7f020072;
-        public static final int ic_menu_close_clear_cancel=0x7f020073;
-        public static final int ic_menu_copy_holo_light=0x7f020074;
-        public static final int ic_menu_cut_holo_light=0x7f020075;
-        public static final int ic_menu_delete=0x7f020076;
-        public static final int ic_menu_edit=0x7f020077;
-        public static final int ic_menu_refresh=0x7f020078;
-        public static final int ic_menu_save=0x7f020079;
-        public static final int ic_menu_set_as=0x7f02007a;
-        public static final int ic_menu_share=0x7f02007b;
-        public static final int ic_menu_upload=0x7f02007c;
-        public static final int ic_social_share=0x7f02007d;
-        public static final int icon=0x7f02007e;
-        public static final int image_x_generic=0x7f02007f;
-        public static final int notification_icon=0x7f020080;
-        public static final int office_document=0x7f020081;
-        public static final int office_presentation=0x7f020082;
-        public static final int office_spreadsheet=0x7f020083;
-        public static final int text_css=0x7f020084;
-        public static final int text_html=0x7f020085;
-        public static final int text_x_preview=0x7f020086;
-        public static final int video_x_generic=0x7f020087;
-        public static final int warning_triangle=0x7f020088;
+        public static final int grabber=0x7f020068;
+        public static final int ic_media_next=0x7f020069;
+        public static final int ic_media_pause=0x7f02006a;
+        public static final int ic_media_play=0x7f02006b;
+        public static final int ic_media_play_notification=0x7f02006c;
+        public static final int ic_media_previous=0x7f02006d;
+        public static final int ic_media_repeat=0x7f02006e;
+        public static final int ic_media_repeat_highlight=0x7f02006f;
+        public static final int ic_media_shuffle=0x7f020070;
+        public static final int ic_media_shuffle_highlight=0x7f020071;
+        public static final int ic_media_stop=0x7f020072;
+        public static final int ic_menu_add_folder=0x7f020073;
+        public static final int ic_menu_close_clear_cancel=0x7f020074;
+        public static final int ic_menu_copy_holo_light=0x7f020075;
+        public static final int ic_menu_cut_holo_light=0x7f020076;
+        public static final int ic_menu_delete=0x7f020077;
+        public static final int ic_menu_edit=0x7f020078;
+        public static final int ic_menu_refresh=0x7f020079;
+        public static final int ic_menu_save=0x7f02007a;
+        public static final int ic_menu_set_as=0x7f02007b;
+        public static final int ic_menu_share=0x7f02007c;
+        public static final int ic_menu_upload=0x7f02007d;
+        public static final int ic_social_share=0x7f02007e;
+        public static final int icon=0x7f02007f;
+        public static final int image_x_generic=0x7f020080;
+        public static final int notification_icon=0x7f020081;
+        public static final int office_document=0x7f020082;
+        public static final int office_presentation=0x7f020083;
+        public static final int office_spreadsheet=0x7f020084;
+        public static final int text_css=0x7f020085;
+        public static final int text_html=0x7f020086;
+        public static final int text_x_preview=0x7f020087;
+        public static final int video_x_generic=0x7f020088;
+        public static final int warning_triangle=0x7f020089;
     }
     public static final class id {
-        public static final int abs__action_bar=0x7f050022;
-        public static final int abs__action_bar_container=0x7f050021;
-        public static final int abs__action_bar_subtitle=0x7f050011;
-        public static final int abs__action_bar_title=0x7f050010;
-        public static final int abs__action_context_bar=0x7f050023;
+        public static final int abs__action_bar=0x7f050027;
+        public static final int abs__action_bar_container=0x7f050026;
+        public static final int abs__action_bar_subtitle=0x7f050016;
+        public static final int abs__action_bar_title=0x7f050015;
+        public static final int abs__action_context_bar=0x7f050028;
         public static final int abs__action_menu_divider=0x7f05000c;
         public static final int abs__action_menu_presenter=0x7f05000d;
-        public static final int abs__action_mode_bar=0x7f050026;
-        public static final int abs__action_mode_bar_stub=0x7f050025;
-        public static final int abs__action_mode_close_button=0x7f050014;
-        public static final int abs__activity_chooser_view_content=0x7f050015;
-        public static final int abs__checkbox=0x7f05001e;
-        public static final int abs__content=0x7f05001d;
-        public static final int abs__default_activity_button=0x7f050018;
-        public static final int abs__expand_activities_button=0x7f050016;
+        public static final int abs__action_mode_bar=0x7f05002b;
+        public static final int abs__action_mode_bar_stub=0x7f05002a;
+        public static final int abs__action_mode_close_button=0x7f050019;
+        public static final int abs__activity_chooser_view_content=0x7f05001a;
+        public static final int abs__checkbox=0x7f050023;
+        public static final int abs__content=0x7f050022;
+        public static final int abs__default_activity_button=0x7f05001d;
+        public static final int abs__expand_activities_button=0x7f05001b;
         public static final int abs__home=0x7f05000a;
-        public static final int abs__icon=0x7f05001a;
-        public static final int abs__image=0x7f050017;
-        public static final int abs__imageButton=0x7f050012;
-        public static final int abs__list_item=0x7f050019;
+        public static final int abs__icon=0x7f05001f;
+        public static final int abs__image=0x7f05001c;
+        public static final int abs__imageButton=0x7f050017;
+        public static final int abs__list_item=0x7f05001e;
         public static final int abs__progress_circular=0x7f05000e;
         public static final int abs__progress_horizontal=0x7f05000f;
-        public static final int abs__radio=0x7f050020;
-        public static final int abs__shortcut=0x7f05001f;
-        public static final int abs__split_action_bar=0x7f050024;
-        public static final int abs__textButton=0x7f050013;
-        public static final int abs__title=0x7f05001b;
-        public static final int abs__titleDivider=0x7f05001c;
+        public static final int abs__radio=0x7f050025;
+        public static final int abs__shortcut=0x7f050024;
+        public static final int abs__split_action_bar=0x7f050029;
+        public static final int abs__textButton=0x7f050018;
+        public static final int abs__title=0x7f050020;
+        public static final int abs__titleDivider=0x7f050021;
         public static final int abs__up=0x7f05000b;
-        public static final int audioAlbumArt=0x7f050028;
-        public static final int audioArtistText=0x7f05002a;
-        public static final int audioButtonLayout=0x7f05002b;
-        public static final int audioButtonSecondaryLayout=0x7f050030;
-        public static final int audioLayout=0x7f050027;
-        public static final int audioNext=0x7f05002f;
-        public static final int audioPlayPause=0x7f05002d;
-        public static final int audioPrevious=0x7f05002c;
-        public static final int audioRepeat=0x7f050032;
-        public static final int audioShuffle=0x7f050031;
-        public static final int audioStop=0x7f05002e;
-        public static final int audioTitleText=0x7f050029;
-        public static final int browser_header_layout=0x7f05004c;
-        public static final int buttonLayout=0x7f050037;
-        public static final int cancelButton=0x7f050038;
-        public static final int close=0x7f050062;
-        public static final int copy=0x7f05005e;
-        public static final int cut=0x7f05005f;
-        public static final int delete=0x7f050060;
-        public static final int descriptionEditText=0x7f050036;
-        public static final int descriptionLabel=0x7f050035;
+        public static final int audioAlbumArt=0x7f05002d;
+        public static final int audioArtistText=0x7f05002f;
+        public static final int audioButtonLayout=0x7f050030;
+        public static final int audioButtonSecondaryLayout=0x7f050035;
+        public static final int audioLayout=0x7f05002c;
+        public static final int audioNext=0x7f050034;
+        public static final int audioPlayPause=0x7f050032;
+        public static final int audioPrevious=0x7f050031;
+        public static final int audioQueueList=0x7f050038;
+        public static final int audioRepeat=0x7f050037;
+        public static final int audioShuffle=0x7f050036;
+        public static final int audioStop=0x7f050033;
+        public static final int audioTitleText=0x7f05002e;
+        public static final int browser_header_layout=0x7f050054;
+        public static final int buttonLayout=0x7f05003e;
+        public static final int cancelButton=0x7f05003f;
+        public static final int close=0x7f05006b;
+        public static final int copy=0x7f050067;
+        public static final int cut=0x7f050068;
+        public static final int delete=0x7f050069;
+        public static final int descriptionEditText=0x7f05003d;
+        public static final int descriptionLabel=0x7f05003c;
         public static final int disableHome=0x7f050009;
-        public static final int folder_hierarchy=0x7f05004d;
+        public static final int fling=0x7f050011;
+        public static final int folder_hierarchy=0x7f050055;
         public static final int homeAsUp=0x7f050006;
-        public static final int image=0x7f05003b;
-        public static final int imageButtonLayout=0x7f050041;
-        public static final int imageCancel=0x7f050043;
-        public static final int imageDialogImage=0x7f050040;
-        public static final int imageSave=0x7f050042;
-        public static final int imageText=0x7f05003f;
-        public static final int introTextView=0x7f050049;
-        public static final int layout=0x7f05003a;
-        public static final int linearLayout1=0x7f05004f;
+        public static final int icon=0x7f050039;
+        public static final int image=0x7f050042;
+        public static final int imageButtonLayout=0x7f050048;
+        public static final int imageCancel=0x7f05004a;
+        public static final int imageDialogImage=0x7f050047;
+        public static final int imageSave=0x7f050049;
+        public static final int imageText=0x7f050046;
+        public static final int introTextView=0x7f050051;
+        public static final int label=0x7f05004c;
+        public static final int layout=0x7f050041;
+        public static final int linearLayout1=0x7f050057;
         public static final int listMode=0x7f050002;
-        public static final int nameEditText=0x7f050034;
-        public static final int nameLabel=0x7f050033;
-        public static final int nameTextView=0x7f050050;
-        public static final int newFolder=0x7f050054;
-        public static final int noAccountText=0x7f05004b;
+        public static final int nameEditText=0x7f05003b;
+        public static final int nameLabel=0x7f05003a;
+        public static final int nameTextView=0x7f050058;
+        public static final int newFolder=0x7f05005d;
+        public static final int noAccountText=0x7f050053;
+        public static final int none=0x7f050010;
         public static final int normal=0x7f050001;
-        public static final int openBrowser=0x7f050061;
-        public static final int paste=0x7f050057;
-        public static final int photo_dialog=0x7f05003e;
-        public static final int progressBar=0x7f05003d;
-        public static final int reload=0x7f050056;
-        public static final int rename=0x7f05005d;
-        public static final int renameButton=0x7f050044;
-        public static final int saveButton=0x7f050039;
-        public static final int savedFiles=0x7f050059;
-        public static final int settings=0x7f05005a;
-        public static final int share=0x7f05005c;
-        public static final int shareButton=0x7f050048;
-        public static final int sharedFiles=0x7f050058;
-        public static final int sharingEditable=0x7f050047;
-        public static final int sharingLinks=0x7f050046;
-        public static final int sharingLinksSummary=0x7f050045;
+        public static final int openBrowser=0x7f05006a;
+        public static final int openQueueEditor=0x7f05005c;
+        public static final int paste=0x7f050060;
+        public static final int photo_dialog=0x7f050045;
+        public static final int progressBar=0x7f050044;
+        public static final int reload=0x7f05005f;
+        public static final int rename=0x7f050066;
+        public static final int renameButton=0x7f05004b;
+        public static final int saveButton=0x7f050040;
+        public static final int savedFiles=0x7f050062;
+        public static final int settings=0x7f050063;
+        public static final int share=0x7f050065;
+        public static final int shareButton=0x7f050050;
+        public static final int sharedFiles=0x7f050061;
+        public static final int sharingEditable=0x7f05004f;
+        public static final int sharingLinks=0x7f05004e;
+        public static final int sharingLinksSummary=0x7f05004d;
         public static final int showCustom=0x7f050008;
         public static final int showHome=0x7f050005;
         public static final int showTitle=0x7f050007;
-        public static final int signInButton=0x7f05004a;
-        public static final int signOut=0x7f05005b;
-        public static final int skyDriveItemIcon=0x7f05004e;
+        public static final int signInButton=0x7f050052;
+        public static final int signOut=0x7f050064;
+        public static final int skyDriveItemIcon=0x7f050056;
+        public static final int slide=0x7f050012;
+        public static final int slideLeft=0x7f050014;
+        public static final int slideRight=0x7f050013;
         public static final int tabMode=0x7f050003;
-        public static final int title=0x7f05003c;
-        public static final int uploadFile=0x7f050055;
-        public static final int uploadToThisFolder=0x7f050051;
+        public static final int title=0x7f050043;
+        public static final int uploadFile=0x7f05005e;
+        public static final int uploadToThisFolder=0x7f050059;
         public static final int useLogo=0x7f050004;
-        public static final int videoView=0x7f050052;
-        public static final int webBrowserView=0x7f050053;
+        public static final int videoView=0x7f05005a;
+        public static final int webBrowserView=0x7f05005b;
         public static final int wrap_content=0x7f050000;
     }
     public static final class integer {
@@ -963,30 +1020,35 @@ containing a value of this type.
         public static final int abs__screen_simple=0x7f030012;
         public static final int abs__screen_simple_overlay_action_mode=0x7f030013;
         public static final int audio_activity=0x7f030014;
-        public static final int create_folder_dialog=0x7f030015;
-        public static final int download_dialog=0x7f030016;
-        public static final int main=0x7f030017;
-        public static final int notification_xload=0x7f030018;
-        public static final int photo_dialog=0x7f030019;
-        public static final int rename_file=0x7f03001a;
-        public static final int saved_files_activity=0x7f03001b;
-        public static final int share_file=0x7f03001c;
-        public static final int sherlock_spinner_dropdown_item=0x7f03001d;
-        public static final int sherlock_spinner_item=0x7f03001e;
-        public static final int sign_in=0x7f03001f;
-        public static final int skydrive=0x7f030020;
-        public static final int skydrive_list_item=0x7f030021;
-        public static final int skydrive_upload_picker=0x7f030022;
-        public static final int video_activity=0x7f030023;
-        public static final int web_activity=0x7f030024;
+        public static final int audio_queue_activity=0x7f030015;
+        public static final int create_folder_dialog=0x7f030016;
+        public static final int download_dialog=0x7f030017;
+        public static final int main=0x7f030018;
+        public static final int notification_xload=0x7f030019;
+        public static final int photo_dialog=0x7f03001a;
+        public static final int rename_file=0x7f03001b;
+        public static final int row=0x7f03001c;
+        public static final int row2=0x7f03001d;
+        public static final int saved_files_activity=0x7f03001e;
+        public static final int share_file=0x7f03001f;
+        public static final int sherlock_spinner_dropdown_item=0x7f030020;
+        public static final int sherlock_spinner_item=0x7f030021;
+        public static final int sign_in=0x7f030022;
+        public static final int skydrive=0x7f030023;
+        public static final int skydrive_list_item=0x7f030024;
+        public static final int skydrive_upload_picker=0x7f030025;
+        public static final int video_activity=0x7f030026;
+        public static final int web_activity=0x7f030027;
     }
     public static final class menu {
-        public static final int browser_menu=0x7f0c0000;
-        public static final int context_menu=0x7f0c0001;
-        public static final int web_menu=0x7f0c0002;
+        public static final int audio_controls_menu=0x7f0c0000;
+        public static final int audio_queue_menu=0x7f0c0001;
+        public static final int browser_menu=0x7f0c0002;
+        public static final int context_menu=0x7f0c0003;
+        public static final int web_menu=0x7f0c0004;
     }
     public static final class string {
-        public static final int aboutTheAppHeader=0x7f0a002a;
+        public static final int aboutTheAppHeader=0x7f0a0029;
         /**  Content description for the action bar "home" affordance. [CHAR LIMIT=NONE] 
          */
         public static final int abs__action_bar_home_description=0x7f0a0000;
@@ -1020,97 +1082,97 @@ containing a value of this type.
         public static final int appExitConfirmationHeader=0x7f0a0060;
         public static final int appName=0x7f0a000b;
         public static final int app_name=0x7f0a000a;
-        public static final int audioAddedToPlayingQueue=0x7f0a008e;
-        public static final int audioBuffering=0x7f0a007c;
-        public static final int audioBufferingSummary=0x7f0a007d;
-        public static final int audioNotPlaying=0x7f0a007e;
-        public static final int audioNotPlayingSummary=0x7f0a007f;
-        public static final int audioNothingToSkipTo=0x7f0a0091;
-        public static final int audioPause=0x7f0a008c;
-        public static final int audioPaused=0x7f0a0084;
-        public static final int audioPlay=0x7f0a008b;
-        public static final int audioPlaying=0x7f0a0080;
-        public static final int audioQueue=0x7f0a0086;
-        public static final int audioRemove=0x7f0a0089;
-        public static final int audioRepeat=0x7f0a0088;
-        public static final int audioReturnToControls=0x7f0a0081;
-        public static final int audioServiceName=0x7f0a007b;
-        public static final int audioShuffle=0x7f0a0087;
-        public static final int audioSkip=0x7f0a008d;
-        public static final int audioStarted=0x7f0a0083;
-        public static final int audioStop=0x7f0a008a;
-        public static final int audioStopped=0x7f0a0082;
-        public static final int audioTapASong=0x7f0a008f;
-        public static final int audioTapToAddToQueue=0x7f0a0090;
-        public static final int audioUpNext=0x7f0a0085;
+        public static final int audioAddedToPlayingQueue=0x7f0a008f;
+        public static final int audioBuffering=0x7f0a007d;
+        public static final int audioBufferingSummary=0x7f0a007e;
+        public static final int audioNotPlaying=0x7f0a007f;
+        public static final int audioNotPlayingSummary=0x7f0a0080;
+        public static final int audioNothingToSkipTo=0x7f0a0092;
+        public static final int audioPause=0x7f0a008d;
+        public static final int audioPaused=0x7f0a0085;
+        public static final int audioPlay=0x7f0a008c;
+        public static final int audioPlaying=0x7f0a0081;
+        public static final int audioQueue=0x7f0a0087;
+        public static final int audioRemove=0x7f0a008a;
+        public static final int audioRepeat=0x7f0a0089;
+        public static final int audioReturnToControls=0x7f0a0082;
+        public static final int audioServiceName=0x7f0a007c;
+        public static final int audioShuffle=0x7f0a0088;
+        public static final int audioSkip=0x7f0a008e;
+        public static final int audioStarted=0x7f0a0084;
+        public static final int audioStop=0x7f0a008b;
+        public static final int audioStopped=0x7f0a0083;
+        public static final int audioTapASong=0x7f0a0090;
+        public static final int audioTapToAddToQueue=0x7f0a0091;
+        public static final int audioUpNext=0x7f0a0086;
         public static final int automaticSignInError=0x7f0a0010;
         public static final int buffering=0x7f0a0068;
-        public static final int cameraUploadHeader=0x7f0a0024;
-        public static final int cameraUploadSummary=0x7f0a0025;
-        public static final int cancel=0x7f0a0041;
+        public static final int cameraUploadHeader=0x7f0a0023;
+        public static final int cameraUploadSummary=0x7f0a0024;
+        public static final int cancel=0x7f0a0040;
         public static final int close=0x7f0a0056;
         public static final int confirmExitHeader=0x7f0a0061;
         public static final int confirmExitSummary=0x7f0a0062;
-        public static final int copiedFiles=0x7f0a0020;
+        public static final int copiedFiles=0x7f0a001f;
         public static final int copy=0x7f0a0052;
-        public static final int copyCutSelectedFiles=0x7f0a001a;
-        public static final int createFolder=0x7f0a0040;
-        public static final int creditsBody=0x7f0a002e;
-        public static final int creditsHeader=0x7f0a002d;
+        public static final int copyCutSelectedFiles=0x7f0a0019;
+        public static final int createFolder=0x7f0a003f;
+        public static final int creditsBody=0x7f0a002d;
+        public static final int creditsHeader=0x7f0a002c;
         public static final int cut=0x7f0a0051;
         public static final int delete=0x7f0a004f;
         public static final int deleteConfirmationBody=0x7f0a005c;
         public static final int deleteConfirmationQuestion=0x7f0a005d;
         public static final int deleteConfirmationTitle=0x7f0a005b;
-        public static final int deletedFiles=0x7f0a001e;
-        public static final int description=0x7f0a0043;
-        public static final int disableThumb=0x7f0a0092;
-        public static final int disableThumbSummary=0x7f0a0093;
+        public static final int deletedFiles=0x7f0a001d;
+        public static final int description=0x7f0a0042;
+        public static final int disableThumb=0x7f0a0093;
+        public static final int disableThumbSummary=0x7f0a0094;
         public static final int download=0x7f0a0055;
-        public static final int downloadError=0x7f0a0035;
-        public static final int downloadFileCannotBeViewed=0x7f0a003e;
-        public static final int downloadNoPreview=0x7f0a003d;
-        public static final int downloading=0x7f0a0031;
-        public static final int downloadingFromSkyDrive=0x7f0a0033;
-        public static final int errorCopyingFile=0x7f0a0076;
-        public static final int errorCouldNotFetchFileForSharing=0x7f0a0078;
-        public static final int errorDeletingFile=0x7f0a0073;
-        public static final int errorDuringLogin=0x7f0a0072;
-        public static final int errorFolderCouldNotBeCreated=0x7f0a006f;
-        public static final int errorLoggedOut=0x7f0a007a;
-        public static final int errorMovingFile=0x7f0a0074;
-        public static final int errorNoApplicationCouldOpenTheFile=0x7f0a0070;
-        public static final int errorOpeningAudioFile=0x7f0a0071;
-        public static final int errorRenamingFile=0x7f0a0075;
-        public static final int errorTooManyFilesAtOnce=0x7f0a0079;
-        public static final int fileAlreadySaved=0x7f0a0036;
-        public static final int fileAlreadySavedMessage=0x7f0a0037;
-        public static final int fileSaved=0x7f0a0034;
-        public static final int fileWillBeDownloaded=0x7f0a002f;
+        public static final int downloadError=0x7f0a0034;
+        public static final int downloadFileCannotBeViewed=0x7f0a003d;
+        public static final int downloadNoPreview=0x7f0a003c;
+        public static final int downloading=0x7f0a0030;
+        public static final int downloadingFromSkyDrive=0x7f0a0032;
+        public static final int errorCopyingFile=0x7f0a0077;
+        public static final int errorCouldNotFetchFileForSharing=0x7f0a0079;
+        public static final int errorDeletingFile=0x7f0a0074;
+        public static final int errorDuringLogin=0x7f0a0073;
+        public static final int errorFolderCouldNotBeCreated=0x7f0a0070;
+        public static final int errorLoggedOut=0x7f0a007b;
+        public static final int errorMovingFile=0x7f0a0075;
+        public static final int errorNoApplicationCouldOpenTheFile=0x7f0a0071;
+        public static final int errorOpeningAudioFile=0x7f0a0072;
+        public static final int errorRenamingFile=0x7f0a0076;
+        public static final int errorTooManyFilesAtOnce=0x7f0a007a;
+        public static final int fileAlreadySaved=0x7f0a0035;
+        public static final int fileAlreadySavedMessage=0x7f0a0036;
+        public static final int fileSaved=0x7f0a0033;
+        public static final int fileWillBeDownloaded=0x7f0a002e;
         public static final int firstWelcomeMessage=0x7f0a000d;
-        public static final int from=0x7f0a003a;
+        public static final int from=0x7f0a0039;
         public static final int icon=0x7f0a0013;
-        public static final int imageDisplayError=0x7f0a0019;
-        public static final int imageLoading=0x7f0a001b;
+        public static final int imageDisplayError=0x7f0a0018;
+        public static final int imageLoading=0x7f0a001a;
         public static final int initializingMessage=0x7f0a000c;
-        public static final int limitCameraToWifiHeader=0x7f0a0026;
-        public static final int limitCameraToWifiSummary=0x7f0a0027;
-        public static final int limitDataToWiFiHeader=0x7f0a0028;
-        public static final int limitDataToWiFiSummary=0x7f0a0029;
+        public static final int limitCameraToWifiHeader=0x7f0a0025;
+        public static final int limitCameraToWifiSummary=0x7f0a0026;
+        public static final int limitDataToWiFiHeader=0x7f0a0027;
+        public static final int limitDataToWiFiSummary=0x7f0a0028;
         public static final int loggedOut=0x7f0a0059;
         public static final int manualSignInError=0x7f0a0011;
-        public static final int movedFiles=0x7f0a001f;
+        public static final int movedFiles=0x7f0a001e;
         public static final int mySkyDrive=0x7f0a000f;
-        public static final int name=0x7f0a0042;
+        public static final int name=0x7f0a0041;
         public static final int newFolder=0x7f0a0016;
         public static final int newFolderTitle=0x7f0a0015;
         public static final int no=0x7f0a005f;
         public static final int noAccountQuestion=0x7f0a0012;
         public static final int noFilesInFolder=0x7f0a004a;
-        public static final int noInternetConnection=0x7f0a002b;
+        public static final int noInternetConnection=0x7f0a002a;
         public static final int noItemsInFolder=0x7f0a0014;
-        public static final int ok=0x7f0a0030;
-        public static final int openWebBrowser=0x7f0a003f;
+        public static final int ok=0x7f0a002f;
+        public static final int openWebBrowser=0x7f0a003e;
         public static final int paste=0x7f0a0057;
         public static final int pause=0x7f0a006b;
         public static final int paused=0x7f0a006c;
@@ -1118,19 +1180,20 @@ containing a value of this type.
         public static final int playing=0x7f0a0069;
         public static final int reload=0x7f0a0054;
         public static final int rename=0x7f0a0053;
-        public static final int renameTitle=0x7f0a0044;
-        public static final int renamedFiles=0x7f0a0021;
-        public static final int rootFolderTitle=0x7f0a001c;
-        public static final int saved=0x7f0a0039;
-        public static final int savedFileCopy=0x7f0a0038;
+        public static final int renameTitle=0x7f0a0043;
+        public static final int renamedFiles=0x7f0a0020;
+        public static final int rootFolderTitle=0x7f0a001b;
+        public static final int saved=0x7f0a006d;
+        public static final int savedFileCopy=0x7f0a0037;
         public static final int savedFiles=0x7f0a005a;
-        public static final int savedFilesTitle=0x7f0a001d;
+        public static final int savedFilesTitle=0x7f0a001c;
+        public static final int savedLowerCase=0x7f0a0038;
         public static final int selectAll=0x7f0a004d;
         public static final int selectNone=0x7f0a004e;
         public static final int selectedOne=0x7f0a004b;
         public static final int selectedSeveral=0x7f0a004c;
-        public static final int serviceLabel=0x7f0a0022;
-        public static final int settings=0x7f0a0023;
+        public static final int serviceLabel=0x7f0a0021;
+        public static final int settings=0x7f0a0022;
         public static final int share=0x7f0a0050;
         public static final int sharedFiles=0x7f0a0063;
         public static final int sharingEnableEditing=0x7f0a0067;
@@ -1139,20 +1202,20 @@ containing a value of this type.
         public static final int sharingLinksSummary=0x7f0a0065;
         public static final int signInToWindowsLive=0x7f0a000e;
         public static final int signOut=0x7f0a0058;
-        public static final int skyDrive=0x7f0a003c;
-        public static final int stop=0x7f0a006d;
-        public static final int stopped=0x7f0a006e;
-        public static final int talkingToSkyDriveWait=0x7f0a0018;
-        public static final int thirdPartyError=0x7f0a0077;
-        public static final int to=0x7f0a003b;
+        public static final int skyDrive=0x7f0a003b;
+        public static final int stop=0x7f0a006e;
+        public static final int stopped=0x7f0a006f;
+        public static final int talkingToSkyDriveWait=0x7f0a0017;
+        public static final int thirdPartyError=0x7f0a0078;
+        public static final int to=0x7f0a003a;
         public static final int uploadError=0x7f0a0047;
         public static final int uploadSelected=0x7f0a0049;
         public static final int uploadTo=0x7f0a0045;
-        public static final int uploadToSkyDrive=0x7f0a0017;
+        public static final int uploadToSkyDrive=0x7f0a0044;
         public static final int uploadToThisFolder=0x7f0a0048;
-        public static final int uploading=0x7f0a0032;
+        public static final int uploading=0x7f0a0031;
         public static final int uploadingToSkyDrive=0x7f0a0046;
-        public static final int versionHeader=0x7f0a002c;
+        public static final int versionHeader=0x7f0a002b;
         public static final int yes=0x7f0a005e;
     }
     public static final class style {
@@ -3083,5 +3146,104 @@ containing a value of this type.
           @attr name android:windowSplitActionBar
         */
         public static final int SherlockTheme_windowSplitActionBar = 48;
+        /** Attributes that can be used with a TouchListView.
+           <p>Includes the following attributes:</p>
+           <table>
+           <colgroup align="left" />
+           <colgroup align="left" />
+           <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code>{@link #TouchListView_dragndrop_background com.killerud.skydrive:dragndrop_background}</code></td><td></td></tr>
+           <tr><td><code>{@link #TouchListView_expanded_height com.killerud.skydrive:expanded_height}</code></td><td></td></tr>
+           <tr><td><code>{@link #TouchListView_grabber com.killerud.skydrive:grabber}</code></td><td></td></tr>
+           <tr><td><code>{@link #TouchListView_normal_height com.killerud.skydrive:normal_height}</code></td><td></td></tr>
+           <tr><td><code>{@link #TouchListView_remove_mode com.killerud.skydrive:remove_mode}</code></td><td></td></tr>
+           </table>
+           @see #TouchListView_dragndrop_background
+           @see #TouchListView_expanded_height
+           @see #TouchListView_grabber
+           @see #TouchListView_normal_height
+           @see #TouchListView_remove_mode
+         */
+        public static final int[] TouchListView = {
+            0x7f010051, 0x7f010052, 0x7f010053, 0x7f010054,
+            0x7f010055
+        };
+        /**
+          <p>This symbol is the offset where the {@link com.killerud.skydrive.R.attr#dragndrop_background}
+          attribute's value can be found in the {@link #TouchListView} array.
+
+
+          <p>Must be a color value, in the form of "<code>#<i>rgb</i></code>", "<code>#<i>argb</i></code>",
+"<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          @attr name android:dragndrop_background
+        */
+        public static final int TouchListView_dragndrop_background = 3;
+        /**
+          <p>This symbol is the offset where the {@link com.killerud.skydrive.R.attr#expanded_height}
+          attribute's value can be found in the {@link #TouchListView} array.
+
+
+          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          @attr name android:expanded_height
+        */
+        public static final int TouchListView_expanded_height = 1;
+        /**
+          <p>This symbol is the offset where the {@link com.killerud.skydrive.R.attr#grabber}
+          attribute's value can be found in the {@link #TouchListView} array.
+
+
+          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+          @attr name android:grabber
+        */
+        public static final int TouchListView_grabber = 2;
+        /**
+          <p>This symbol is the offset where the {@link com.killerud.skydrive.R.attr#normal_height}
+          attribute's value can be found in the {@link #TouchListView} array.
+
+
+          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          @attr name android:normal_height
+        */
+        public static final int TouchListView_normal_height = 0;
+        /**
+          <p>This symbol is the offset where the {@link com.killerud.skydrive.R.attr#remove_mode}
+          attribute's value can be found in the {@link #TouchListView} array.
+
+
+          <p>Must be one of the following constant values.</p>
+<table>
+<colgroup align="left" />
+<colgroup align="left" />
+<colgroup align="left" />
+<tr><th>Constant</th><th>Value</th><th>Description</th></tr>
+<tr><td><code>none</code></td><td>-1</td><td></td></tr>
+<tr><td><code>fling</code></td><td>0</td><td></td></tr>
+<tr><td><code>slide</code></td><td>1</td><td></td></tr>
+<tr><td><code>slideRight</code></td><td>1</td><td></td></tr>
+<tr><td><code>slideLeft</code></td><td>2</td><td></td></tr>
+</table>
+          @attr name android:remove_mode
+        */
+        public static final int TouchListView_remove_mode = 4;
     };
 }

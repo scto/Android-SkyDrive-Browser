@@ -61,4 +61,10 @@ public class SkyDriveAudio extends SkyDriveObject
     {
         return mObject.optString("title");
     }
+
+    @Override
+    public String toString()
+    {
+        return getTitle();
+    }
 }

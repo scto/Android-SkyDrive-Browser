@@ -9,6 +9,7 @@ package com.killerud.skydrive;
 import android.content.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
@@ -17,6 +18,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.killerud.skydrive.constants.Constants;
@@ -59,6 +62,15 @@ public class AudioControlActivity extends SherlockActivity implements View.OnCli
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+
+        MenuInflater inflater = getSupportMenuInflater();
+        inflater.inflate(R.menu.audio_controls_menu, menu);
+        return true;
+    }
+
+    @Override
     protected void onResume()
     {
         super.onResume();
@@ -74,10 +86,6 @@ public class AudioControlActivity extends SherlockActivity implements View.OnCli
     {
         super.onPause();
         unregisterReceiver(broadcastReceiver);
-        if (audioPlaybackService.NOW_PLAYING.isEmpty())
-        {
-            audioPlaybackService.onDestroy();
-        }
         unbindService(audioPlaybackServiceConnection);
     }
 
@@ -95,6 +103,9 @@ public class AudioControlActivity extends SherlockActivity implements View.OnCli
         {
             case android.R.id.home:
                 finish();
+                return true;
+            case R.id.openQueueEditor:
+                startActivity(new Intent(getApplicationContext(), AudioPlayQueueActivity.class));
                 return true;
             default:
                 return false;
@@ -340,6 +351,10 @@ public class AudioControlActivity extends SherlockActivity implements View.OnCli
         public void onServiceConnected(ComponentName componentName, IBinder iBinder)
         {
             audioPlaybackService = ((AudioPlaybackService.AudioPlaybackServiceBinder) iBinder).getService();
+            if(audioPlaybackService.NOW_PLAYING.size()==1)
+            {
+                audioPlaybackService.startFirstSong();
+            }
             audioPlaybackService.updateUI();
         }
 

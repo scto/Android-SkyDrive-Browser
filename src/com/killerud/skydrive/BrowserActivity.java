@@ -448,17 +448,25 @@ public class BrowserActivity extends SherlockListActivity
                 if (mUploadDialog) return;
                 if(connectionIsUnavailable()) return;
                 if(audioPlaybackService != null){
-                    if(!audioPlaybackService.isPlaying())
+                    if(!audioServiceHasSongsToPlay())
                     {
                         startActivity(new Intent(getApplicationContext(), AudioControlActivity.class));
                     }
                     audioPlaybackService.NOW_PLAYING.add(audio);
+
+
+
                     Toast.makeText(getApplicationContext(),
                             audioPlaybackService.getAudioTitle(audio) + " " + getString(R.string.audioAddedToPlayingQueue),
                             Toast.LENGTH_SHORT).show();
                 }
             }
         });
+    }
+
+    private boolean audioServiceHasSongsToPlay()
+    {
+        return audioPlaybackService.NOW_PLAYING.size()>0;
     }
 
     private boolean isDisplayableByWebBrowser(SkyDriveFile file) {

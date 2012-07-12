@@ -404,6 +404,15 @@ public class AudioPlaybackService extends Service
         return repeatPlaylist;
     }
 
+    public void populateNowPlayingWithUpdatedQueue(List<SkyDriveAudio> newQueue)
+    {
+        NOW_PLAYING.clear();
+        for(SkyDriveAudio skyDriveAudio : newQueue)
+        {
+            NOW_PLAYING.add(skyDriveAudio);
+        }
+    }
+
     public final LinkedList<SkyDriveAudio> NOW_PLAYING = new LinkedList<SkyDriveAudio>()
     {
         @Override
@@ -415,20 +424,18 @@ public class AudioPlaybackService extends Service
             }
 
             boolean success = super.add(skyDriveAudio);
-            if (success && isFirstAudioAdded())
-            {
-                updateUI(this.peek());
-                startPlayback(this.peek());
-            }
-
             return success;
         }
-
-        private boolean isFirstAudioAdded()
-        {
-            return this.size() == 1;
-        }
     };
+
+    public void startFirstSong()
+    {
+        if(NOW_PLAYING.size() != 1)
+        {
+            return;
+        }
+        startPlayback(NOW_PLAYING.peek());
+    }
 
     private final Stack<SkyDriveAudio> PLAYED = new Stack<SkyDriveAudio>();
 

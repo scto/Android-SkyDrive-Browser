@@ -18,7 +18,6 @@
     <string name="noItemsInFolder">No files in this folder</string>
     <string name="newFolderTitle">Create a new folder here</string>
     <string name="newFolder">New folder</string>
-    <string name="uploadToSkyDrive">Upload to SkyDrive</string>
     <string name="talkingToSkyDriveWait">Talking to SkyDrive...</string>
     <string name="imageDisplayError">Could not show the image</string>
     <string name="copyCutSelectedFiles">Selected files ready to paste</string>
@@ -58,7 +57,7 @@
         Download again?
     </string>
     <string name="savedFileCopy"> Copy </string>
-    <string name="saved">saved</string>
+    <string name="savedLowerCase">saved</string>
     <string name="from">from</string>
     <string name="to">to</string>
     <string name="skyDrive">SkyDrive</string>
@@ -165,6 +164,7 @@
     <string name="audioTapASong">Tap a song</string>
     <string name="audioTapToAddToQueue">Tap a song to add it to the playing queue</string>
     <string name="audioNothingToSkipTo">No song to skip to</string>
+
 
     <string name="disableThumb">Disable thumbnails</string>
     <string name="disableThumbSummary">Conserves memory and bandwidth. Disable thumbnails if you experience crashes.</string>

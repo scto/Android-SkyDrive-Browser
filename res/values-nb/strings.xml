@@ -16,7 +16,6 @@
     <string name="noItemsInFolder">Ingen filer i denne mappen</string>
     <string name="newFolderTitle">Lag en ny mappe her</string>
     <string name="newFolder">Ny mappe</string>
-    <string name="uploadToSkyDrive">Last opp til SkyDrive</string>
     <string name="uploadTo">Last opp til</string>
     <string name="talkingToSkyDriveWait">Snakker med SkyDrive...</string>
     <string name="imageDisplayError">Kunne ikke vise bildet</string>
@@ -56,7 +55,7 @@
     <string name="fileAlreadySaved">Filen finnes allerede</string>
     <string name="fileAlreadySavedMessage">Den filen har blitt lastet ned før, men kan ha blitt endret siden da. Last ned på nytt?</string>
     <string name="savedFileCopy">Kopi</string>
-    <string name="saved">lagret</string>
+    <string name="savedLowerCase">lagret</string>
     <string name="from">fra</string>
     <string name="to">til</string>
     <string name="skyDrive">SkyDrive</string>
