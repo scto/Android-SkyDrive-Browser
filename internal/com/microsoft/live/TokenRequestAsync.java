@@ -12,19 +12,14 @@ import android.os.AsyncTask;
  * TokenRequestAsync performs an async token request. It takes in a TokenRequest,
  * executes it, checks the OAuthResponse, and then calls the given listener.
  */
-class TokenRequestAsync extends AsyncTask<Void, Void, Void> implements ObservableOAuthRequest
-{
+class TokenRequestAsync extends AsyncTask<Void, Void, Void> implements ObservableOAuthRequest {
 
     private final DefaultObservableOAuthRequest observerable;
 
-    /**
-     * Not null if there was an exception
-     */
+    /** Not null if there was an exception */
     private LiveAuthException exception;
 
-    /**
-     * Not null if there was a response
-     */
+    /** Not null if there was a response */
     private OAuthResponse response;
 
     private final TokenRequest request;
@@ -34,8 +29,7 @@ class TokenRequestAsync extends AsyncTask<Void, Void, Void> implements Observabl
      *
      * @param request to perform
      */
-    public TokenRequestAsync(TokenRequest request)
-    {
+    public TokenRequestAsync(TokenRequest request) {
         assert request != null;
 
         this.observerable = new DefaultObservableOAuthRequest();
@@ -43,25 +37,20 @@ class TokenRequestAsync extends AsyncTask<Void, Void, Void> implements Observabl
     }
 
     @Override
-    public void addObserver(OAuthRequestObserver observer)
-    {
+    public void addObserver(OAuthRequestObserver observer) {
         this.observerable.addObserver(observer);
     }
 
     @Override
-    public boolean removeObserver(OAuthRequestObserver observer)
-    {
+    public boolean removeObserver(OAuthRequestObserver observer) {
         return this.observerable.removeObserver(observer);
     }
 
     @Override
-    protected Void doInBackground(Void... params)
-    {
-        try
-        {
+    protected Void doInBackground(Void... params) {
+        try {
             this.response = this.request.execute();
-        } catch (LiveAuthException e)
-        {
+        } catch (LiveAuthException e) {
             this.exception = e;
         }
 
@@ -69,20 +58,14 @@ class TokenRequestAsync extends AsyncTask<Void, Void, Void> implements Observabl
     }
 
     @Override
-    protected void onPostExecute(Void result)
-    {
+    protected void onPostExecute(Void result) {
         super.onPostExecute(result);
 
-        if (this.response != null)
-        {
+        if (this.response != null) {
             this.observerable.notifyObservers(this.response);
-        }
-        else if (this.exception != null)
-        {
+        } else if (this.exception != null) {
             this.observerable.notifyObservers(this.exception);
-        }
-        else
-        {
+        } else {
             final LiveAuthException exception = new LiveAuthException(ErrorMessages.CLIENT_ERROR);
             this.observerable.notifyObservers(exception);
         }

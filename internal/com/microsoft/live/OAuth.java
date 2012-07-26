@@ -9,24 +9,20 @@ package com.microsoft.live;
 /**
  * OAuth is a non-instantiable utility class that contains types and constants
  * for the OAuth protocol.
- * <p/>
+ *
  * See the <a href="http://tools.ietf.org/html/draft-ietf-oauth-v2-22">OAuth 2.0 spec</a>
  * for more information.
  */
-final class OAuth
-{
+final class OAuth {
 
-    public enum DisplayType
-    {
-        HOST,
+    public enum DisplayType {
         NONE,
         PAGE,
         POPUP,
         TOUCH;
     }
 
-    public enum ErrorType
-    {
+    public enum ErrorType {
         /**
          * Client authentication failed (e.g. unknown client, no
          * client authentication included, or unsupported
@@ -78,55 +74,44 @@ final class OAuth
         UNSUPPORTED_GRANT_TYPE;
     }
 
-    public enum GrantType
-    {
+    public enum GrantType {
         AUTHORIZATION_CODE,
         CLIENT_CREDENTIALS,
         PASSWORD,
         REFRESH_TOKEN;
     }
 
-    public enum ResponseType
-    {
+    public enum ResponseType {
         CODE,
         TOKEN;
     }
 
-    public enum ThemeType
-    {
-        ANDROID,
+    public enum ThemeType {
         DARK,
         LIGHT,
         DEFAULT;
     }
 
-    public enum TokenType
-    {
+    public enum TokenType {
         BEARER,
         MAC;
     }
 
     /**
      * Key for the access_token parameter.
-     * <p/>
+     *
      * See <a href="http://tools.ietf.org/html/draft-ietf-oauth-v2-22#section-5.1">Section 5.1</a>
      * of the OAuth 2.0 spec for more information.
      */
     public static final String ACCESS_TOKEN = "access_token";
 
-    /**
-     * The app's authentication token.
-     */
+    /** The app's authentication token. */
     public static final String AUTHENTICATION_TOKEN = "authentication_token";
 
-    /**
-     * The app's client ID.
-     */
+    /** The app's client ID. */
     public static final String CLIENT_ID = "client_id";
 
-    /**
-     * Equivalent to the profile that is described in the OAuth 2.0 protocol spec.
-     */
+    /** Equivalent to the profile that is described in the OAuth 2.0 protocol spec. */
     public static final String CODE = "code";
 
     /**
@@ -137,7 +122,7 @@ final class OAuth
 
     /**
      * Key for the error parameter.
-     * <p/>
+     *
      * error can have the following values:
      * invalid_request, unauthorized_client, access_denied, unsupported_response_type,
      * invalid_scope, server_error, or temporarily_unavailable.
@@ -146,7 +131,7 @@ final class OAuth
 
     /**
      * Key for the error_description parameter. error_description is described below.
-     * <p/>
+     *
      * OPTIONAL.  A human-readable UTF-8 encoded text providing
      * additional information, used to assist the client developer in
      * understanding the error that occurred.
@@ -155,7 +140,7 @@ final class OAuth
 
     /**
      * Key for the error_uri parameter. error_uri is described below.
-     * <p/>
+     *
      * OPTIONAL.  A URI identifying a human-readable web page with
      * information about the error, used to provide the client
      * developer with additional information about the error.
@@ -164,7 +149,7 @@ final class OAuth
 
     /**
      * Key for the expires_in parameter. expires_in is described below.
-     * <p/>
+     *
      * OPTIONAL.  The lifetime in seconds of the access token.  For
      * example, the value "3600" denotes that the access token will
      * expire in one hour from the time the response was generated.
@@ -173,7 +158,7 @@ final class OAuth
 
     /**
      * Key for the grant_type parameter. grant_type is described below.
-     * <p/>
+     *
      * grant_type is used in a token request. It can take on the following
      * values: authorization_code, password, client_credentials, or refresh_token.
      */
@@ -188,7 +173,7 @@ final class OAuth
 
     /**
      * Key for the redirect_uri parameter.
-     * <p/>
+     *
      * See <a href="http://tools.ietf.org/html/draft-ietf-oauth-v2-22#section-3.1.2">Section 3.1.2</a>
      * of the OAuth 2.0 spec for more information.
      */
@@ -196,7 +181,7 @@ final class OAuth
 
     /**
      * Key used for the refresh_token parameter.
-     * <p/>
+     *
      * See <a href="http://tools.ietf.org/html/draft-ietf-oauth-v2-22#section-5.1">Section 5.1</a>
      * of the OAuth 2.0 spec for more information.
      */
@@ -214,9 +199,7 @@ final class OAuth
      */
     public static final String SCOPE = "scope";
 
-    /**
-     * Delimiter for the scopes field response.
-     */
+    /** Delimiter for the scopes field response. */
     public static final String SCOPE_DELIMITER = " ";
 
     /**
@@ -229,17 +212,12 @@ final class OAuth
 
     /**
      * Key used for the token_type parameter.
-     * <p/>
+     *
      * See <a href="http://tools.ietf.org/html/draft-ietf-oauth-v2-22#section-5.1">Section 5.1</a>
      * of the OAuth 2.0 spec for more information.
      */
     public static final String TOKEN_TYPE = "token_type";
 
-    /**
-     * Private to prevent instantiation
-     */
-    private OAuth()
-    {
-        throw new AssertionError(ErrorMessages.NON_INSTANTIABLE_CLASS);
-    }
+    /** Private to prevent instantiation */
+    private OAuth() { throw new AssertionError(ErrorMessages.NON_INSTANTIABLE_CLASS); }
 }

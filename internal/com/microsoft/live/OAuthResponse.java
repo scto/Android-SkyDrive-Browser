@@ -11,8 +11,7 @@ package com.microsoft.live;
  * Known implementors are OAuthSuccessfulResponse and OAuthErrorResponse.
  * Different OAuthResponses can be determined by using the OAuthResponseVisitor.
  */
-interface OAuthResponse
-{
+interface OAuthResponse {
 
     /**
      * Calls visit() on the visitor.

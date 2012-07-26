@@ -6,25 +6,25 @@
 
 package com.microsoft.live;
 
-import android.text.TextUtils;
-import com.microsoft.live.OAuth.TokenType;
+import java.util.Map;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Map;
+import android.text.TextUtils;
+
+import com.microsoft.live.OAuth.TokenType;
 
 /**
  * OAuthSuccessfulResponse represents a successful response form an OAuth server.
  */
-class OAuthSuccessfulResponse implements OAuthResponse
-{
+class OAuthSuccessfulResponse implements OAuthResponse {
 
     /**
      * Builder is a utility class that is used to build a new OAuthSuccessfulResponse.
      * It must be constructed with the required fields, and can add on the optional ones.
      */
-    public static class Builder
-    {
+    public static class Builder {
         private final String accessToken;
         private String authenticationToken;
         private int expiresIn = UNINITIALIZED;
@@ -32,8 +32,7 @@ class OAuthSuccessfulResponse implements OAuthResponse
         private String scope;
         private final TokenType tokenType;
 
-        public Builder(String accessToken, TokenType tokenType)
-        {
+        public Builder(String accessToken, TokenType tokenType) {
             assert accessToken != null;
             assert !TextUtils.isEmpty(accessToken);
             assert tokenType != null;
@@ -42,8 +41,7 @@ class OAuthSuccessfulResponse implements OAuthResponse
             this.tokenType = tokenType;
         }
 
-        public Builder authenticationToken(String authenticationToken)
-        {
+        public Builder authenticationToken(String authenticationToken) {
             this.authenticationToken = authenticationToken;
             return this;
         }
@@ -52,38 +50,31 @@ class OAuthSuccessfulResponse implements OAuthResponse
          * @return a new instance of an OAuthSuccessfulResponse with the given
          *         parameters passed into the builder.
          */
-        public OAuthSuccessfulResponse build()
-        {
+        public OAuthSuccessfulResponse build() {
             return new OAuthSuccessfulResponse(this);
         }
 
-        public Builder expiresIn(int expiresIn)
-        {
+        public Builder expiresIn(int expiresIn) {
             this.expiresIn = expiresIn;
             return this;
         }
 
-        public Builder refreshToken(String refreshToken)
-        {
+        public Builder refreshToken(String refreshToken) {
             this.refreshToken = refreshToken;
             return this;
         }
 
-        public Builder scope(String scope)
-        {
+        public Builder scope(String scope) {
             this.scope = scope;
             return this;
         }
     }
 
-    /**
-     * Used to declare expiresIn uninitialized
-     */
+    /** Used to declare expiresIn uninitialized */
     private static final int UNINITIALIZED = -1;
 
     public static OAuthSuccessfulResponse createFromFragment(
-            Map<String, String> fragmentParameters) throws LiveAuthException
-    {
+            Map<String, String> fragmentParameters) throws LiveAuthException {
         final String accessToken = fragmentParameters.get(OAuth.ACCESS_TOKEN);
         final String tokenTypeString = fragmentParameters.get(OAuth.TOKEN_TYPE);
 
@@ -92,11 +83,9 @@ class OAuthSuccessfulResponse implements OAuthResponse
         assert tokenTypeString != null;
 
         final TokenType tokenType;
-        try
-        {
+        try {
             tokenType = TokenType.valueOf(tokenTypeString.toUpperCase());
-        } catch (final IllegalArgumentException e)
-        {
+        } catch (final IllegalArgumentException e) {
             throw new LiveAuthException(ErrorMessages.SERVER_ERROR, e);
         }
 
@@ -104,20 +93,16 @@ class OAuthSuccessfulResponse implements OAuthResponse
                 new OAuthSuccessfulResponse.Builder(accessToken, tokenType);
 
         final String authenticationToken = fragmentParameters.get(OAuth.AUTHENTICATION_TOKEN);
-        if (authenticationToken != null)
-        {
+        if (authenticationToken != null) {
             builder.authenticationToken(authenticationToken);
         }
 
         final String expiresInString = fragmentParameters.get(OAuth.EXPIRES_IN);
-        if (expiresInString != null)
-        {
+        if (expiresInString != null) {
             final int expiresIn;
-            try
-            {
+            try {
                 expiresIn = Integer.parseInt(expiresInString);
-            } catch (final NumberFormatException e)
-            {
+            } catch (final NumberFormatException e) {
                 throw new LiveAuthException(ErrorMessages.SERVER_ERROR, e);
             }
 
@@ -125,8 +110,7 @@ class OAuthSuccessfulResponse implements OAuthResponse
         }
 
         final String scope = fragmentParameters.get(OAuth.SCOPE);
-        if (scope != null)
-        {
+        if (scope != null) {
             builder.scope(scope);
         }
 
@@ -142,89 +126,69 @@ class OAuthSuccessfulResponse implements OAuthResponse
      * @throws LiveAuthException if there is a JSONException or the token_type is unknown.
      */
     public static OAuthSuccessfulResponse createFromJson(JSONObject response)
-            throws LiveAuthException
-    {
+            throws LiveAuthException {
         assert validOAuthSuccessfulResponse(response);
 
         final String accessToken;
-        try
-        {
+        try {
             accessToken = response.getString(OAuth.ACCESS_TOKEN);
-        } catch (final JSONException e)
-        {
+        } catch (final JSONException e) {
             throw new LiveAuthException(ErrorMessages.SERVER_ERROR, e);
         }
 
         final String tokenTypeString;
-        try
-        {
+        try {
             tokenTypeString = response.getString(OAuth.TOKEN_TYPE);
-        } catch (final JSONException e)
-        {
+        } catch (final JSONException e) {
             throw new LiveAuthException(ErrorMessages.SERVER_ERROR, e);
         }
 
         final TokenType tokenType;
-        try
-        {
+        try {
             tokenType = TokenType.valueOf(tokenTypeString.toUpperCase());
-        } catch (final IllegalArgumentException e)
-        {
+        } catch (final IllegalArgumentException e) {
             throw new LiveAuthException(ErrorMessages.SERVER_ERROR, e);
-        } catch (final NullPointerException e)
-        {
+        } catch (final NullPointerException e) {
             throw new LiveAuthException(ErrorMessages.SERVER_ERROR, e);
         }
 
         final Builder builder = new Builder(accessToken, tokenType);
 
-        if (response.has(OAuth.AUTHENTICATION_TOKEN))
-        {
+        if (response.has(OAuth.AUTHENTICATION_TOKEN)) {
             final String authenticationToken;
-            try
-            {
+            try {
                 authenticationToken = response.getString(OAuth.AUTHENTICATION_TOKEN);
-            } catch (final JSONException e)
-            {
+            } catch (final JSONException e) {
                 throw new LiveAuthException(ErrorMessages.CLIENT_ERROR, e);
             }
             builder.authenticationToken(authenticationToken);
         }
 
-        if (response.has(OAuth.REFRESH_TOKEN))
-        {
+        if (response.has(OAuth.REFRESH_TOKEN)) {
             final String refreshToken;
-            try
-            {
+            try {
                 refreshToken = response.getString(OAuth.REFRESH_TOKEN);
-            } catch (final JSONException e)
-            {
+            } catch (final JSONException e) {
                 throw new LiveAuthException(ErrorMessages.CLIENT_ERROR, e);
             }
             builder.refreshToken(refreshToken);
         }
 
-        if (response.has(OAuth.EXPIRES_IN))
-        {
+        if (response.has(OAuth.EXPIRES_IN)) {
             final int expiresIn;
-            try
-            {
+            try {
                 expiresIn = response.getInt(OAuth.EXPIRES_IN);
-            } catch (final JSONException e)
-            {
+            } catch (final JSONException e) {
                 throw new LiveAuthException(ErrorMessages.CLIENT_ERROR, e);
             }
             builder.expiresIn(expiresIn);
         }
 
-        if (response.has(OAuth.SCOPE))
-        {
+        if (response.has(OAuth.SCOPE)) {
             final String scope;
-            try
-            {
+            try {
                 scope = response.getString(OAuth.SCOPE);
-            } catch (final JSONException e)
-            {
+            } catch (final JSONException e) {
                 throw new LiveAuthException(ErrorMessages.CLIENT_ERROR, e);
             }
             builder.scope(scope);
@@ -238,15 +202,12 @@ class OAuthSuccessfulResponse implements OAuthResponse
      * @return true if the given JSONObject has the required fields to construct an
      *         OAuthSuccessfulResponse (i.e., has access_token and token_type)
      */
-    public static boolean validOAuthSuccessfulResponse(JSONObject response)
-    {
+    public static boolean validOAuthSuccessfulResponse(JSONObject response) {
         return response.has(OAuth.ACCESS_TOKEN) &&
-                response.has(OAuth.TOKEN_TYPE);
+               response.has(OAuth.TOKEN_TYPE);
     }
 
-    /**
-     * REQUIRED. The access token issued by the authorization server.
-     */
+    /** REQUIRED. The access token issued by the authorization server. */
     private final String accessToken;
 
     private final String authenticationToken;
@@ -264,23 +225,17 @@ class OAuthSuccessfulResponse implements OAuthResponse
      */
     private final String refreshToken;
 
-    /**
-     * OPTIONAL.
-     */
+    /** OPTIONAL. */
     private final String scope;
 
-    /**
-     * REQUIRED.
-     */
+    /** REQUIRED. */
     private final TokenType tokenType;
 
     /**
      * Private constructor to enforce the user of the builder.
-     *
      * @param builder to use to construct the object from.
      */
-    private OAuthSuccessfulResponse(Builder builder)
-    {
+    private OAuthSuccessfulResponse(Builder builder) {
         this.accessToken = builder.accessToken;
         this.authenticationToken = builder.authenticationToken;
         this.tokenType = builder.tokenType;
@@ -290,70 +245,58 @@ class OAuthSuccessfulResponse implements OAuthResponse
     }
 
     @Override
-    public void accept(OAuthResponseVisitor visitor)
-    {
+    public void accept(OAuthResponseVisitor visitor) {
         visitor.visit(this);
     }
 
-    public String getAccessToken()
-    {
+    public String getAccessToken() {
         return this.accessToken;
     }
 
-    public String getAuthenticationToken()
-    {
+    public String getAuthenticationToken() {
         return this.authenticationToken;
     }
 
-    public int getExpiresIn()
-    {
+    public int getExpiresIn() {
         return this.expiresIn;
     }
 
-    public String getRefreshToken()
-    {
+    public String getRefreshToken() {
         return this.refreshToken;
     }
 
-    public String getScope()
-    {
+    public String getScope() {
         return this.scope;
     }
 
-    public TokenType getTokenType()
-    {
+    public TokenType getTokenType() {
         return this.tokenType;
     }
 
-    public boolean hasAuthenticationToken()
-    {
+    public boolean hasAuthenticationToken() {
         return this.authenticationToken != null && !TextUtils.isEmpty(this.authenticationToken);
     }
 
-    public boolean hasExpiresIn()
-    {
+    public boolean hasExpiresIn() {
         return this.expiresIn != UNINITIALIZED;
     }
 
-    public boolean hasRefreshToken()
-    {
+    public boolean hasRefreshToken() {
         return this.refreshToken != null && !TextUtils.isEmpty(this.refreshToken);
     }
 
-    public boolean hasScope()
-    {
+    public boolean hasScope() {
         return this.scope != null && !TextUtils.isEmpty(this.scope);
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return String.format("OAuthSuccessfulResponse [accessToken=%s, authenticationToken=%s, tokenType=%s, refreshToken=%s, expiresIn=%s, scope=%s]",
-                this.accessToken,
-                this.authenticationToken,
-                this.tokenType,
-                this.refreshToken,
-                this.expiresIn,
-                this.scope);
+                             this.accessToken,
+                             this.authenticationToken,
+                             this.tokenType,
+                             this.refreshToken,
+                             this.expiresIn,
+                             this.scope);
     }
 }

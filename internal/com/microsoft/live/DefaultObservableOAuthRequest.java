@@ -13,19 +13,16 @@ import java.util.List;
  * Default implementation of an ObserverableOAuthRequest.
  * Other classes that need to be observed can compose themselves out of this class.
  */
-class DefaultObservableOAuthRequest implements ObservableOAuthRequest
-{
+class DefaultObservableOAuthRequest implements ObservableOAuthRequest {
 
     private final List<OAuthRequestObserver> observers;
 
-    public DefaultObservableOAuthRequest()
-    {
+    public DefaultObservableOAuthRequest() {
         this.observers = new ArrayList<OAuthRequestObserver>();
     }
 
     @Override
-    public void addObserver(OAuthRequestObserver observer)
-    {
+    public void addObserver(OAuthRequestObserver observer) {
         this.observers.add(observer);
     }
 
@@ -34,10 +31,8 @@ class DefaultObservableOAuthRequest implements ObservableOAuthRequest
      *
      * @param exception to give to the observers
      */
-    public void notifyObservers(LiveAuthException exception)
-    {
-        for (final OAuthRequestObserver observer : this.observers)
-        {
+    public void notifyObservers(LiveAuthException exception) {
+        for (final OAuthRequestObserver observer : this.observers) {
             observer.onException(exception);
         }
     }
@@ -47,17 +42,14 @@ class DefaultObservableOAuthRequest implements ObservableOAuthRequest
      *
      * @param response to give to the observers
      */
-    public void notifyObservers(OAuthResponse response)
-    {
-        for (final OAuthRequestObserver observer : this.observers)
-        {
+    public void notifyObservers(OAuthResponse response) {
+        for (final OAuthRequestObserver observer : this.observers) {
             observer.onResponse(response);
         }
     }
 
     @Override
-    public boolean removeObserver(OAuthRequestObserver observer)
-    {
+    public boolean removeObserver(OAuthRequestObserver observer) {
         return this.observers.remove(observer);
     }
 }

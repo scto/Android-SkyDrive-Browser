@@ -6,8 +6,6 @@
 
 package com.microsoft.live;
 
-import android.net.Uri;
-import android.text.TextUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -16,8 +14,10 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-class UploadRequest extends EntityEnclosingApiRequest<JSONObject>
-{
+import android.net.Uri;
+import android.text.TextUtils;
+
+class UploadRequest extends EntityEnclosingApiRequest<JSONObject> {
 
     public static final String METHOD = HttpPut.METHOD_NAME;
 
@@ -34,15 +34,14 @@ class UploadRequest extends EntityEnclosingApiRequest<JSONObject>
                          String path,
                          HttpEntity entity,
                          String filename,
-                         boolean overwrite)
-    {
+                         boolean overwrite) {
         super(session,
-                client,
-                JsonResponseHandler.INSTANCE,
-                path,
-                entity,
-                ResponseCodes.SUPPRESS,
-                Redirects.UNSUPPRESSED);
+              client,
+              JsonResponseHandler.INSTANCE,
+              path,
+              entity,
+              ResponseCodes.SUPPRESS,
+              Redirects.UNSUPPRESSED);
 
         assert !TextUtils.isEmpty(filename);
 
@@ -52,49 +51,39 @@ class UploadRequest extends EntityEnclosingApiRequest<JSONObject>
     }
 
     @Override
-    public String getMethod()
-    {
+    public String getMethod() {
         return METHOD;
     }
 
     @Override
-    public JSONObject execute() throws LiveOperationException
-    {
+    public JSONObject execute() throws LiveOperationException {
         Uri.Builder uploadRequestUri;
 
         // if the path was relative, we have to retrieve the upload location, because if we don't,
         // we will proxy the upload request, which is a waste of resources.
-        if (this.isRelativePath)
-        {
+        if (this.isRelativePath) {
             JSONObject response = this.getUploadLocation();
 
             // We could of tried to get the upload location on an invalid path.
             // If we did, just return that response.
             // If the user passes in a path that does contain an upload location, then
             // we need to throw an error.
-            if (response.has(ERROR_KEY))
-            {
+            if (response.has(ERROR_KEY)) {
                 return response;
-            }
-            else if (!response.has(UPLOAD_LOCATION_KEY))
-            {
+            } else if (!response.has(UPLOAD_LOCATION_KEY)) {
                 throw new LiveOperationException(ErrorMessages.MISSING_UPLOAD_LOCATION);
             }
 
             // once we have the file object, get the upload location
             String uploadLocation;
-            try
-            {
+            try {
                 uploadLocation = response.getString(UPLOAD_LOCATION_KEY);
-            } catch (JSONException e)
-            {
+            } catch (JSONException e) {
                 throw new LiveOperationException(ErrorMessages.SERVER_ERROR, e);
             }
 
             uploadRequestUri = Uri.parse(uploadLocation).buildUpon();
-        }
-        else
-        {
+        } else {
             uploadRequestUri = this.requestUri;
         }
 
@@ -102,7 +91,7 @@ class UploadRequest extends EntityEnclosingApiRequest<JSONObject>
         // and don't forget to set the overwrite query parameter
         uploadRequestUri.appendPath(this.filename);
         uploadRequestUri.appendQueryParameter(QueryParameters.OVERWRITE,
-                Boolean.toString(this.overwrite));
+                                              Boolean.toString(this.overwrite));
 
         HttpPut uploadRequest = new HttpPut(uploadRequestUri.toString());
         uploadRequest.setEntity(this.entity);
@@ -113,8 +102,7 @@ class UploadRequest extends EntityEnclosingApiRequest<JSONObject>
     }
 
     @Override
-    protected HttpUriRequest createHttpRequest() throws LiveOperationException
-    {
+    protected HttpUriRequest createHttpRequest() throws LiveOperationException {
         return this.currentRequest;
     }
 
@@ -124,8 +112,7 @@ class UploadRequest extends EntityEnclosingApiRequest<JSONObject>
      * @return
      * @throws LiveOperationException
      */
-    private JSONObject getUploadLocation() throws LiveOperationException
-    {
+    private JSONObject getUploadLocation() throws LiveOperationException {
         this.currentRequest = new HttpGet(this.requestUri.toString());
         return super.execute();
     }

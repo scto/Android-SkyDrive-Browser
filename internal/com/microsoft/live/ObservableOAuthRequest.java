@@ -10,8 +10,7 @@ package com.microsoft.live;
  * An OAuth Request that can be observed, by adding observers that will be notified on any
  * exception or response.
  */
-interface ObservableOAuthRequest
-{
+interface ObservableOAuthRequest {
     /**
      * Adds an observer to observe the OAuth request
      *

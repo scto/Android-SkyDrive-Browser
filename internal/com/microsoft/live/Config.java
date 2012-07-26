@@ -9,11 +9,8 @@ package com.microsoft.live;
 import android.net.Uri;
 import android.text.TextUtils;
 
-/**
- * Config is a singleton class that contains the values used throughout the SDK.
- */
-enum Config
-{
+/** Config is a singleton class that contains the values used throughout the SDK. */
+enum Config {
     INSTANCE;
 
     private Uri apiUri;
@@ -23,8 +20,7 @@ enum Config
     private Uri oAuthLogoutUri;
     private Uri oAuthTokenUri;
 
-    Config()
-    {
+    Config() {
         apiUri = Uri.parse("https://apis.live.net/v5.0");
         apiVersion = "5.0";
         oAuthAuthorizeUri = Uri.parse("https://login.live.com/oauth20_authorize.srf");
@@ -33,69 +29,57 @@ enum Config
         oAuthTokenUri = Uri.parse("https://login.live.com/oauth20_token.srf");
     }
 
-    public Uri getApiUri()
-    {
+    public Uri getApiUri() {
         return apiUri;
     }
 
-    public String getApiVersion()
-    {
+    public String getApiVersion() {
         return apiVersion;
     }
 
-    public Uri getOAuthAuthorizeUri()
-    {
+    public Uri getOAuthAuthorizeUri() {
         return oAuthAuthorizeUri;
     }
 
-    public Uri getOAuthDesktopUri()
-    {
+    public Uri getOAuthDesktopUri() {
         return oAuthDesktopUri;
     }
 
-    public Uri getOAuthLogoutUri()
-    {
+    public Uri getOAuthLogoutUri() {
         return oAuthLogoutUri;
     }
 
-    public Uri getOAuthTokenUri()
-    {
+    public Uri getOAuthTokenUri() {
         return oAuthTokenUri;
     }
 
-    public void setApiUri(Uri apiUri)
-    {
+    public void setApiUri(Uri apiUri) {
         assert apiUri != null;
         this.apiUri = apiUri;
     }
 
-    public void setApiVersion(String apiVersion)
-    {
+    public void setApiVersion(String apiVersion) {
         assert !TextUtils.isEmpty(apiVersion);
         this.apiVersion = apiVersion;
     }
 
-    public void setOAuthAuthorizeUri(Uri oAuthAuthorizeUri)
-    {
+    public void setOAuthAuthorizeUri(Uri oAuthAuthorizeUri) {
         assert oAuthAuthorizeUri != null;
         this.oAuthAuthorizeUri = oAuthAuthorizeUri;
     }
 
-    public void setOAuthDesktopUri(Uri oAuthDesktopUri)
-    {
+    public void setOAuthDesktopUri(Uri oAuthDesktopUri) {
         assert oAuthDesktopUri != null;
         this.oAuthDesktopUri = oAuthDesktopUri;
     }
 
-    public void setOAuthLogoutUri(Uri oAuthLogoutUri)
-    {
+    public void setOAuthLogoutUri(Uri oAuthLogoutUri) {
         assert oAuthLogoutUri != null;
 
         this.oAuthLogoutUri = oAuthLogoutUri;
     }
 
-    public void setOAuthTokenUri(Uri oAuthTokenUri)
-    {
+    public void setOAuthTokenUri(Uri oAuthTokenUri) {
         assert oAuthTokenUri != null;
         this.oAuthTokenUri = oAuthTokenUri;
     }

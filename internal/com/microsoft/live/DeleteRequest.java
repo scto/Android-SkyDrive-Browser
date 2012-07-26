@@ -14,8 +14,7 @@ import org.json.JSONObject;
 /**
  * DeleteRequest is a subclass of an ApiRequest and performs a delete request.
  */
-class DeleteRequest extends ApiRequest<JSONObject>
-{
+class DeleteRequest extends ApiRequest<JSONObject> {
 
     public static final String METHOD = HttpDelete.METHOD_NAME;
 
@@ -23,20 +22,16 @@ class DeleteRequest extends ApiRequest<JSONObject>
      * Constructs a new DeleteRequest and initializes its member variables.
      *
      * @param session with the access_token
-     * @param client  to perform Http requests on
-     * @param path    of the request
+     * @param client to perform Http requests on
+     * @param path of the request
      */
-    public DeleteRequest(LiveConnectSession session, HttpClient client, String path)
-    {
+    public DeleteRequest(LiveConnectSession session, HttpClient client, String path) {
         super(session, client, JsonResponseHandler.INSTANCE, path);
     }
 
-    /**
-     * @return the string "DELETE"
-     */
+    /** @return the string "DELETE" */
     @Override
-    public String getMethod()
-    {
+    public String getMethod() {
         return METHOD;
     }
 
@@ -46,8 +41,7 @@ class DeleteRequest extends ApiRequest<JSONObject>
      * @return a HttpDelete request
      */
     @Override
-    protected HttpUriRequest createHttpRequest()
-    {
+    protected HttpUriRequest createHttpRequest() {
         return new HttpDelete(this.requestUri.toString());
     }
 }
