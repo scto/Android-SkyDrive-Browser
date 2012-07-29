@@ -189,8 +189,10 @@ public class AudioPlaybackService extends Service
 
         if (skyDriveAudio == null && repeatPlaylist)
         {
-            populateNowPlayingWithPlayed();
-            startPlayback(NOW_PLAYING.peek());
+            if(NOW_PLAYING.size()>0){
+                populateNowPlayingWithPlayed();
+                startPlayback(NOW_PLAYING.peek());
+            }
             return;
         } else if (skyDriveAudio == null)
         {
@@ -239,9 +241,13 @@ public class AudioPlaybackService extends Service
 
     private void populateNowPlayingWithPlayed()
     {
+        SkyDriveAudio audio;
         for (int i = 0; i < PLAYED.size(); i++)
         {
-            NOW_PLAYING.addFirst(PLAYED.pop());
+            audio = PLAYED.pop();
+            if(audio != null){
+                NOW_PLAYING.add(PLAYED.pop());
+            }
         }
     }
 

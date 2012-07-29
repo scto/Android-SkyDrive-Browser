@@ -1012,7 +1012,7 @@ public class BrowserActivity extends SherlockListActivity
         public View getView(int position, View convertView, final ViewGroup parent)
         {
             SkyDriveObject skyDriveObj = getItem(position);
-            mView = convertView != null ? convertView : null;
+            mView = convertView;
             mPosition = position;
             skyDriveObj.accept(new SkyDriveObject.Visitor()
             {

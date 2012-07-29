@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Toast;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.killerud.skydrive.BrowserForSkyDriveApplication;
 import com.killerud.skydrive.R;
@@ -18,7 +19,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 
-public class SharingDialog extends SherlockActivity{
+public class SharingDialog extends SherlockActivity
+{
 
     public static final String EXTRAS_FILE_IDS = "fileIds";
     public static final String EXTRAS_FILE_NAMES = "fileNames";
@@ -43,7 +45,7 @@ public class SharingDialog extends SherlockActivity{
         final BrowserForSkyDriveApplication app = (BrowserForSkyDriveApplication) getApplication();
         final LiveConnectClient client = app.getConnectClient();
 
-        for(int i=0;i<mFileIds.size();i++)
+        for (int i = 0; i < mFileIds.size(); i++)
         {
             getLinkToFile(mFileIds.get(i));
         }
@@ -70,22 +72,24 @@ public class SharingDialog extends SherlockActivity{
             }
         });
 
-        ((CheckBox) findViewById(R.id.sharingEditable)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        ((CheckBox) findViewById(R.id.sharingEditable)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+        {
             @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
+            public void onCheckedChanged(CompoundButton compoundButton, boolean checked)
+            {
                 mResultView.setText(R.string.sharingGeneratingLinks);
                 mResultBuilder = new StringBuilder();
                 mLinkCounter = 0;
 
-                if(checked)
+                if (checked)
                 {
-                    for(int i=0;i<mFileIds.size();i++)
+                    for (int i = 0; i < mFileIds.size(); i++)
                     {
                         getLinkToEditFile(mFileIds.get(i));
                     }
-                }else
+                } else
                 {
-                    for(int i=0;i<mFileIds.size();i++)
+                    for (int i = 0; i < mFileIds.size(); i++)
                     {
                         getLinkToFile(mFileIds.get(i));
                     }
@@ -95,39 +99,60 @@ public class SharingDialog extends SherlockActivity{
     }
 
 
-
-    private void getLinkToFile(String fileId) {
-        final String path = fileId + "/shared_read_link";
-        final LiveOperationListener operationListener = createOperationListener();
-        ((BrowserForSkyDriveApplication) getApplication()).getConnectClient().getAsync(path, operationListener);
+    private void getLinkToFile(String fileId)
+    {
+        try
+        {
+            final String path = fileId + "/shared_read_link";
+            final LiveOperationListener operationListener = createOperationListener();
+            ((BrowserForSkyDriveApplication) getApplication()).getConnectClient().getAsync(path, operationListener);
+        } catch (NullPointerException e)
+        {
+            Toast.makeText(getApplicationContext(), R.string.errorCouldNotFetchFileForSharing, Toast.LENGTH_SHORT).show();
+            finish();
+        }
     }
 
     private void getLinkToEditFile(String fileId)
     {
-        final String path = fileId + "/shared_edit_link";
-        final LiveOperationListener operationListener = createOperationListener();
-        ((BrowserForSkyDriveApplication) getApplication()).getConnectClient().getAsync(path, operationListener);
+        try
+        {
+            final String path = fileId + "/shared_edit_link";
+            final LiveOperationListener operationListener = createOperationListener();
+            ((BrowserForSkyDriveApplication) getApplication()).getConnectClient().getAsync(path, operationListener);
+        } catch (NullPointerException e)
+        {
+            Toast.makeText(getApplicationContext(), R.string.errorCouldNotFetchFileForSharing, Toast.LENGTH_SHORT).show();
+            finish();
+        }
     }
 
-    private LiveOperationListener createOperationListener() {
-        return new LiveOperationListener() {
-                public void onError(LiveOperationException exception, LiveOperation operation) {
-                    Log.e(Constants.LOGTAG, "Error getting link to file: " + exception.getMessage());
-                    return;
-                }
-                public void onComplete(LiveOperation operation) {
-                    JSONObject result = operation.getResult();
-                    mResultBuilder.append(result.optString("link"));
-                    mResultBuilder.append("\n");
-                    mLinkCounter++;
-                    updateResultView();
-                }
-            };
+    private LiveOperationListener createOperationListener()
+    {
+        return new LiveOperationListener()
+        {
+            public void onError(LiveOperationException exception, LiveOperation operation)
+            {
+                Log.e(Constants.LOGTAG, "Error getting link to file: " + exception.getMessage());
+                return;
+            }
+
+            public void onComplete(LiveOperation operation)
+            {
+                JSONObject result = operation.getResult();
+                mResultBuilder.append(result.optString("link"));
+                mResultBuilder.append("\n");
+                mLinkCounter++;
+                updateResultView();
+            }
+        };
     }
 
     private void updateResultView()
     {
-        if(mLinkCounter == mFileIds.size())
+        if (mLinkCounter == mFileIds.size())
+        {
             mResultView.setText(mResultBuilder.toString());
+        }
     }
 }

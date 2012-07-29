@@ -38,11 +38,15 @@
             <intent-filter>
                 <action android:name="android.intent.action.SEND"/>
                 <action android:name="android.intent.action.SEND_MULTIPLE"/>
+
+                <!-- Sadly most file types here are not allowed by MS-->
                 <data android:mimeType="image/*"/>
-                <data android:mimeType="text/*"/>
+                <data android:mimeType="text/plain"/>
                 <data android:mimeType="video/*"/>
                 <data android:mimeType="application/pdf"/>
-                <!-- Sadly most file types here are not allowed by MS. PDF one of the few. -->
+                <data android:mimeType="application/msword"/>
+                <data android:mimeType="application/vnd.ms-powerpoint" />
+                <data android:mimeType="application/vnd.ms-excel" />
                 <data android:mimeType="audio/*"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>

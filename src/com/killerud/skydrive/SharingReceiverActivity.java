@@ -123,11 +123,13 @@ public class SharingReceiverActivity extends Activity
 
     public String parseUriToFilePath(Uri uri)
     {
+        assert uri != null;
+
         String selectedImagePath = null;
         String filemanagerPath = uri.getPath();
 
-        String[] projection = {MediaStore.Images.Media.DATA};
-        Cursor cursor = managedQuery(uri, projection, null, null, null);
+        String[] projection = {};
+        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
 
         if (cursor != null)
         {
@@ -137,6 +139,8 @@ public class SharingReceiverActivity extends Activity
             cursor.moveToFirst();
             selectedImagePath = cursor.getString(column_index);
         }
+
+        cursor.close();
 
         if (selectedImagePath != null)
         {
@@ -168,7 +172,8 @@ public class SharingReceiverActivity extends Activity
 
                 ArrayList<String> filePath = new ArrayList<String>();
                 try{
-                    filePath.add(parseUriToFilePath(uri));
+
+                    if(uri!= null) filePath.add(parseUriToFilePath(uri));
                 }catch (UnsupportedOperationException e)
                 {
                     Toast.makeText(this, R.string.errorCouldNotFetchFileForSharing, Toast.LENGTH_SHORT).show();
@@ -191,7 +196,8 @@ public class SharingReceiverActivity extends Activity
                 try{
                     for (int i = 0; i < fileList.size(); i++)
                     {
-                        filePaths.add(parseUriToFilePath(fileList.get(i)));
+                        Uri uri = fileList.get(i);
+                        if(uri != null) filePaths.add(parseUriToFilePath(uri));
                     }
                 }catch (UnsupportedOperationException e)
                 {
