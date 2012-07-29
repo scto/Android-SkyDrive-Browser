@@ -861,7 +861,10 @@ public class BrowserActivity extends SherlockListActivity
                 startActivity(new Intent(getApplicationContext(), FileBrowserActivity.class));
                 return true;
             case R.id.settings:
-                startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
+                startActivity(new Intent(getApplicationContext(), PreferencesActivity.class));
+                return true;
+            case R.id.audioControls:
+                startActivity(new Intent(getApplicationContext(), AudioControlActivity.class));
                 return true;
             case R.id.signOut:
                 setSupportProgressBarIndeterminateVisibility(true);

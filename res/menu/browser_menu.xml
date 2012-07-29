@@ -37,6 +37,10 @@
           android:showAsAction="withText|never"
           android:title="@string/savedFiles"/>
 
+    <item android:title="@string/audioControls"
+          android:showAsAction="withText|never"
+          android:id="@+id/audioControls"/>
+
     <item android:title="@string/settings"
           android:showAsAction="withText|never"
           android:id="@+id/settings"/>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+            android:title="@string/preferencesFeatures">
+
+    <CheckBoxPreference android:key="automatic_camera_upload"
+                        android:title="@string/cameraUploadHeader"
+                        android:defaultValue="false"
+                        android:summary="@string/cameraUploadSummary"
+            />
+
+    <CheckBoxPreference android:title="@string/confirmExitHeader"
+                        android:key="confirm_exit"
+                        android:summary="@string/confirmExitSummary"
+                        android:defaultValue="false" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

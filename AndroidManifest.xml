@@ -86,8 +86,12 @@
                   android:label="@string/downloadFileCannotBeViewed"
                   android:theme="@style/LightThemeDialog"/>
 
-        <activity android:name=".SettingsActivity"
-                  android:theme="@style/LightTheme"/>
+        <activity android:name=".PreferencesActivity"
+                  android:theme="@style/LightTheme">
+            <intent-filter>
+                <category android:name="android.intent.category.PREFERENCE" />
+            </intent-filter>
+        </activity>
 
         <activity android:name=".WebActivity"
                   android:uiOptions="none"

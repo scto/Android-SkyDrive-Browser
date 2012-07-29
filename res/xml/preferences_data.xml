@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+            android:title="@string/preferencesData">
+    <CheckBoxPreference android:defaultValue="false"
+                        android:key="limit_all_to_wifi"
+                        android:title="@string/limitDataToWiFiHeader"
+                        android:summary="@string/limitDataToWiFiSummary"
+            />
+
+    <CheckBoxPreference android:title="@string/limitCameraToWifiHeader"
+                        android:key="camera_upload_wifi_only"
+                        android:summary="@string/limitCameraToWifiSummary"
+                        android:defaultValue="false"/>
+
+    <CheckBoxPreference android:defaultValue="false"
+                        android:key="thumbnails_disabled"
+                        android:title="@string/disableThumb"
+                        android:summary="@string/disableThumbSummary" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

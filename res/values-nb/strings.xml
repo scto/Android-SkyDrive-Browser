@@ -29,21 +29,8 @@
     <string name="copiedFiles">Kopierte file(r)</string>
     <string name="renamedFiles">Endret file(r)</string>
     <string name="serviceLabel">Tjeneste for automatisk kameraopplasing til SkyDrive</string>
-    <string name="settings">Instillinger</string>
-    <string name="cameraUploadHeader">Atomatisk kameraopplasting</string>
-    <string name="cameraUploadSummary">Last opp nye kamerabilder automatisk</string>
-    <string name="limitCameraToWifiHeader">Kameraopplasting kun på WiFi</string>
-    <string name="limitCameraToWifiSummary">Bruk dette om du har et abonnement uten inkludert datatrafikk</string>
-    <string name="limitDataToWiFiHeader">Begrens all data til WiFi</string>
-    <string name="limitDataToWiFiSummary">Bruk dette om du har et abonnement uten inkludert datatrafikk</string>
-    <string name="aboutTheAppHeader">Om appen</string>
-    <string name="noInternetConnection">Ingen WiFi tilgjengelig. Finn et trådløst nett eller skru av begrensingen i instillinger.</string>
-    <string name="versionHeader">Versjon</string>
-    <string name="creditsHeader">Skaperene</string>
-    <string name="creditsBody">Utvikler: William Killerud\n
-			App-ikon: Tom Emery\n
-			Biblioteker brukt: Live SDK for Android av Microsoft og ActionBarSherlock av Jake Wharton
-        </string>
+
+
 
     <string name="fileWillBeDownloaded">Filen lastes ned til telefonen</string>
     <string name="ok">OK</string>
@@ -133,5 +120,14 @@
     <string name="errorCouldNotFetchFileForSharing">Kunne ikke finne filen du delte, beklager!</string>
     <string name="errorTooManyFilesAtOnce">Klarer ikke gjøre mer enn 99 ting om gangen. Gjør så godt jeg kan!</string>
     <string name="errorLoggedOut">Du har blitt logget ut og må logge inn igjen for å bruke appen</string>
+
+    <string name="settings">Instillinger</string>
+    <string name="cameraUploadHeader">Atomatisk kameraopplasting</string>
+    <string name="cameraUploadSummary">Last opp nye kamerabilder automatisk</string>
+    <string name="limitCameraToWifiHeader">Kameraopplasting kun på WiFi</string>
+    <string name="limitCameraToWifiSummary">Bruk dette om du har et abonnement uten inkludert datatrafikk</string>
+    <string name="limitDataToWiFiHeader">Begrens all data til WiFi</string>
+    <string name="limitDataToWiFiSummary">Bruk dette om du har et abonnement uten inkludert datatrafikk</string>
+    <string name="noInternetConnection">Ingen WiFi tilgjengelig. Finn et trådløst nett eller skru av begrensingen i instillinger.</string>
 
 </resources>
