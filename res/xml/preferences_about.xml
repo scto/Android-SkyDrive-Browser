@@ -4,6 +4,10 @@
     <PreferenceCategory
             android:title="@string/preferencesAbout">
 
+        <Preference android:title="@string/skyDriveQuota"
+                    android:summary="@string/skyDriveQuotaLoading"
+                    android:key="skydrive_storage_quota"
+                />
 
 
         <PreferenceScreen android:icon="@drawable/emblem_shared"

@@ -2,22 +2,22 @@
 <preference-headers
         xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <header android:fragment="com.killerud.skydrive.PreferencesActivity$CompatabilityPreferenceFragment"
+    <header android:fragment="com.killerud.skydrive.PreferencesActivity$CompatibilityPreferenceFragment"
             android:icon="@android:drawable/ic_menu_sort_by_size"
             android:title="@string/preferencesFeatures" >
 
         <extra android:name="pref-resource" android:value="preferences_features" />
     </header>
 
-    <header android:fragment="com.killerud.skydrive.PreferencesActivity$CompatabilityPreferenceFragment"
+    <header android:fragment="com.killerud.skydrive.PreferencesActivity$CompatibilityPreferenceFragment"
             android:icon="@android:drawable/ic_menu_gallery"
             android:title="@string/preferencesData" >
         <extra android:name="pref-resource" android:value="preferences_data" />
     </header>
 
-    <header android:fragment="com.killerud.skydrive.PreferencesActivity$CompatabilityPreferenceFragment"
+    <header android:fragment="com.killerud.skydrive.PreferencesActivity$CompatibilityPreferenceFragment"
             android:icon="@android:drawable/ic_menu_gallery"
-            android:title="@string/aboutTheAppHeader" >
+            android:title="@string/preferencesAbout" >
         <extra android:name="pref-resource" android:value="preferences_about" />
     </header>
 

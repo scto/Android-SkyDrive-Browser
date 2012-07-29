@@ -32,4 +32,9 @@ public class Utility
 		r.setSeed(seed);
 		return r.nextInt();
 	}
+
+    public static long convertBytesToGigabytes(long bytes)
+    {
+        return bytes/1024/1024/1024;
+    }
 }

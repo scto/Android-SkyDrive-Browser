@@ -1,10 +1,16 @@
 package com.killerud.skydrive;
 
-import android.content.Context;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.actionbarsherlock.view.MenuItem;
+import com.killerud.skydrive.util.Utility;
+import com.microsoft.live.LiveConnectClient;
+import com.microsoft.live.LiveOperation;
+import com.microsoft.live.LiveOperationException;
+import com.microsoft.live.LiveOperationListener;
+import org.json.JSONException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -60,7 +66,7 @@ public class PreferencesActivity extends SherlockPreferenceActivity
             addPreferencesFromResource(R.xml.preferences_features);
             addPreferencesFromResource(R.xml.preferences_data);
             addPreferencesFromResource(R.xml.preferences_about);
-            //addPreferencesFromResource(R.xml.app_prefs_cat3);
+            getAndUpdateSkyDriveQuota(null);
         }
     }
 
@@ -79,18 +85,92 @@ public class PreferencesActivity extends SherlockPreferenceActivity
         }
     }
 
-    static public class CompatabilityPreferenceFragment extends PreferenceFragment
+    static public class CompatibilityPreferenceFragment extends PreferenceFragment
     {
         @Override
-        public void onCreate(Bundle aSavedState)
+        public void onCreate(Bundle savedInstanceState)
         {
-            super.onCreate(aSavedState);
+            super.onCreate(savedInstanceState);
+            String resourceArgument = getArguments().getString("pref-resource");
+
             addPreferencesFromResource(
                     getActivity().getApplicationContext().getResources().getIdentifier(
-                            getArguments().getString("pref-resource"),
+                            resourceArgument,
                             "xml",
                             getActivity().getApplicationContext().getPackageName()));
+
+            if(resourceArgument.equals("preferences_about"))
+            {
+                ((PreferencesActivity) getActivity()).getAndUpdateSkyDriveQuota(this);
+            }
         }
+    }
+
+    private void getAndUpdateSkyDriveQuota(final PreferenceFragment context)
+    {
+        LiveConnectClient client = ((BrowserForSkyDriveApplication) getApplication()).getConnectClient();
+        client.getAsync("me/skydrive/quota", new LiveOperationListener()
+        {
+            @Override
+            public void onComplete(LiveOperation operation)
+            {
+                String totalAvailableSpace = "";
+                String unusedSpace = "";
+                try
+                {
+                    totalAvailableSpace = operation.getResult().getString("quota");
+                } catch (JSONException e)
+                {
+                    totalAvailableSpace = "unknown";
+                }
+
+                try{
+                    unusedSpace = operation.getResult().getString("available");
+                }catch (JSONException e)
+                {
+                    totalAvailableSpace = "unknown";
+                }
+
+                String baseString = getString(R.string.skyDriveQuotaSummary);
+
+                Preference quotaPreference;
+                if(context == null)
+                {
+                    quotaPreference = findPreference("skydrive_storage_quota");
+                }else
+                {
+                    quotaPreference = context.findPreference("skydrive_storage_quota");
+                }
+                quotaPreference.setSummary(createReadableSkyDriveQuotaString(baseString, unusedSpace, totalAvailableSpace));
+
+            }
+
+            @Override
+            public void onError(LiveOperationException exception, LiveOperation operation)
+            {
+                Preference quotaPreference;
+                if(context == null)
+                {
+                    quotaPreference = findPreference("skydrive_storage_quota");
+                }else
+                {
+                    quotaPreference = context.findPreference("skydrive_storage_quota");
+                }
+                quotaPreference.setSummary(getString(R.string.errorQuotaFetch));
+            }
+        });
+    }
+
+    private String createReadableSkyDriveQuotaString(String baseString, String unusedSpace, String totalAvailableSpace)
+    {
+        long unused = Long.parseLong(unusedSpace);
+        long totalAvailable = Long.parseLong(totalAvailableSpace);
+        long occupied = totalAvailable-unused;
+
+        String occupiedInGigabytes = Utility.convertBytesToGigabytes(occupied) + "GB";
+        String totalAvailableInGigabytes = Utility.convertBytesToGigabytes(totalAvailable) + "GB";
+
+        return String.format(baseString, occupiedInGigabytes, totalAvailableInGigabytes);
     }
 
     public boolean onOptionsItemSelected(MenuItem item)

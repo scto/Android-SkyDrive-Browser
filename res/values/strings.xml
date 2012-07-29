@@ -2,7 +2,7 @@
 <resources>
 
     <string name="appName">Explorer for SkyDrive</string>
-    <string name="initializingMessage">Connecting to your Microsoft account...</string>
+    <string name="initializingMessage">Connecting to your Microsoft account…</string>
     <string name="firstWelcomeMessage">Sign in with your Microsoft account to get
         started!</string>
     <string name="signInToWindowsLive">Sign in</string>
@@ -15,7 +15,7 @@
     <string name="noItemsInFolder">No files here</string>
     <string name="newFolderTitle">Create a new folder here</string>
     <string name="newFolder">New folder</string>
-    <string name="talkingToSkyDriveWait">Talking to SkyDrive...</string>
+    <string name="talkingToSkyDriveWait">Talking to SkyDrive…</string>
     <string name="imageDisplayError">Couldn\'t show the image</string>
     <string name="copyCutSelectedFiles">Selected files ready to paste</string>
     <string name="imageLoading">Image is loading</string>
@@ -35,7 +35,7 @@
     <string name="ok">OK</string>
     <string name="downloading">Downloading</string>
     <string name="uploading">Uploading</string>
-    <string name="downloadingFromSkyDrive">Downloading from SkyDrive...</string>
+    <string name="downloadingFromSkyDrive">Downloading from SkyDrive…</string>
     <string name="fileSaved">File saved</string>
     <string name="downloadError">Something went wrong while downloading. The file was not saved on your phone.</string>
 
@@ -47,7 +47,7 @@
 
     <string name="downloadNoPreview">No preview available</string>
     <string name="downloadFileCannotBeViewed">Can\'t open file for preview. Download instead?</string>
-    <string name="openWebBrowser">Open in...</string>
+    <string name="openWebBrowser">Open in…</string>
 
     <string name="createFolder">Create folder</string>
     <string name="cancel">Cancel</string>
@@ -57,7 +57,7 @@
 
     <string name="uploadToSkyDrive">Upload to SkyDrive</string>
     <string name="uploadTo">Upload to</string>
-    <string name="uploadingToSkyDrive">Uploading to your SkyDrive...</string>
+    <string name="uploadingToSkyDrive">Uploading to your SkyDrive…</string>
     <string name="uploadError">Something happened while uploading. The file was not saved in your SkyDrive.</string>
     <string name="uploadToThisFolder">Upload here</string>
     <string name="uploadSelected">Upload selected</string>
@@ -95,7 +95,7 @@
    <string name="sharedFiles">Shared files</string>
     <string name="sharingLinks">Sharing links</string>
     <string name="sharingLinksSummary">Anyone with these links will be able to see the file</string>
-    <string name="sharingGeneratingLinks">Generating sharing links...</string>
+    <string name="sharingGeneratingLinks">Generating sharing links…</string>
     <string name="sharingEnableEditing">Allow file editing</string>
 
     <string name="buffering">Buffering</string>
@@ -115,10 +115,11 @@
     <string name="errorMovingFile">Error moving file(s)</string>
     <string name="errorRenamingFile">Error renaming file(s)</string>
     <string name="errorCopyingFile">Error copying file(s)</string>
-    <string name="thirdPartyError"> can\'t be uploaded to SkyDrive by third-party apps and has been skipped...</string>
+    <string name="thirdPartyError">can\'t be uploaded to SkyDrive by third-party apps and has been skipped…</string>
     <string name="errorCouldNotFetchFileForSharing">Could not find the file you shared, sorry!</string>
     <string name="errorTooManyFilesAtOnce">Can\'t handle more than 99 files in one go, sorry. Handling as many as I can!</string>
     <string name="errorLoggedOut">You\'ve been logged out and have to log in again to keep using the app</string>
+    <string name="errorQuotaFetch">Couldn\'t get numbers</string>
 
     <string name="settings">Settings</string>
     <string name="cameraUploadHeader">Camera upload</string>
@@ -135,7 +136,10 @@
     <string name="disableThumb">Disable thumbnails</string>
     <string name="disableThumbSummary">Conserves memory and bandwidth. Disable thumbnails if you experience crashes.</string>
     <string name="donate">Donate</string>
-    <string name="donateSummary">Like the app? Click to donate a small amount to help out the developer.</string>
+    <string name="donateSummary">Click to donate a small amount to help out the developer.</string>
+    <string name="skyDriveQuota">Space on SkyDrive</string>
+    <string name="skyDriveQuotaLoading">Getting numbers from SkyDrive…</string>
+    <string name="skyDriveQuotaSummary">You\'re using %1$s of %2$s available</string>
 
     <string name="audioServiceName">Explorer for SkyDrive Music</string>
     <string name="audioBuffering">Buffering song</string>
