@@ -94,7 +94,7 @@ public class BrowserActivity extends SherlockListActivity
             }
         }else if(requestCode == DownloadDialog.DOWNLOAD_REQUEST)
         {
-            if(requestCode == RESULT_OK)
+            if(resultCode == RESULT_OK)
             {
                 XLoader loader = new XLoader(this);
                 ArrayList<SkyDriveObject> file = new ArrayList<SkyDriveObject>();
@@ -534,30 +534,6 @@ public class BrowserActivity extends SherlockListActivity
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         if (preferences.getBoolean("automatic_camera_upload", false))
         {
-            Map<String, String> folder = new HashMap<String, String>();
-            folder.put(JsonKeys.NAME, "me/skydrive/camera_roll");
-            try{
-                liveConnectClient.postAsync(currentFolderId,
-                        new JSONObject(folder),
-                        new LiveOperationListener()
-                        {
-                            @Override
-                            public void onError(LiveOperationException exception, LiveOperation operation)
-                            {
-                                Log.e(Constants.LOGTAG, exception.getMessage());
-                            }
-
-                            @Override
-                            public void onComplete(LiveOperation operation)
-                            {
-                                ((BrowserForSkyDriveApplication) getApplication()).getCurrentBrowser().reloadFolder();
-                            }
-                        });
-            }catch (IllegalStateException e)
-            {
-                handleIllegalConnectionState();
-            }
-
             startService(new Intent(this, CameraObserverService.class));
         }
         else

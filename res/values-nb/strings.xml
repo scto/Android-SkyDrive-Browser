@@ -130,4 +130,42 @@
     <string name="limitDataToWiFiSummary">Bruk dette om du har et abonnement uten inkludert datatrafikk</string>
     <string name="noInternetConnection">Ingen WiFi tilgjengelig. Finn et trådløst nett eller skru av begrensingen i instillinger.</string>
 
+    <string name="preferencesFeatures">Egenskaper</string>
+    <string name="preferencesData">Databruk</string>
+    <string name="preferencesAbout">Om appen</string>
+    <string name="disableThumb">Skru av forhåndsvisning</string>
+    <string name="disableThumbSummary">Senker minne- og databruk. Bruk dette om appen krasjer ofte.</string>
+    <string name="donate">Donér</string>
+    <string name="donateSummary">Hjelp utvikleren med en liten slant</string>
+    <string name="skyDriveQuota">Plass på SkyDrive</string>
+    <string name="skyDriveQuotaLoading">Henter tall fra SkyDrive…</string>
+    <string name="skyDriveQuotaSummary">Du bruker %1$s av totalt %2$s</string>
+
+    <string name="audioServiceName">Explorer for SkyDrive Musikk</string>
+    <string name="audioBuffering">Buffrer sang</string>
+    <string name="audioBufferingSummary">Buffrer sang fra SkyDrive</string>
+    <string name="audioNotPlaying">Spiller ikke</string>
+    <string name="audioNotPlayingSummary">Ingen sanger i spillelisten. Trykk på noen for å spille!</string>
+    <string name="audioPlaying">Spiller</string>
+    <string name="audioReturnToControls">Trykk på varselet for å åpne kontroller</string>
+    <string name="audioStopped">Stoppet</string>
+    <string name="audioStarted">Startet</string>
+    <string name="audioPaused">Pauset</string>
+    <string name="audioUpNext">Neste sang</string>
+    <string name="audioQueue">Kø</string>
+    <string name="audioShuffle">Tilfeldig</string>
+    <string name="audioRepeat">Gjenta</string>
+    <string name="audioRemove">Fjern</string>
+    <string name="audioStop">Stopp</string>
+    <string name="audioPlay">Spill</string>
+    <string name="audioPause">Pause</string>
+    <string name="audioSkip">Hopp over</string>
+    <string name="audioAddedToPlayingQueue">lagt til i køen</string>
+    <string name="audioTapASong">Trykk på en sang</string>
+    <string name="audioTapToAddToQueue">Trykk på en sang for å legge den til i køen</string>
+    <string name="audioNothingToSkipTo">Ingen sang å spille</string>
+    <string name="audioQueueInstructions">Dra og slipp for å endre rekkefølgen. Dra til venstre for å fjerne.</string>
+    <string name="audioControls">Musikkontroller</string>
+    <string name="audioQueueClear">Fjern alle</string>
+
 </resources>

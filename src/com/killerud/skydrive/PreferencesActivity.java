@@ -99,7 +99,7 @@ public class PreferencesActivity extends SherlockPreferenceActivity
                             "xml",
                             getActivity().getApplicationContext().getPackageName()));
 
-            if(resourceArgument.equals("preferences_about"))
+            if(resourceArgument.equals("preferences_data"))
             {
                 ((PreferencesActivity) getActivity()).getAndUpdateSkyDriveQuota(this);
             }

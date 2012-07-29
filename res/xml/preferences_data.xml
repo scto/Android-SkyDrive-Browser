@@ -21,4 +21,9 @@
 
     </PreferenceCategory>
 
+    <Preference android:title="@string/skyDriveQuota"
+                android:summary="@string/skyDriveQuotaLoading"
+                android:key="skydrive_storage_quota"
+            />
+
 </PreferenceScreen>
