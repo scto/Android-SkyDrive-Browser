@@ -102,10 +102,10 @@
                 android:permission="android.permission.INTERNET"
                 android:exported="false" />
 
-        <service android:name=".CameraImageAutoUploadService"
-                 android:exported="false"
-                 android:label="@string/serviceLabel"
-                 android:permission="android.permission.INTERNET"/>
+        <service android:label="@string/serviceLabel"
+                 android:name=".CameraObserverService"
+                 android:permission="android.permission.INTERNET"
+                 android:exported="false" />
 
     </application>
 </manifest> 

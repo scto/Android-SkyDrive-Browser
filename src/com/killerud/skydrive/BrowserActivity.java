@@ -43,28 +43,29 @@ import java.util.*;
 public class BrowserActivity extends SherlockListActivity
 {
     /* Live Client and download/upload class */
-    private LiveConnectClient mClient;
-    private XLoader mXloader;
+    private LiveConnectClient liveConnectClient;
+    private XLoader xLoader;
+    private CameraImageObserver cameraImageObserver;
 
     /* Directory navigation */
-    private SkyDriveListAdapter mSkyDriveListAdapter;
+    private SkyDriveListAdapter skyDriveListAdapter;
     private static final String HOME_FOLDER = "me/skydrive";
-    private String mCurrentFolderId;
-    private Stack<String> mPreviousFolderIds;
-    private Stack<String> mFolderHierarchy;
-    private TextView mFolderHierarchyView;
-    private ActionBar mActionBar;
+    private String currentFolderId;
+    private Stack<String> previousFolderIds;
+    private Stack<String> folderHierarchy;
+    private TextView folderHierarchyView;
+    private ActionBar actionBar;
 
     /* File manipulation */
-    private boolean mCutNotPaste;
-    private ArrayList<SkyDriveObject> mCopyCutFiles;
-    private ArrayList<SkyDriveObject> mCurrentlySelectedFiles;
+    private boolean isCutNotPaste;
+    private ArrayList<SkyDriveObject> filesToBePasted;
+    private ArrayList<SkyDriveObject> currentlySelectedFiles;
 
     /*
      * Holder for the ActionMode, part of the contectual action bar
      * for selecting and manipulating items
      */
-    private ActionMode mActionMode;
+    private ActionMode actionMode;
 
     /* Browser state. If this is set to true only folders will be shown
      * and a button starting an upload of a given file (passed through
@@ -72,9 +73,9 @@ public class BrowserActivity extends SherlockListActivity
      *
      * Used by the share receiver activity.
      */
-    private boolean mUploadDialog = false;
-    private boolean mAllWifiOnly;
-    private ConnectivityManager mConnectivityManager;
+    private boolean isUploadDialog = false;
+    private boolean isDataOnWifiOnly;
+    private ConnectivityManager connectivityManager;
 
     /**
      * Handles the chosen file from the UploadFile dialog
@@ -87,9 +88,9 @@ public class BrowserActivity extends SherlockListActivity
             if (resultCode == RESULT_OK)
             {
                 XLoader loader = new XLoader(this);
-                loader.uploadFile(mClient,
+                loader.uploadFile(liveConnectClient,
                         data.getStringArrayListExtra(UploadFileActivity.EXTRA_FILES_LIST),
-                        mCurrentFolderId);
+                        currentFolderId);
             }
         }else if(requestCode == DownloadDialog.DOWNLOAD_REQUEST)
         {
@@ -110,38 +111,38 @@ public class BrowserActivity extends SherlockListActivity
     {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        mConnectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 
-        mXloader = new XLoader(this);
-        mSkyDriveListAdapter = new SkyDriveListAdapter(this);
-        setListAdapter(mSkyDriveListAdapter);
+        xLoader = new XLoader(this);
+        skyDriveListAdapter = new SkyDriveListAdapter(this);
+        setListAdapter(skyDriveListAdapter);
 
         BrowserForSkyDriveApplication app = (BrowserForSkyDriveApplication) getApplication();
 
-        mClient = app.getConnectClient();
+        liveConnectClient = app.getConnectClient();
 
-        mCurrentlySelectedFiles = new ArrayList<SkyDriveObject>();
-        mCopyCutFiles = new ArrayList<SkyDriveObject>();
-        mPreviousFolderIds = new Stack<String>();
-        mCurrentFolderId = HOME_FOLDER;
+        currentlySelectedFiles = new ArrayList<SkyDriveObject>();
+        filesToBePasted = new ArrayList<SkyDriveObject>();
+        previousFolderIds = new Stack<String>();
+        currentFolderId = HOME_FOLDER;
 
         determineBrowserStateAndLayout(getIntent());
         createLocalSkyDriveFolderIfNotExists();
         setupListView(getListView());
 
-        mFolderHierarchyView = (TextView) findViewById(R.id.folder_hierarchy);
-        mFolderHierarchy = new Stack<String>();
-        mFolderHierarchy.push(getString(R.string.rootFolderTitle));
+        folderHierarchyView = (TextView) findViewById(R.id.folder_hierarchy);
+        folderHierarchy = new Stack<String>();
+        folderHierarchy.push(getString(R.string.rootFolderTitle));
 
         updateFolderHierarchy(null);
         app.setCurrentBrowser(this);
 
-        mActionBar = getSupportActionBar();
+        actionBar = getSupportActionBar();
         if (savedInstanceState != null)
         {
             restoreSavedInstanceState(savedInstanceState);
         }
-        loadFolder(mCurrentFolderId);
+        loadFolder(currentFolderId);
     }
 
     private void createLocalSkyDriveFolderIfNotExists() {
@@ -158,27 +159,27 @@ public class BrowserActivity extends SherlockListActivity
 
         if (savedInstanceState.containsKey(Constants.STATE_CURRENT_FOLDER))
         {
-            mCurrentFolderId = savedInstanceState.getString(Constants.STATE_CURRENT_FOLDER);
+            currentFolderId = savedInstanceState.getString(Constants.STATE_CURRENT_FOLDER);
         }
 
         if (savedInstanceState.containsKey(Constants.STATE_CURRENT_HIERARCHY))
         {
-            mFolderHierarchy = new Stack<String>();
+            folderHierarchy = new Stack<String>();
             String[] hierarchy = savedInstanceState.getStringArray(Constants.STATE_CURRENT_HIERARCHY);
             for (int i = 0; i < hierarchy.length; i++)
             {
-                mFolderHierarchy.push(hierarchy[i]);
+                folderHierarchy.push(hierarchy[i]);
             }
             updateFolderHierarchy(null);
         }
 
         if (savedInstanceState.containsKey(Constants.STATE_PREVIOUS_FOLDERS))
         {
-            mPreviousFolderIds = new Stack<String>();
+            previousFolderIds = new Stack<String>();
             String[] folderIds = savedInstanceState.getStringArray(Constants.STATE_PREVIOUS_FOLDERS);
             for (int i = 0; i < folderIds.length; i++)
             {
-                mPreviousFolderIds.push(folderIds[i]);
+                previousFolderIds.push(folderIds[i]);
             }
         }
 
@@ -186,7 +187,7 @@ public class BrowserActivity extends SherlockListActivity
         {
             if (savedInstanceState.getBoolean(Constants.STATE_ACTION_MODE_CURRENTLY_ON))
             {
-                mActionMode = startActionMode(new SkyDriveActionMode());
+                actionMode = startActionMode(new SkyDriveActionMode());
             }
         }
 
@@ -194,7 +195,7 @@ public class BrowserActivity extends SherlockListActivity
         ((SkyDriveListAdapter) getListAdapter()).setCheckedPositions(((BrowserForSkyDriveApplication) getApplication())
                 .getCurrentlyCheckedPositions());
 
-        if(mActionMode != null)
+        if(actionMode != null)
         {
             updateActionModeTitleWithSelectedCount();
         }
@@ -210,21 +211,21 @@ public class BrowserActivity extends SherlockListActivity
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
-                if (mActionMode != null)
+                if (actionMode != null)
                 {
-                    boolean rowIsChecked = mSkyDriveListAdapter.isChecked(position);
-                    if(position >= mSkyDriveListAdapter.getCount()) return;
+                    boolean rowIsChecked = skyDriveListAdapter.isChecked(position);
+                    if(position >= skyDriveListAdapter.getCount()) return;
                     if (rowIsChecked)
                     {
-                        mCurrentlySelectedFiles.remove(
+                        currentlySelectedFiles.remove(
                                 ((SkyDriveListAdapter) getListAdapter()).getItem(position));
                     }
                     else
                     {
-                        mCurrentlySelectedFiles.add(
+                        currentlySelectedFiles.add(
                                 ((SkyDriveListAdapter) getListAdapter()).getItem(position));
                     }
-                    mSkyDriveListAdapter.setChecked(position, !rowIsChecked);
+                    skyDriveListAdapter.setChecked(position, !rowIsChecked);
 
                     updateActionModeTitleWithSelectedCount();
                 }
@@ -242,11 +243,11 @@ public class BrowserActivity extends SherlockListActivity
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long l)
             {
-                if (mActionMode == null)
+                if (actionMode == null)
                 {
-                    mActionMode = startActionMode(new SkyDriveActionMode());
-                    mSkyDriveListAdapter.setChecked(position, true);
-                    mCurrentlySelectedFiles.add(
+                    actionMode = startActionMode(new SkyDriveActionMode());
+                    skyDriveListAdapter.setChecked(position, true);
+                    currentlySelectedFiles.add(
                             ((SkyDriveListAdapter) getListAdapter()).getItem(position));
                     updateActionModeTitleWithSelectedCount();
                 }
@@ -259,13 +260,13 @@ public class BrowserActivity extends SherlockListActivity
         final int checkedCount = ((SkyDriveListAdapter) getListAdapter()).getCheckedCount();
         switch (checkedCount) {
             case 0:
-                mActionMode.setTitle(null);
+                actionMode.setTitle(null);
                 break;
             case 1:
-                mActionMode.setTitle(getString(R.string.selectedOne));
+                actionMode.setTitle(getString(R.string.selectedOne));
                 break;
             default:
-                mActionMode.setTitle("" + checkedCount + " " + getString(R.string.selectedSeveral));
+                actionMode.setTitle("" + checkedCount + " " + getString(R.string.selectedSeveral));
                 break;
         }
     }
@@ -282,14 +283,14 @@ public class BrowserActivity extends SherlockListActivity
                 @Override
                 public void onClick(View view)
                 {
-                    if (!connectionIsUnavailable()) mXloader.uploadFile(mClient,
+                    if (!connectionIsUnavailable()) xLoader.uploadFile(liveConnectClient,
                             getIntent().getStringArrayListExtra(UploadFileActivity.EXTRA_FILES_LIST),
-                            mCurrentFolderId);
+                            currentFolderId);
                     finish();
                 }
             });
 
-            mUploadDialog = true;
+            isUploadDialog = true;
         }
         else
         {
@@ -346,11 +347,11 @@ public class BrowserActivity extends SherlockListActivity
     {
         if (connectionIsUnavailable()) return false;
 
-        if (mPreviousFolderIds.isEmpty())
+        if (previousFolderIds.isEmpty())
         {
-            if (mActionBar != null)
+            if (actionBar != null)
             {
-                mActionBar.setDisplayHomeAsUpEnabled(false);
+                actionBar.setDisplayHomeAsUpEnabled(false);
             }
 
             return false;
@@ -359,11 +360,11 @@ public class BrowserActivity extends SherlockListActivity
     }
 
     private void navigateBack() {
-        loadFolder(mPreviousFolderIds.pop());
+        loadFolder(previousFolderIds.pop());
 
-        if (!mFolderHierarchy.isEmpty())
+        if (!folderHierarchy.isEmpty())
         {
-            mFolderHierarchy.pop();
+            folderHierarchy.pop();
             updateFolderHierarchy(null);
         }
     }
@@ -371,14 +372,14 @@ public class BrowserActivity extends SherlockListActivity
     private void pushPreviousFolderId(String folderId)
     {
 
-        if (!mPreviousFolderIds.isEmpty()
-                && mPreviousFolderIds.peek().equals(folderId))
+        if (!previousFolderIds.isEmpty()
+                && previousFolderIds.peek().equals(folderId))
         {
             return;
         }
         else
         {
-            mPreviousFolderIds.push(folderId);
+            previousFolderIds.push(folderId);
         }
     }
 
@@ -392,7 +393,7 @@ public class BrowserActivity extends SherlockListActivity
             @Override
             public void visit(SkyDriveAlbum album)
             {
-                pushPreviousFolderId(mCurrentFolderId);
+                pushPreviousFolderId(currentFolderId);
                 updateFolderHierarchy(album);
                 loadFolder(album.getId());
             }
@@ -400,7 +401,7 @@ public class BrowserActivity extends SherlockListActivity
             @Override
             public void visit(SkyDrivePhoto photo)
             {
-                if (mUploadDialog) return;
+                if (isUploadDialog) return;
                 Intent startPhotoDialog = new Intent(getApplicationContext(), ViewPhotoDialog.class);
                 startPhotoDialog.putExtra("killerud.skydrive.PHOTO_ID", photo.getId());
                 startPhotoDialog.putExtra("killerud.skydrive.PHOTO_NAME", photo.getName());
@@ -410,7 +411,7 @@ public class BrowserActivity extends SherlockListActivity
             @Override
             public void visit(SkyDriveFolder folder)
             {
-                pushPreviousFolderId(mCurrentFolderId);
+                pushPreviousFolderId(currentFolderId);
                 updateFolderHierarchy(folder);
                 loadFolder(folder.getId());
             }
@@ -418,7 +419,7 @@ public class BrowserActivity extends SherlockListActivity
             @Override
             public void visit(SkyDriveFile file)
             {
-                if (mUploadDialog || connectionIsUnavailable()) return;
+                if (isUploadDialog || connectionIsUnavailable()) return;
 
                 if(isDisplayableByWebBrowser(file))
                 {
@@ -436,7 +437,7 @@ public class BrowserActivity extends SherlockListActivity
             @Override
             public void visit(SkyDriveVideo video)
             {
-                if (mUploadDialog) return;
+                if (isUploadDialog) return;
                 ((BrowserForSkyDriveApplication) getApplication()).setCurrentVideo(video);
                 Intent startVideoDialog = new Intent(getApplicationContext(), PlayVideoActivity.class);
                 if (!connectionIsUnavailable()) startActivity(startVideoDialog);
@@ -445,7 +446,7 @@ public class BrowserActivity extends SherlockListActivity
             @Override
             public void visit(SkyDriveAudio audio)
             {
-                if (mUploadDialog) return;
+                if (isUploadDialog) return;
                 if(connectionIsUnavailable()) return;
                 if(audioPlaybackService != null){
                     if(!audioServiceHasSongsToPlay())
@@ -519,9 +520,9 @@ public class BrowserActivity extends SherlockListActivity
     {
         if (intentThatStartedMe.getExtras().getString(UploadFileActivity.EXTRA_FILES_LIST) != null)
         {
-            if (!connectionIsUnavailable()) mXloader.uploadFile(mClient,
+            if (!connectionIsUnavailable()) xLoader.uploadFile(liveConnectClient,
                     intentThatStartedMe.getStringArrayListExtra(UploadFileActivity.EXTRA_FILES_LIST),
-                    mCurrentFolderId);
+                    currentFolderId);
         }
     }
 
@@ -536,7 +537,7 @@ public class BrowserActivity extends SherlockListActivity
             Map<String, String> folder = new HashMap<String, String>();
             folder.put(JsonKeys.NAME, "me/skydrive/camera_roll");
             try{
-                mClient.postAsync(mCurrentFolderId,
+                liveConnectClient.postAsync(currentFolderId,
                         new JSONObject(folder),
                         new LiveOperationListener()
                         {
@@ -557,11 +558,11 @@ public class BrowserActivity extends SherlockListActivity
                 handleIllegalConnectionState();
             }
 
-            startService(new Intent(this, CameraImageAutoUploadService.class));
+            startService(new Intent(this, CameraObserverService.class));
         }
         else
         {
-            stopService(new Intent(this, CameraImageAutoUploadService.class));
+            stopService(new Intent(this, CameraObserverService.class));
         }
     }
 
@@ -599,24 +600,24 @@ public class BrowserActivity extends SherlockListActivity
     {
         super.onSaveInstanceState(savedInstanceState);
 
-        savedInstanceState.putString(Constants.STATE_CURRENT_FOLDER, mCurrentFolderId);
+        savedInstanceState.putString(Constants.STATE_CURRENT_FOLDER, currentFolderId);
 
-        String[] hierarcy = new String[mFolderHierarchy.size()];
+        String[] hierarcy = new String[folderHierarchy.size()];
         for (int i = 0; i < hierarcy.length; i++)
         {
-            hierarcy[i] = mFolderHierarchy.get(i);
+            hierarcy[i] = folderHierarchy.get(i);
         }
 
-        String[] previous = new String[mPreviousFolderIds.size()];
+        String[] previous = new String[previousFolderIds.size()];
         for (int i = 0; i < previous.length; i++)
         {
-            previous[i] = mPreviousFolderIds.get(i);
+            previous[i] = previousFolderIds.get(i);
         }
 
         savedInstanceState.putStringArray(Constants.STATE_CURRENT_HIERARCHY, hierarcy);
         savedInstanceState.putStringArray(Constants.STATE_PREVIOUS_FOLDERS, previous);
 
-        if (mActionMode != null)
+        if (actionMode != null)
         {
             savedInstanceState.putBoolean(Constants.STATE_ACTION_MODE_CURRENTLY_ON, true);
         }
@@ -629,7 +630,7 @@ public class BrowserActivity extends SherlockListActivity
 
     private void updateFolderHierarchy(SkyDriveObject folder)
     {
-        String currentText = mFolderHierarchyView.getText().toString();
+        String currentText = folderHierarchyView.getText().toString();
         String newText = "";
 
         if (folder == null)
@@ -638,11 +639,11 @@ public class BrowserActivity extends SherlockListActivity
         }
         else
         {
-            if (!mFolderHierarchy.empty() &&
-                    !mFolderHierarchy.peek().equals(folder.getName()))
+            if (!folderHierarchy.empty() &&
+                    !folderHierarchy.peek().equals(folder.getName()))
             {
-                mFolderHierarchy.push(folder.getName());
-                newText = currentText + ">" + mFolderHierarchy.peek();
+                folderHierarchy.push(folder.getName());
+                newText = currentText + ">" + folderHierarchy.peek();
                 setTitle(folder.getName());
             }
             else
@@ -650,23 +651,23 @@ public class BrowserActivity extends SherlockListActivity
                 newText = currentText;
             }
         }
-        mFolderHierarchyView.setText(newText);
+        folderHierarchyView.setText(newText);
     }
 
     private String updateFolderHierarchyWhenNavigatingUp()
     {
-        if (!mFolderHierarchy.isEmpty())
+        if (!folderHierarchy.isEmpty())
         {
-            setTitle(mFolderHierarchy.peek());
+            setTitle(folderHierarchy.peek());
         }
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < mFolderHierarchy.size(); i++)
+        for (int i = 0; i < folderHierarchy.size(); i++)
         {
             if (i > 0) //If not root
             {
                 builder.append(">");
             }
-            builder.append(mFolderHierarchy.get(i));
+            builder.append(folderHierarchy.get(i));
         }
         return builder.toString();
     }
@@ -676,7 +677,7 @@ public class BrowserActivity extends SherlockListActivity
         try{
             setSupportProgressBarIndeterminateVisibility(false);
             supportInvalidateOptionsMenu();
-            loadFolder(mCurrentFolderId);
+            loadFolder(currentFolderId);
         }catch (NullPointerException e)
         {
             /* At this point an XLoader object has attempted a reload of a BrowserActivity that no longer exists.
@@ -688,7 +689,7 @@ public class BrowserActivity extends SherlockListActivity
     private void loadSharedFiles()
     {
         setTitle(R.string.sharedFiles);
-        mPreviousFolderIds.push(mCurrentFolderId);
+        previousFolderIds.push(currentFolderId);
         loadFolder("me/skydrive/shared");
     }
 
@@ -702,20 +703,20 @@ public class BrowserActivity extends SherlockListActivity
 
         setSupportProgressBarIndeterminateVisibility(true);
 
-        if (mActionBar != null && !mPreviousFolderIds.empty())
+        if (actionBar != null && !previousFolderIds.empty())
         {
-            mActionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayHomeAsUpEnabled(true);
         }
         else
         {
-            mActionBar.setDisplayHomeAsUpEnabled(false);
+            actionBar.setDisplayHomeAsUpEnabled(false);
         }
 
-        mCurrentFolderId = folderId;
+        currentFolderId = folderId;
 
-        if (mCurrentlySelectedFiles != null) mCurrentlySelectedFiles.clear();
+        if (currentlySelectedFiles != null) currentlySelectedFiles.clear();
 
-        if (mActionMode == null)
+        if (actionMode == null)
         {
             /* If there is an action mode, we are currently selecting files and the state has just changed.
              * No actual navigation has taken place, so we don't want to clear selected. */
@@ -724,7 +725,7 @@ public class BrowserActivity extends SherlockListActivity
 
         try
         {
-            if (mClient != null) mClient.getAsync(folderId + "/files?sort_by=" +
+            if (liveConnectClient != null) liveConnectClient.getAsync(folderId + "/files?sort_by=" +
                     SortCriteria.NAME + "&sort_order=" + SortCriteria.ASCENDING, new LiveOperationListener()
             {
                 @Override
@@ -742,7 +743,7 @@ public class BrowserActivity extends SherlockListActivity
                         return;
                     }
 
-                    ArrayList<SkyDriveObject> skyDriveObjs = mSkyDriveListAdapter.getSkyDriveObjects();
+                    ArrayList<SkyDriveObject> skyDriveObjs = skyDriveListAdapter.getSkyDriveObjects();
                     skyDriveObjs.clear();
 
                     JSONArray data = result.optJSONArray(JsonKeys.DATA);
@@ -752,16 +753,16 @@ public class BrowserActivity extends SherlockListActivity
                         skyDriveObjs.add(skyDriveObj);
                     }
 
-                    mSkyDriveListAdapter.notifyDataSetChanged();
+                    skyDriveListAdapter.notifyDataSetChanged();
 
-                    SparseBooleanArray checkedPositions = mSkyDriveListAdapter.getCheckedPositions();
+                    SparseBooleanArray checkedPositions = skyDriveListAdapter.getCheckedPositions();
                     for (int i = 0; i < checkedPositions.size(); i++)
                     {
                         int adapterPosition = checkedPositions.keyAt(i);
-                        if(adapterPosition >= mSkyDriveListAdapter.getCount()) continue;
+                        if(adapterPosition >= skyDriveListAdapter.getCount()) continue;
 
-                        SkyDriveObject objectSelected = mSkyDriveListAdapter.getItem(adapterPosition);
-                        mCurrentlySelectedFiles.add(objectSelected);
+                        SkyDriveObject objectSelected = skyDriveListAdapter.getItem(adapterPosition);
+                        currentlySelectedFiles.add(objectSelected);
                     }
                 }
 
@@ -782,8 +783,8 @@ public class BrowserActivity extends SherlockListActivity
     private boolean connectionIsUnavailable()
     {
         getPreferences();
-        boolean unavailable = (mAllWifiOnly &&
-                (mConnectivityManager.getActiveNetworkInfo().getType()
+        boolean unavailable = (isDataOnWifiOnly &&
+                (connectivityManager.getActiveNetworkInfo().getType()
                         != ConnectivityManager.TYPE_WIFI));
         if (unavailable)
         {
@@ -795,18 +796,18 @@ public class BrowserActivity extends SherlockListActivity
     private void getPreferences()
     {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
-        mAllWifiOnly = preferences.getBoolean("limit_all_to_wifi", false);
+        isDataOnWifiOnly = preferences.getBoolean("limit_all_to_wifi", false);
     }
 
     /* Menus and AB */
     @Override
     public boolean onPrepareOptionsMenu(Menu menu)
     {
-        if (mCopyCutFiles.size() > 0)
+        if (filesToBePasted.size() > 0)
         {
             menu.getItem(3).setVisible(true); //Paste
         }
-        else if (mCopyCutFiles.size() < 1)
+        else if (filesToBePasted.size() < 1)
         {
             menu.getItem(3).setVisible(false); //Paste
         }
@@ -835,7 +836,7 @@ public class BrowserActivity extends SherlockListActivity
 
             case R.id.newFolder:
                 Intent startNewFolderDialog = new Intent(getApplicationContext(), NewFolderDialog.class);
-                startNewFolderDialog.putExtra("killerud.skydrive.CURRENT_FOLDER", mCurrentFolderId);
+                startNewFolderDialog.putExtra("killerud.skydrive.CURRENT_FOLDER", currentFolderId);
                 if (!connectionIsUnavailable()) startActivity(startNewFolderDialog);
                 supportInvalidateOptionsMenu();
                 return true;
@@ -846,13 +847,13 @@ public class BrowserActivity extends SherlockListActivity
                 supportInvalidateOptionsMenu();
                 return true;
             case R.id.reload:
-                loadFolder(mCurrentFolderId);
+                loadFolder(currentFolderId);
                 supportInvalidateOptionsMenu();
                 return true;
             case R.id.paste:
                 setSupportProgressBarIndeterminateVisibility(true);
                 if (!connectionIsUnavailable())
-                    mXloader.pasteFiles(mClient, mCopyCutFiles, mCurrentFolderId, mCutNotPaste);
+                    xLoader.pasteFiles(liveConnectClient, filesToBePasted, currentFolderId, isCutNotPaste);
                 return true;
             case R.id.sharedFiles:
                 loadSharedFiles();
@@ -972,7 +973,7 @@ public class BrowserActivity extends SherlockListActivity
         {
             mChecked = 0;
             mCheckedPositions = new SparseBooleanArray();
-            mCurrentlySelectedFiles = new ArrayList<SkyDriveObject>();
+            currentlySelectedFiles = new ArrayList<SkyDriveObject>();
             notifyDataSetChanged();
         }
 
@@ -985,7 +986,7 @@ public class BrowserActivity extends SherlockListActivity
                     mChecked++;
                 }
                 mCheckedPositions.put(i, true);
-                mCurrentlySelectedFiles.add(mSkyDriveObjs.get(i));
+                currentlySelectedFiles.add(mSkyDriveObjs.get(i));
             }
             notifyDataSetChanged();
         }
@@ -1044,7 +1045,7 @@ public class BrowserActivity extends SherlockListActivity
 
                     try
                     {
-                        mClient.downloadAsync(skyDriveObject.getId() + "/picture?type=thumbnail", new LiveDownloadOperationListener()
+                        liveConnectClient.downloadAsync(skyDriveObject.getId() + "/picture?type=thumbnail", new LiveDownloadOperationListener()
                         {
                             @Override
                             public void onDownloadProgress(int totalBytes,
@@ -1142,8 +1143,7 @@ public class BrowserActivity extends SherlockListActivity
 
                                     }
 
-                                }
-                                else
+                                } else
                                 {
                                     Bitmap bm = BitmapFactory.decodeStream(operation.getStream());
 
@@ -1398,7 +1398,7 @@ public class BrowserActivity extends SherlockListActivity
                 *  Create a clone so selected aren't cleared logically.
                 */
                 if (!connectionIsUnavailable())
-                    mXloader.downloadFiles(mClient, (ArrayList<SkyDriveObject>) mCurrentlySelectedFiles.clone());
+                    xLoader.downloadFiles(liveConnectClient, (ArrayList<SkyDriveObject>) currentlySelectedFiles.clone());
 
                 resetSelection();
                 mode.finish();
@@ -1453,7 +1453,7 @@ public class BrowserActivity extends SherlockListActivity
         public void onDestroyActionMode(com.actionbarsherlock.view.ActionMode mode)
         {
             resetSelection();
-            mActionMode = null;
+            actionMode = null;
             supportInvalidateOptionsMenu();
         }
 
@@ -1461,8 +1461,8 @@ public class BrowserActivity extends SherlockListActivity
     }
 
     private void copySelectedFiles(ActionMode mode) {
-        mCopyCutFiles = (ArrayList<SkyDriveObject>) mCurrentlySelectedFiles.clone();
-        mCutNotPaste = false;
+        filesToBePasted = (ArrayList<SkyDriveObject>) currentlySelectedFiles.clone();
+        isCutNotPaste = false;
 
         Toast.makeText(getApplicationContext(), R.string.copyCutSelectedFiles, Toast.LENGTH_SHORT).show();
 
@@ -1471,8 +1471,8 @@ public class BrowserActivity extends SherlockListActivity
     }
 
     private void cutSelectedFiles(ActionMode mode) {
-        mCopyCutFiles = (ArrayList<SkyDriveObject>) mCurrentlySelectedFiles.clone();
-        mCutNotPaste = true;
+        filesToBePasted = (ArrayList<SkyDriveObject>) currentlySelectedFiles.clone();
+        isCutNotPaste = true;
 
         Toast.makeText(getApplicationContext(), R.string.copyCutSelectedFiles, Toast.LENGTH_SHORT).show();
 
@@ -1486,9 +1486,9 @@ public class BrowserActivity extends SherlockListActivity
         dialog.setIcon(R.drawable.warning_triangle);
         StringBuilder deleteMessage = new StringBuilder();
         deleteMessage.append(getString(R.string.deleteConfirmationBody));
-        for (int i = 0; i < mCurrentlySelectedFiles.size(); i++)
+        for (int i = 0; i < currentlySelectedFiles.size(); i++)
         {
-            deleteMessage.append(mCurrentlySelectedFiles.get(i).getName());
+            deleteMessage.append(currentlySelectedFiles.get(i).getName());
             deleteMessage.append("\n");
         }
         deleteMessage.append(getString(R.string.deleteConfirmationQuestion));
@@ -1501,7 +1501,7 @@ public class BrowserActivity extends SherlockListActivity
             {
                 setSupportProgressBarIndeterminateVisibility(true);
                 if (!connectionIsUnavailable())
-                    mXloader.deleteFiles(mClient, (ArrayList<SkyDriveObject>) mCurrentlySelectedFiles.clone());
+                    xLoader.deleteFiles(liveConnectClient, (ArrayList<SkyDriveObject>) currentlySelectedFiles.clone());
                 resetSelection();
                 mode.finish();
 
@@ -1522,10 +1522,10 @@ public class BrowserActivity extends SherlockListActivity
         Intent startRenameDialog = new Intent(getSupportActionBar().getThemedContext(), RenameDialog.class);
         ArrayList<String> fileIds = new ArrayList<String>();
         ArrayList<String> fileNames = new ArrayList<String>();
-        for (int i = 0; i < mCurrentlySelectedFiles.size(); i++)
+        for (int i = 0; i < currentlySelectedFiles.size(); i++)
         {
-            fileIds.add(mCurrentlySelectedFiles.get(i).getId());
-            fileNames.add(mCurrentlySelectedFiles.get(i).getName());
+            fileIds.add(currentlySelectedFiles.get(i).getId());
+            fileNames.add(currentlySelectedFiles.get(i).getName());
         }
         startRenameDialog.putExtra(RenameDialog.EXTRAS_FILE_IDS, fileIds);
         startRenameDialog.putExtra(RenameDialog.EXTRAS_FILE_NAMES, fileNames);
@@ -1538,9 +1538,9 @@ public class BrowserActivity extends SherlockListActivity
     {
         Intent startSharingDialog = new Intent(getSupportActionBar().getThemedContext(), SharingDialog.class);
         ArrayList<String> fileIds = new ArrayList<String>();
-        for (int i = 0; i < mCurrentlySelectedFiles.size(); i++)
+        for (int i = 0; i < currentlySelectedFiles.size(); i++)
         {
-            fileIds.add(mCurrentlySelectedFiles.get(i).getId());
+            fileIds.add(currentlySelectedFiles.get(i).getId());
         }
         startSharingDialog.putExtra(RenameDialog.EXTRAS_FILE_IDS, fileIds);
         if (!connectionIsUnavailable()) startActivity(startSharingDialog);
@@ -1548,7 +1548,7 @@ public class BrowserActivity extends SherlockListActivity
 
     private void resetSelection() {
         ((SkyDriveListAdapter) getListAdapter()).clearChecked();
-        mCurrentlySelectedFiles.clear();
+        currentlySelectedFiles.clear();
         updateActionModeTitleWithSelectedCount();
     }
 

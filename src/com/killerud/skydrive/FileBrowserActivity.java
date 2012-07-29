@@ -407,8 +407,7 @@ public class FileBrowserActivity extends SherlockListActivity
                         @Override
                         protected Bitmap doInBackground(File... files)
                         {
-                            File thumbCacheFile = new File(Environment.getExternalStorageDirectory()
-                                    + "/Android/data/com.killerud.skydrive/thumbs/" + files[0].getPath());
+                            File thumbCacheFile = new File(files[0].getAbsolutePath());
                             if (thumbCacheFile.exists())
                             {
                                 return BitmapFactory.decodeFile(thumbCacheFile.getPath());

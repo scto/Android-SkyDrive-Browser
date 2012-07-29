@@ -1,6 +1,7 @@
 package com.killerud.skydrive;
 
 import android.app.Application;
+import android.os.FileObserver;
 import android.util.SparseBooleanArray;
 import com.killerud.skydrive.constants.Constants;
 import com.killerud.skydrive.objects.SkyDriveAudio;
@@ -16,99 +17,100 @@ import com.microsoft.live.LiveConnectSession;
  */
 public class BrowserForSkyDriveApplication extends Application
 {
-    private LiveAuthClient mAuthClient;
-    private LiveConnectClient mConnectClient;
-    private LiveConnectSession mSession;
-    private SkyDriveAudio mCurrentMusic;
-    private SkyDriveVideo mCurrentVideo;
-    private String mFirstName;
-    private BrowserActivity mCurrentBrowser;
-    private SparseBooleanArray mCheckedPositions;
+    private LiveAuthClient authClient;
+    private LiveConnectClient connectClient;
+    private LiveConnectSession session;
+    private SkyDriveAudio currentMusic;
+    private SkyDriveVideo currentVideo;
+    private String firstName;
+    private BrowserActivity browserActivity;
+    private SparseBooleanArray checkedPositions;
+    private FileObserver cameraFileObserver;
 
 
     public void setCurrentBrowser(BrowserActivity browser)
     {
-        this.mCurrentBrowser = browser;
+        this.browserActivity = browser;
     }
 
     public BrowserActivity getCurrentBrowser()
     {
-        if (mCurrentBrowser == null)
+        if (browserActivity == null)
         {
             return new BrowserActivity();
         }
-        return this.mCurrentBrowser;
+        return this.browserActivity;
     }
 
     public LiveAuthClient getAuthClient()
     {
-        if(mAuthClient == null)
+        if(authClient == null)
         {
             return new LiveAuthClient(getApplicationContext(), Constants.APP_CLIENT_ID);
         }
-        return mAuthClient;
+        return authClient;
     }
 
     public LiveConnectClient getConnectClient()
     {
-        return mConnectClient;
+        return connectClient;
     }
 
     public LiveConnectSession getSession()
     {
-        return mSession;
+        return session;
     }
 
     public void setAuthClient(LiveAuthClient authClient)
     {
-        mAuthClient = authClient;
+        this.authClient = authClient;
     }
 
     public void setConnectClient(LiveConnectClient connectClient)
     {
-        mConnectClient = connectClient;
+        this.connectClient = connectClient;
     }
 
     public void setSession(LiveConnectSession session)
     {
-        mSession = session;
+        this.session = session;
     }
 
     public void setUserFirstName(String name)
     {
-        mFirstName = name;
+        firstName = name;
     }
 
     public String getUserFirstName()
     {
-        return mFirstName;
+        return firstName;
     }
 
     public void setCurrentMusic(SkyDriveAudio audio)
     {
-        this.mCurrentMusic = audio;
+        this.currentMusic = audio;
     }
 
     public SkyDriveAudio getAudioClicked()
     {
-        return this.mCurrentMusic;
+        return this.currentMusic;
     }
 
     public void setCurrentVideo(SkyDriveVideo video)
     {
-        this.mCurrentVideo = video;
+        this.currentVideo = video;
     }
 
     public SkyDriveVideo getCurrentVideo()
     {
-        return this.mCurrentVideo;
+        return this.currentVideo;
     }
 
     public SparseBooleanArray getCurrentlyCheckedPositions()
     {
-        if (mCheckedPositions != null)
+        if (checkedPositions != null)
         {
-            return mCheckedPositions;
+            return checkedPositions;
         }
 
         return new SparseBooleanArray();
@@ -116,7 +118,17 @@ public class BrowserForSkyDriveApplication extends Application
 
     public void setCurrentlyCheckedPositions(SparseBooleanArray checkedPositions)
     {
-        this.mCheckedPositions = checkedPositions;
+        this.checkedPositions = checkedPositions;
+    }
+
+    public void setCameraFileObserver(FileObserver cameraFileObserver)
+    {
+        this.cameraFileObserver = cameraFileObserver;
+    }
+
+    public FileObserver getCameraFileObserver()
+    {
+        return this.cameraFileObserver;
     }
 
 }

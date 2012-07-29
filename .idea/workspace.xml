@@ -1,13 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AndroidConfiguredLogFilters">
+    <filters>
+      <filter>
+        <option name="logLevel" value="verbose" />
+        <option name="logMessagePattern" value="" />
+        <option name="logTagPattern" value="" />
+        <option name="name" value="killerud" />
+        <option name="pid" value="" />
+      </filter>
+    </filters>
+  </component>
+  <component name="AndroidLogFilters">
+    <option name="TOOL_WINDOW_CUSTOM_FILTER" value="killerud" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="8c4b86e5-f33d-4e42-9336-09fa6857f563" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gen/com/killerud/skydrive/R.java" afterPath="$PROJECT_DIR$/gen/com/killerud/skydrive/R.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/res/values/strings.xml" afterPath="$PROJECT_DIR$/res/values/strings.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/res/xml/preference_headers.xml" afterPath="$PROJECT_DIR$/res/xml/preference_headers.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/res/xml/preferences_about.xml" afterPath="$PROJECT_DIR$/res/xml/preferences_about.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/killerud/skydrive/PreferencesActivity.java" afterPath="$PROJECT_DIR$/src/com/killerud/skydrive/PreferencesActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/killerud/skydrive/util/Utility.java" afterPath="$PROJECT_DIR$/src/com/killerud/skydrive/util/Utility.java" />
+      <change type="DELETED" beforePath="C:\Users\William\git\Android-SkyDrive-Browser\src\com\killerud\skydrive\CameraImageAutoUploadService.java" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/AndroidManifest.xml" afterPath="$PROJECT_DIR$/AndroidManifest.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/killerud/skydrive/BrowserActivity.java" afterPath="$PROJECT_DIR$/src/com/killerud/skydrive/BrowserActivity.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/killerud/skydrive/BrowserForSkyDriveApplication.java" afterPath="$PROJECT_DIR$/src/com/killerud/skydrive/BrowserForSkyDriveApplication.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/killerud/skydrive/FileBrowserActivity.java" afterPath="$PROJECT_DIR$/src/com/killerud/skydrive/FileBrowserActivity.java" />
     </list>
     <ignored path="Android-SkyDrive-Browser.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -25,6 +39,34 @@
     <disable_hints />
   </component>
   <component name="DebuggerManager">
+    <line_breakpoints>
+      <breakpoint url="file://$PROJECT_DIR$/src/com/killerud/skydrive/CameraImageObserver.java" line="48" class="com.killerud.skydrive.CameraImageObserver" package="com.killerud.skydrive">
+        <option name="ENABLED" value="true" />
+        <option name="LOG_ENABLED" value="false" />
+        <option name="LOG_EXPRESSION_ENABLED" value="false" />
+        <option name="SUSPEND_POLICY" value="SuspendAll" />
+        <option name="COUNT_FILTER_ENABLED" value="false" />
+        <option name="COUNT_FILTER" value="0" />
+        <option name="CONDITION_ENABLED" value="false" />
+        <option name="CLASS_FILTERS_ENABLED" value="false" />
+        <option name="INSTANCE_FILTERS_ENABLED" value="false" />
+        <option name="CONDITION" value="" />
+        <option name="LOG_MESSAGE" value="" />
+      </breakpoint>
+      <breakpoint url="file://$PROJECT_DIR$/src/com/killerud/skydrive/XLoader.java" line="91" class="com.killerud.skydrive.XLoader" package="com.killerud.skydrive">
+        <option name="ENABLED" value="true" />
+        <option name="LOG_ENABLED" value="false" />
+        <option name="LOG_EXPRESSION_ENABLED" value="false" />
+        <option name="SUSPEND_POLICY" value="SuspendAll" />
+        <option name="COUNT_FILTER_ENABLED" value="false" />
+        <option name="COUNT_FILTER" value="0" />
+        <option name="CONDITION_ENABLED" value="false" />
+        <option name="CLASS_FILTERS_ENABLED" value="false" />
+        <option name="INSTANCE_FILTERS_ENABLED" value="false" />
+        <option name="CONDITION" value="" />
+        <option name="LOG_MESSAGE" value="" />
+      </breakpoint>
+    </line_breakpoints>
     <breakpoint_any>
       <breakpoint>
         <option name="NOTIFY_CAUGHT" value="true" />
@@ -65,14 +107,74 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="PreferencesActivity.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="PreferencesActivity.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/PreferencesActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="19" column="70" selection-start="689" selection-end="689" vertical-scroll-proportion="0.14680484">
+            <state line="19" column="70" selection-start="689" selection-end="689" vertical-scroll-proportion="0.0">
               <folding>
                 <element signature="method#isPreferenceActivityToBeUsedOnSDKV11OrHigher#0;class#PreferencesActivity#0" expanded="false" />
                 <element signature="method#hasNeededMethodsForSDKV11OrHigher#0;class#PreferencesActivity#0" expanded="false" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="BrowserActivity.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/BrowserActivity.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="560" column="58" selection-start="19953" selection-end="19953" vertical-scroll-proportion="-10.615385">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="CameraImageObserver.java" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/CameraImageObserver.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="132" column="66" selection-start="4284" selection-end="4284" vertical-scroll-proportion="0.41278064">
+              <folding>
+                <element signature="imports" expanded="true" />
+                <element signature="e#1502#1510#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="CameraObserverService.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/CameraObserverService.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="9" column="0" selection-start="232" selection-end="232" vertical-scroll-proportion="0.0">
+              <folding>
+                <element signature="imports" expanded="true" />
+                <element signature="method#onBind#0;class#CameraObserverService#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="AudioPlaybackService.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/AudioPlaybackService.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="221" column="19" selection-start="6959" selection-end="6959" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="AndroidManifest.xml" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/AndroidManifest.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="102" column="46" selection-start="4190" selection-end="4190" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="BrowserForSkyDriveApplication.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/BrowserForSkyDriveApplication.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="27" column="32" selection-start="907" selection-end="907" vertical-scroll-proportion="0.0">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -86,64 +188,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="browser_menu.xml" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/res/menu/browser_menu.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="46" column="0" selection-start="1590" selection-end="1590" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="AudioPlayQueueActivity.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/AudioPlayQueueActivity.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="32" column="61" selection-start="1045" selection-end="1045" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="preferences_about.xml" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/res/xml/preferences_about.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="7" column="65" selection-start="320" selection-end="320" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="preferences_data.xml" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/res/xml/preferences_data.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="12" column="62" selection-start="559" selection-end="596" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="preference_headers.xml" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/res/xml/preference_headers.xml">
           <provider selected="true" editor-type-id="text-editor">
             <state line="19" column="52" selection-start="991" selection-end="991" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="strings.xml" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/res/values/strings.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="121" column="65" selection-start="6477" selection-end="6477" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="strings.xml" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/res/values-nb/strings.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="130" column="138" selection-start="7451" selection-end="7451" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -162,14 +210,6 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/src/com/killerud/skydrive/AudioControlActivity.java" />
-        <option value="$PROJECT_DIR$/res/menu/audio_queue_menu.xml" />
-        <option value="$PROJECT_DIR$/src/com/killerud/skydrive/AudioPlayQueueActivity.java" />
-        <option value="$PROJECT_DIR$/src/com/killerud/skydrive/BrowserActivity.java" />
-        <option value="$PROJECT_DIR$/src/com/killerud/skydrive/SettingsActivity.java" />
-        <option value="$PROJECT_DIR$/AndroidManifest.xml" />
-        <option value="$PROJECT_DIR$/res/xml/preferences.xml" />
-        <option value="$PROJECT_DIR$/res/menu/browser_menu.xml" />
         <option value="$PROJECT_DIR$/res/xml/preferences_data.xml" />
         <option value="$PROJECT_DIR$/res/xml/preferences_features.xml" />
         <option value="$PROJECT_DIR$/res/values-nb/strings.xml" />
@@ -178,6 +218,14 @@
         <option value="$PROJECT_DIR$/res/xml/preferences_about.xml" />
         <option value="$PROJECT_DIR$/res/values/strings.xml" />
         <option value="$PROJECT_DIR$/src/com/killerud/skydrive/PreferencesActivity.java" />
+        <option value="$PROJECT_DIR$/src/com/killerud/skydrive/BrowserForSkyDriveApplication.java" />
+        <option value="$PROJECT_DIR$/src/com/killerud/skydrive/CameraImageAutoUploadService.java" />
+        <option value="$PROJECT_DIR$/src/com/killerud/skydrive/FileBrowserActivity.java" />
+        <option value="$PROJECT_DIR$/src/com/killerud/skydrive/util/Stopwatch.java" />
+        <option value="$PROJECT_DIR$/src/com/killerud/skydrive/util/CameraObserverService.java" />
+        <option value="$PROJECT_DIR$/src/com/killerud/skydrive/BrowserActivity.java" />
+        <option value="$PROJECT_DIR$/AndroidManifest.xml" />
+        <option value="$PROJECT_DIR$/src/com/killerud/skydrive/CameraImageObserver.java" />
       </list>
     </option>
   </component>
@@ -275,61 +323,15 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Android-SkyDrive-Browser" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Android-SkyDrive-Browser" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="com" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="skydrive" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Android-SkyDrive-Browser" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Android-SkyDrive-Browser" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="com" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="skydrive" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="util" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
         </subPane>
       </pane>
     </panes>
   </component>
   <component name="PropertiesComponent">
+    <property name="SHOW_ALL_PROCESSES" value="false" />
     <property name="GoToFile.includeJavaFiles" value="false" />
     <property name="project.structure.last.edited" value="SDKs" />
+    <property name="OverrideImplement.combined" value="true" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="options.splitter.main.proportions" value="0.3" />
     <property name="ExportedApkPath" value="C:\Users\William\git\Android-SkyDrive-Browser\Android-SkyDrive-Browser.apk" />
@@ -339,7 +341,7 @@
     <property name="ExportedModule" value="Android-SkyDrive-Browser" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="MemberChooser.copyJavadoc" value="false" />
-    <property name="DEBUGGABLE_DEVICE" value="0149A4460D00F007" />
+    <property name="DEBUGGABLE_DEVICE" value="P729_GENERIC" />
     <property name="DEBUGGABLE_PROCESS" value="com.killerud.skydrive" />
     <property name="GoToClass.toSaveIncludeLibraries" value="false" />
     <property name="AndroidRunProguardForReleaseBuild" value="false" />
@@ -353,6 +355,12 @@
   <component name="RecentsManager">
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="" />
+    </key>
+    <key name="ExtractSuperBase.RECENT_KEYS">
+      <recent name="com.killerud.skydrive.util" />
+    </key>
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="com.killerud.skydrive" />
     </key>
   </component>
   <component name="RunManager" selected="Android Application.Android-SkyDrive-Browser">
@@ -578,18 +586,18 @@
       <window_info id="JetGradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39957264" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39957264" sideWeight="0.54339415" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32905984" sideWeight="0.5002764" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32905984" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Android" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25747862" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32905984" sideWeight="0.49806523" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Android" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.54273504" sideWeight="0.49585405" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.249309" sideWeight="0.41025642" order="1" side_tool="true" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.249309" sideWeight="0.10576923" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.249309" sideWeight="0.25320512" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32905984" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.249309" sideWeight="0.5576923" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32905984" sideWeight="0.49585405" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -656,81 +664,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/AudioControlActivity.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="338" column="41" selection-start="11606" selection-end="11606" vertical-scroll-proportion="0.6356073" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/res/menu/audio_queue_menu.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="9" column="38" selection-start="312" selection-end="312" vertical-scroll-proportion="0.2545757">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/res/menu/audio_controls_menu.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="3" column="4" selection-start="110" selection-end="299" vertical-scroll-proportion="0.08485857">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/BrowserActivity.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="857" column="49" selection-start="30496" selection-end="30496" vertical-scroll-proportion="3.1347754">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/AudioPlaybackService.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="31" column="13" selection-start="875" selection-end="875" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/AndroidManifest.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="89" column="53" selection-start="3669" selection-end="3669" vertical-scroll-proportion="0.5388601">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/res/xml/preferences_features.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="17" column="25" selection-start="736" selection-end="736" vertical-scroll-proportion="0.4808652">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/res/xml/preferences_data.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="12" column="62" selection-start="559" selection-end="596" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/AudioPlayQueueActivity.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="32" column="61" selection-start="1045" selection-end="1045" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/res/values-nb/strings.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="130" column="138" selection-start="7451" selection-end="7451" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/util/Utility.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="37" column="40" selection-start="803" selection-end="803" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/res/menu/browser_menu.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state line="46" column="0" selection-start="1590" selection-end="1590" vertical-scroll-proportion="0.0">
@@ -759,12 +692,95 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/BrowserForSkyDriveApplication.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="27" column="32" selection-start="907" selection-end="907" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://C:/Program Files (x86)/Android/android-sdk/platforms/android-14/android.jar!/android/os/FileObserver.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="30" column="25" selection-start="1111" selection-end="1111" vertical-scroll-proportion="0.7680312">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/FileBrowserActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="409" column="87" selection-start="13407" selection-end="13407" vertical-scroll-proportion="0.797654">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/util/Stopwatch.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="20" column="57" selection-start="432" selection-end="432" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/PreferencesActivity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="19" column="70" selection-start="689" selection-end="689" vertical-scroll-proportion="0.14680484">
+        <state line="19" column="70" selection-start="689" selection-end="689" vertical-scroll-proportion="0.0">
           <folding>
             <element signature="method#isPreferenceActivityToBeUsedOnSDKV11OrHigher#0;class#PreferencesActivity#0" expanded="false" />
             <element signature="method#hasNeededMethodsForSDKV11OrHigher#0;class#PreferencesActivity#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/XLoader.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="63" column="31" selection-start="2115" selection-end="2115" vertical-scroll-proportion="1.1744387">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/util/Utility.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="37" column="40" selection-start="803" selection-end="803" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/AudioPlaybackService.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="221" column="19" selection-start="6959" selection-end="6959" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/CameraObserverService.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="9" column="0" selection-start="232" selection-end="232" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="method#onBind#0;class#CameraObserverService#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/BrowserActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="560" column="58" selection-start="19953" selection-end="19953" vertical-scroll-proportion="-10.615385">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AndroidManifest.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="102" column="46" selection-start="4190" selection-end="4190" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/CameraImageObserver.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="132" column="66" selection-start="4284" selection-end="4284" vertical-scroll-proportion="0.41278064">
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#1502#1510#0" expanded="true" />
           </folding>
         </state>
       </provider>
