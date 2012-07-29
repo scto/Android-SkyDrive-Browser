@@ -40,7 +40,8 @@ public class CameraImageObserver extends ContentObserver
     @Override
     public void onChange(boolean selfChange)
     {
-        if (getIdOfLatestImageAddedToMediaStore() == -1)
+        int id = getIdOfLatestImageAddedToMediaStore();
+        if (id == -1)
         {
             return;
         }
@@ -88,12 +89,13 @@ public class CameraImageObserver extends ContentObserver
 
     private int getIdOfLatestImageAddedToMediaStore()
     {
-        String[] columns = new String[]{MediaStore.Images.Media._ID, MediaStore.Images.Media.ORIENTATION};
+        String[] columns = new String[]{MediaStore.Images.Media._ID, MediaStore.Images.Media.DATE_TAKEN};
         Cursor cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null,
                 MediaStore.Images.Media._ID + " DESC");
 
         if (!cursor.moveToFirst())
         {
+            cursor.close();
             return -1;
         }
 
@@ -101,28 +103,30 @@ public class CameraImageObserver extends ContentObserver
         if (changeOrDeletionInMediaStoreSinceLastInvocation(topMediaIdFromDatabase))
         {
             latestMediaId = topMediaIdFromDatabase;
+            cursor.close();
             return -1;
         }
 
-        String imageOrientation = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.ORIENTATION));
-        if (!isCameraImage(imageOrientation))
+        if (!isCameraImage(cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATE_TAKEN))))
         {
             latestMediaId = topMediaIdFromDatabase;
+            cursor.close();
             return -1;
         }
 
         latestMediaId = topMediaIdFromDatabase;
+        cursor.close();
         return topMediaIdFromDatabase;
     }
 
     private boolean isCameraImage(String imageOrientation)
     {
-        return imageOrientation != null;
+        return (imageOrientation != null);
     }
 
     private boolean changeOrDeletionInMediaStoreSinceLastInvocation(int topMediaIdFromDatabase)
     {
-        return topMediaIdFromDatabase <= latestMediaId;
+        return (topMediaIdFromDatabase <= latestMediaId);
     }
 
     public String getLatestCameraImagePathFromMediaStore()
@@ -130,35 +134,35 @@ public class CameraImageObserver extends ContentObserver
         String path = null;
         String[] columns = new String[]{MediaStore.Images.Media.DATA, MediaStore.Images.Media.MINI_THUMB_MAGIC};
 
-        Stopwatch stopwatch = new Stopwatch();
-        while (true && stopwatch.elapsedTimeInSeconds() < 6)
-        {
-            Uri image = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, latestMediaId);
-            Cursor cursor = context.getContentResolver().query(image, columns, null, null, null);
-            if(cursor == null)
-            {
-                cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null,
-                        MediaStore.Images.Media._ID + " DESC");
-            }
 
-            if (cursor != null && cursor.moveToFirst())
+        Uri image = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, latestMediaId);
+        Cursor cursor = context.getContentResolver().query(image, columns, null, null, null);
+        if(cursor == null)
+        {
+            cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null,
+                    MediaStore.Images.Media._ID + " DESC");
+        }
+        if (cursor != null && cursor.moveToFirst())
+        {
+            Stopwatch stopwatch = new Stopwatch();
+            while (true)
             {
-                String imageThumb = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.MINI_THUMB_MAGIC));
-                if (imageHasBeenProperlyStored(imageThumb))
+
+                if(stopwatch.elapsedTimeInSeconds()>10)
                 {
                     path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
                     break;
                 }
-            } else
-            {
-                break;
+
+                String thumb = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.MINI_THUMB_MAGIC));
+                if (thumb != null)
+                {
+                    path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+                    break;
+                }
             }
         }
+        cursor.close();
         return path;
-    }
-
-    private boolean imageHasBeenProperlyStored(String imageThumb)
-    {
-        return imageThumb != null;
     }
 }
