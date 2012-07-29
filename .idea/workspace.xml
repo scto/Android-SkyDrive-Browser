@@ -2,44 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8c4b86e5-f33d-4e42-9336-09fa6857f563" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/libs1.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/libs2.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Android-SkyDrive-Browser.iml" afterPath="$PROJECT_DIR$/Android-SkyDrive-Browser.iml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/AndroidManifest.xml" afterPath="$PROJECT_DIR$/AndroidManifest.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gen/com/killerud/skydrive/R.java" afterPath="$PROJECT_DIR$/gen/com/killerud/skydrive/R.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/AccessTokenRequest.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/AccessTokenRequest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/ApiRequest.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/ApiRequest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/ApiRequestAsync.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/ApiRequestAsync.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/AuthorizationRequest.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/AuthorizationRequest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/Config.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/Config.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/CopyRequest.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/CopyRequest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/DefaultObservableOAuthRequest.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/DefaultObservableOAuthRequest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/DeleteRequest.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/DeleteRequest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/DownloadRequest.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/DownloadRequest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/EntityEnclosingApiRequest.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/EntityEnclosingApiRequest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/ErrorMessages.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/ErrorMessages.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/GetRequest.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/GetRequest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/HttpCopy.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/HttpCopy.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/HttpMove.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/HttpMove.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/InputStreamResponseHandler.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/InputStreamResponseHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/JsonEntity.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/JsonEntity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/JsonResponseHandler.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/JsonResponseHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/LiveConnectUtils.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/LiveConnectUtils.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/MoveRequest.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/MoveRequest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/OAuth.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/OAuth.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/OAuthErrorResponse.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/OAuthErrorResponse.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/OAuthRequestObserver.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/OAuthRequestObserver.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/OAuthResponse.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/OAuthResponse.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/OAuthResponseVisitor.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/OAuthResponseVisitor.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/OAuthSuccessfulResponse.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/OAuthSuccessfulResponse.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/ObservableOAuthRequest.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/ObservableOAuthRequest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/PostRequest.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/PostRequest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/PreferencesConstants.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/PreferencesConstants.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/PutRequest.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/PutRequest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/QueryParameters.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/QueryParameters.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/RefreshAccessTokenRequest.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/RefreshAccessTokenRequest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/TokenRequest.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/TokenRequest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/TokenRequestAsync.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/TokenRequestAsync.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/internal/com/microsoft/live/UploadRequest.java" afterPath="$PROJECT_DIR$/internal/com/microsoft/live/UploadRequest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/res/menu/audio_queue_menu.xml" afterPath="$PROJECT_DIR$/res/menu/audio_queue_menu.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/res/values/strings.xml" afterPath="$PROJECT_DIR$/res/values/strings.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/killerud/skydrive/AudioControlActivity.java" afterPath="$PROJECT_DIR$/src/com/killerud/skydrive/AudioControlActivity.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/killerud/skydrive/AudioPlayQueueActivity.java" afterPath="$PROJECT_DIR$/src/com/killerud/skydrive/AudioPlayQueueActivity.java" />
     </list>
     <ignored path="Android-SkyDrive-Browser.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -97,19 +67,19 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="AndroidManifest.xml" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/AndroidManifest.xml">
+      <file leaf-file-name="strings.xml" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/res/values/strings.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="4" column="36" selection-start="221" selection-end="221" vertical-scroll-proportion="0.113144755">
+            <state line="7" column="58" selection-start="361" selection-end="361" vertical-scroll-proportion="0.19800332">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="AudioPlayQueueActivity.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/AudioPlayQueueActivity.java">
+      <file leaf-file-name="audio_controls_menu.xml" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/res/menu/audio_controls_menu.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="104" column="19" selection-start="3275" selection-end="3275" vertical-scroll-proportion="0.0">
+            <state line="3" column="4" selection-start="110" selection-end="299" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -130,6 +100,10 @@
       <list>
         <option value="$PROJECT_DIR$/internal/com/microsoft/live/AuthorizationRequest.java" />
         <option value="$PROJECT_DIR$/internal/com/microsoft/live/OAuth.java" />
+        <option value="$PROJECT_DIR$/src/com/killerud/skydrive/AudioControlActivity.java" />
+        <option value="$PROJECT_DIR$/res/menu/audio_queue_menu.xml" />
+        <option value="$PROJECT_DIR$/res/values/strings.xml" />
+        <option value="$PROJECT_DIR$/src/com/killerud/skydrive/AudioPlayQueueActivity.java" />
         <option value="$PROJECT_DIR$/AndroidManifest.xml" />
       </list>
     </option>
@@ -172,6 +146,16 @@
       <sortByType />
     </navigator>
     <panes>
+      <pane id="PackagesPane">
+        <subPane>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Android-SkyDrive-Browser" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageViewProjectNode" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+      </pane>
       <pane id="Scope">
         <subPane subId="Project Files">
           <PATH>
@@ -182,7 +166,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -201,46 +184,6 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Android-SkyDrive-Browser" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Android-SkyDrive-Browser" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="com" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Android-SkyDrive-Browser" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Android-SkyDrive-Browser" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="com" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="skydrive" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
         </subPane>
       </pane>
     </panes>
@@ -250,14 +193,19 @@
     <property name="project.structure.last.edited" value="SDKs" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="options.splitter.main.proportions" value="0.3" />
+    <property name="ExportedApkPath" value="C:\Users\William\git\Android-SkyDrive-Browser\Android-SkyDrive-Browser.apk" />
     <property name="MemberChooser.sorted" value="false" />
     <property name="recentsLimit" value="5" />
     <property name="options.lastSelected" value="preferences.externalResources" />
+    <property name="ExportedModule" value="Android-SkyDrive-Browser" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="MemberChooser.copyJavadoc" value="false" />
     <property name="DEBUGGABLE_DEVICE" value="0149A4460D00F007" />
     <property name="DEBUGGABLE_PROCESS" value="com.killerud.skydrive" />
     <property name="GoToClass.toSaveIncludeLibraries" value="false" />
+    <property name="AndroidRunProguardForReleaseBuild" value="false" />
+    <property name="KeystoreLocation" value="C:\Users\William\Dropbox\Documents\Android\killerud-keystore.keystore" />
+    <property name="KeyAlias" value="killerud" />
     <property name="MemberChooser.showClasses" value="true" />
     <property name="GoToClass.includeLibraries" value="false" />
     <property name="options.splitter.details.proportions" value="0.2" />
@@ -466,6 +414,7 @@
     <option name="IGNORE_SPACES_IN_ANNOTATE" value="true" />
     <option name="SHOW_MERGE_SOURCES_IN_ANNOTATE" value="true" />
     <option name="FORCE_UPDATE" value="false" />
+    <option name="IGNORE_EXTERNALS" value="false" />
     <configuration useDefault="false">C:\Users\William\AppData\Roaming\Subversion</configuration>
     <myIsUseDefaultProxy>false</myIsUseDefaultProxy>
   </component>
@@ -593,23 +542,47 @@
         <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/AudioPlaybackService.java">
+    <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/AudioControlActivity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="31" column="13" selection-start="875" selection-end="875" vertical-scroll-proportion="-12.718802">
-          <folding />
-        </state>
+        <state line="338" column="41" selection-start="11606" selection-end="11606" vertical-scroll-proportion="0.6356073" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/AudioPlayQueueActivity.java">
+    <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/AudioPlaybackService.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="104" column="19" selection-start="3275" selection-end="3275" vertical-scroll-proportion="0.0">
+        <state line="31" column="13" selection-start="875" selection-end="875" vertical-scroll-proportion="0.028286189" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/res/menu/audio_controls_menu.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="3" column="4" selection-start="110" selection-end="299" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/AndroidManifest.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="4" column="36" selection-start="221" selection-end="221" vertical-scroll-proportion="0.113144755">
+        <state line="69" column="42" selection-start="2861" selection-end="2861" vertical-scroll-proportion="0.7171381">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/res/menu/audio_queue_menu.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="9" column="38" selection-start="312" selection-end="312" vertical-scroll-proportion="0.2545757">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/killerud/skydrive/AudioPlayQueueActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="87" column="75" selection-start="2595" selection-end="2595" vertical-scroll-proportion="0.55074877">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/res/values/strings.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="7" column="58" selection-start="361" selection-end="361" vertical-scroll-proportion="0.19800332">
           <folding />
         </state>
       </provider>

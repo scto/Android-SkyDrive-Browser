@@ -75,9 +75,19 @@ public class AudioPlayQueueActivity extends SherlockActivity
             case android.R.id.home:
                 finish();
                 return true;
+            case R.id.audioQueueClear:
+                clearNowPlayingQueue();
+                return true;
             default:
                 return false;
         }
+    }
+
+    private void clearNowPlayingQueue()
+    {
+        ((AudioQueueAdapter) listView.getAdapter()).getQueue().clear();
+        audioPlaybackService.populateNowPlayingWithUpdatedQueue(((AudioQueueAdapter) listView.getAdapter()).getQueue());
+        ((AudioQueueAdapter) listView.getAdapter()).notifyDataSetChanged();
     }
 
     private TouchListView.DropListener onDrop = new TouchListView.DropListener()

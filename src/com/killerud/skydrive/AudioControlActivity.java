@@ -45,7 +45,6 @@ public class AudioControlActivity extends SherlockActivity implements View.OnCli
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
         setContentView(R.layout.audio_activity);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -74,7 +73,6 @@ public class AudioControlActivity extends SherlockActivity implements View.OnCli
     protected void onResume()
     {
         super.onResume();
-        setProgressBarIndeterminateVisibility(true);
         registerBroadcastReceiver();
         startService(new Intent(this, AudioPlaybackService.class));
         bindService(new Intent(this, AudioPlaybackService.class),
@@ -129,12 +127,10 @@ public class AudioControlActivity extends SherlockActivity implements View.OnCli
                 }
                 return;
             case R.id.audioNext:
-                setProgressBarIndeterminateVisibility(true);
                 audioPlaybackService.nextSong();
                 setToSongPlayingUI();
                 return;
             case R.id.audioPrevious:
-                setProgressBarIndeterminateVisibility(true);
                 audioPlaybackService.previousSong();
                 setToSongPlayingUI();
                 return;
@@ -192,6 +188,7 @@ public class AudioControlActivity extends SherlockActivity implements View.OnCli
     private void setToSongStoppedUI()
     {
         ((ImageButton) findViewById(R.id.audioPlayPause)).setImageResource(R.drawable.ic_media_play);
+
     }
 
     private void setToSongPlayingUI()
@@ -213,7 +210,6 @@ public class AudioControlActivity extends SherlockActivity implements View.OnCli
             if (intent.getAction().equals(Constants.ACTION_SONG_CHANGE))
             {
                 updateUI(audioPlaybackService.NOW_PLAYING.peek());
-                setProgressBarIndeterminateVisibility(false);
             }
         }
     };

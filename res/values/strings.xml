@@ -2,17 +2,14 @@
 <resources>
 
     <string name="appName">Explorer for SkyDrive</string>
-    <string name="initializingMessage">Connecting the app to your Windows Live account...</string>
-    <string name="firstWelcomeMessage">Welcome to Android Explorer for SkyDrive!\n\nSign in with your
-        Windows Live account and access your Microsoft SkyDrive. Easily upload files to your
-        SkyDrive and share your files between computers and friends!\n\nSign in with your Windows Live account to get
-        started!
-    </string>
-    <string name="signInToWindowsLive">Sign in to Windows Live</string>
+    <string name="initializingMessage">Connecting to your Microsoft account...</string>
+    <string name="firstWelcomeMessage">Sign in with your Microsoft account to get
+        started!</string>
+    <string name="signInToWindowsLive">Sign in</string>
     <string name="mySkyDrive">My SkyDrive</string>
-    <string name="automaticSignInError">Could not connect automatically to Windows Live. Please try logging in manually. </string>
-    <string name="manualSignInError">Could not connect Windows Live. Please make sure you are connected to the internet and try again. </string>
-    <string name="noAccountQuestion">No Live account? Go to live.com and register for 7GB free storage!</string>
+    <string name="automaticSignInError">Could not connect automatically. Please try logging in manually. </string>
+    <string name="manualSignInError">Could not connect. Please make sure you are connected to the internet and try again. </string>
+    <string name="noAccountQuestion">No Microsoft account? Go to live.com and register for 7GB free storage!</string>
 
     <string name="icon">Icon</string>
     <string name="noItemsInFolder">No files in this folder</string>
@@ -165,6 +162,8 @@
     <string name="audioTapToAddToQueue">Tap a song to add it to the playing queue</string>
     <string name="audioNothingToSkipTo">No song to skip to</string>
     <string name="audioQueueInstructions">Drag and drop to change the queue. Slide left to remove.</string>
+
+    <string name="audioQueueClear">Clear</string>
 
 
     <string name="disableThumb">Disable thumbnails</string>

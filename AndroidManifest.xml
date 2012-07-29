@@ -67,6 +67,7 @@
 
         <activity android:name=".AudioPlayQueueActivity"
                   android:label="@string/audioQueue"
+                  android:uiOptions="none"
                   android:theme="@style/LightTheme"/>
 
         <activity android:name=".PlayVideoActivity"
