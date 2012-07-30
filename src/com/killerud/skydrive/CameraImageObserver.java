@@ -9,9 +9,14 @@ import android.net.Uri;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.util.Log;
+import android.widget.Toast;
+import com.killerud.skydrive.constants.Constants;
 import com.killerud.skydrive.util.Stopwatch;
+import com.microsoft.live.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 
 public class CameraImageObserver extends ContentObserver
@@ -46,12 +51,42 @@ public class CameraImageObserver extends ContentObserver
             return;
         }
 
-        ArrayList<String> path = new ArrayList<String>();
+        final ArrayList<String> path = new ArrayList<String>();
         path.add(imagePath);
         if(!connectionIsUnavailable())
         {
-            loader.uploadFile(((BrowserForSkyDriveApplication) context.getApplication())
-                    .getConnectClient(), path, "me/skydrive/camera_roll");
+
+            final LiveConnectClient client = ((BrowserForSkyDriveApplication) context.getApplication()).getConnectClient();
+            if(client == null)
+            {
+                LiveAuthClient authClient = new LiveAuthClient(context, Constants.APP_CLIENT_ID);
+                ((BrowserForSkyDriveApplication) context.getApplication()).setAuthClient(authClient);
+                authClient.initialize(Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener()
+                {
+                    @Override
+                    public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState)
+                    {
+                        if (status == LiveStatus.CONNECTED)
+                        {
+                            ((BrowserForSkyDriveApplication) context.getApplication()).getConnectClient();
+                            loader.uploadFile(client, path, "me/skydrive/camera_roll");
+                        }
+                        else
+                        {
+                            Log.e(Constants.LOGTAG, "Initialize did not connect. Status is " + status + ".");
+                        }
+                    }
+
+                    @Override
+                    public void onAuthError(LiveAuthException exception, Object userState)
+                    {
+                        Log.e(Constants.LOGTAG, "Error: " + exception.getMessage());
+                    }
+                });
+            }else{
+                loader.uploadFile(client, path, "me/skydrive/camera_roll");
+            }
+
         }
     }
 
