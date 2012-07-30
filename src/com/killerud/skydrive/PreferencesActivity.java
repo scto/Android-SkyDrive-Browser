@@ -109,6 +109,12 @@ public class PreferencesActivity extends SherlockPreferenceActivity
     private void getAndUpdateSkyDriveQuota(final PreferenceFragment context)
     {
         LiveConnectClient client = ((BrowserForSkyDriveApplication) getApplication()).getConnectClient();
+        if(client == null)
+        {
+            errorOnSkyDriveFetch(context);
+            return;
+        }
+
         client.getAsync("me/skydrive/quota", new LiveOperationListener()
         {
             @Override
@@ -148,17 +154,22 @@ public class PreferencesActivity extends SherlockPreferenceActivity
             @Override
             public void onError(LiveOperationException exception, LiveOperation operation)
             {
-                Preference quotaPreference;
-                if(context == null)
-                {
-                    quotaPreference = findPreference("skydrive_storage_quota");
-                }else
-                {
-                    quotaPreference = context.findPreference("skydrive_storage_quota");
-                }
-                quotaPreference.setSummary(getString(R.string.errorQuotaFetch));
+                errorOnSkyDriveFetch(context);
             }
         });
+    }
+
+    private void errorOnSkyDriveFetch(PreferenceFragment context)
+    {
+        Preference quotaPreference;
+        if(context == null)
+        {
+            quotaPreference = findPreference("skydrive_storage_quota");
+        }else
+        {
+            quotaPreference = context.findPreference("skydrive_storage_quota");
+        }
+        quotaPreference.setSummary(getString(R.string.errorQuotaFetch));
     }
 
     private String createReadableSkyDriveQuotaString(String baseString, String unusedSpace, String totalAvailableSpace)
