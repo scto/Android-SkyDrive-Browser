@@ -2,7 +2,6 @@ package com.killerud.skydrive.dialogs;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.killerud.skydrive.BrowserForSkyDriveApplication;

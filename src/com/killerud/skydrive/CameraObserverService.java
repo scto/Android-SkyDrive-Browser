@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.MediaStore;
-import com.killerud.skydrive.CameraImageObserver;
 
 
 public class CameraObserverService extends Service

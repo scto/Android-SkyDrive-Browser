@@ -11,8 +11,6 @@ import android.os.Bundle;
 import android.widget.MediaController;
 import android.widget.VideoView;
 import com.actionbarsherlock.app.SherlockActivity;
-import com.killerud.skydrive.BrowserForSkyDriveApplication;
-import com.killerud.skydrive.R;
 import com.killerud.skydrive.objects.SkyDriveVideo;
 
 /**

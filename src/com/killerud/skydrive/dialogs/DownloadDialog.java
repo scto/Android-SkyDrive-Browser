@@ -6,11 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import com.actionbarsherlock.app.SherlockActivity;
-import com.killerud.skydrive.BrowserForSkyDriveApplication;
 import com.killerud.skydrive.R;
-import com.killerud.skydrive.XLoader;
-
-import java.util.ArrayList;
 
 /**
  * Created with IntelliJ IDEA.

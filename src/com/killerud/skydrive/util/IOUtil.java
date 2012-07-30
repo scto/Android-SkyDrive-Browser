@@ -1,7 +1,6 @@
 package com.killerud.skydrive.util;
 
 import com.killerud.skydrive.R;
-import com.killerud.skydrive.objects.SkyDriveFile;
 import eu.medsea.mimeutil.MimeType;
 import eu.medsea.mimeutil.MimeUtil;
 

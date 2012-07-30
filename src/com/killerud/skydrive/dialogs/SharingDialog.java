@@ -12,11 +12,13 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.killerud.skydrive.BrowserForSkyDriveApplication;
 import com.killerud.skydrive.R;
 import com.killerud.skydrive.constants.Constants;
-import com.microsoft.live.*;
+import com.microsoft.live.LiveConnectClient;
+import com.microsoft.live.LiveOperation;
+import com.microsoft.live.LiveOperationException;
+import com.microsoft.live.LiveOperationListener;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 
 public class SharingDialog extends SherlockActivity
