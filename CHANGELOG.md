@@ -1,5 +1,15 @@
 Changelog
 =========
+
+**2.5**
+- Updated automatic camera upload for broader device support. Scrapped FileObserver for ContentObserver.
+- Updated settings screen
+- Storage quota available in settings
+- Music controls acces in menu
+
+**2.4.1**
+- Hotfix for the Microsoft account rollout bug
+
 **2.4**
 - File preview added for Office- and Open Documents (text documents, spreadsheets, and presentations)
 - Thumbnail preview for SkyDrive videos
