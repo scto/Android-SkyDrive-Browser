@@ -13,13 +13,7 @@ import com.killerud.skydrive.util.Stopwatch;
 
 import java.util.ArrayList;
 
-/**
- * Created with IntelliJ IDEA.
- * User: William
- * Date: 29.07.12
- * Time: 18:24
- * To change this template use File | Settings | File Templates.
- */
+
 public class CameraImageObserver extends ContentObserver
 {
     private final CameraObserverService context;
@@ -73,6 +67,11 @@ public class CameraImageObserver extends ContentObserver
                     || (isCameraWiFiOnly
                     && (connectivityManager.getActiveNetworkInfo().getType()
                     != ConnectivityManager.TYPE_WIFI));
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+            if (!preferences.getBoolean("automatic_camera_upload", false))
+            {
+                unavailable = true;
+            }
         }catch (NullPointerException e)
         {
             unavailable = true;
