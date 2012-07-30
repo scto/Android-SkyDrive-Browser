@@ -22,7 +22,7 @@ import java.util.ArrayList;
  */
 public class CameraImageObserver extends ContentObserver
 {
-    private CameraObserverService context;
+    private final CameraObserverService context;
     private int latestMediaId;
     XLoader loader;
     private boolean isWiFiOnly;

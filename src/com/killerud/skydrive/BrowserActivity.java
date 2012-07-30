@@ -542,6 +542,16 @@ public class BrowserActivity extends SherlockListActivity
         }
     }
 
+
+    @Override
+    protected void onPause()
+    {
+        if(audioPlaybackServiceConnection != null)
+        {
+            unbindService(audioPlaybackServiceConnection);
+        }
+    }
+
     private void handleIllegalConnectionState() {
         ((BrowserForSkyDriveApplication) getApplication())
                 .getAuthClient()
