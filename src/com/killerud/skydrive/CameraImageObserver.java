@@ -59,7 +59,7 @@ public class CameraImageObserver extends ContentObserver
             final LiveConnectClient client = ((BrowserForSkyDriveApplication) context.getApplication()).getConnectClient();
             if(client == null)
             {
-                LiveAuthClient authClient = new LiveAuthClient(context, Constants.APP_CLIENT_ID);
+                final LiveAuthClient authClient = new LiveAuthClient(context, Constants.APP_CLIENT_ID);
                 ((BrowserForSkyDriveApplication) context.getApplication()).setAuthClient(authClient);
                 authClient.initialize(Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener()
                 {
@@ -68,10 +68,14 @@ public class CameraImageObserver extends ContentObserver
                     {
                         if (status == LiveStatus.CONNECTED)
                         {
-                            ((BrowserForSkyDriveApplication) context.getApplication()).getConnectClient();
-                            loader.uploadFile(client, path, "me/skydrive/camera_roll");
-                        }
-                        else
+                            ((BrowserForSkyDriveApplication) context.getApplication()).setAuthClient(authClient);
+                            ((BrowserForSkyDriveApplication) context.getApplication()).setSession(session);
+                            ((BrowserForSkyDriveApplication) context.getApplication())
+                                    .setConnectClient(new LiveConnectClient(session));
+
+                            loader.uploadFile(((BrowserForSkyDriveApplication) context.getApplication()).getConnectClient()
+                                    , path, "me/skydrive/camera_roll");
+                        } else
                         {
                             Log.e(Constants.LOGTAG, "Initialize did not connect. Status is " + status + ".");
                         }
