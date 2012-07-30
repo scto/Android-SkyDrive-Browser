@@ -220,6 +220,9 @@ abstract class ApiRequest<ResponseType> {
                 throw new LiveOperationException(e.getMessage());
             } catch (JSONException jsonException) {
                 throw new LiveOperationException(ErrorMessages.SERVER_ERROR, e);
+            }catch(NullPointerException npe)
+            {
+                throw new LiveOperationException(""+npe.getMessage());
             }
         }
     }
