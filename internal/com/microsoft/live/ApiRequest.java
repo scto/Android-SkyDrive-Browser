@@ -86,7 +86,7 @@ abstract class ApiRequest<ResponseType> {
 
     /**
      * Constructs a new instance of a Header that contains the
-     * @param accessToken to construct inside the Authorization header
+     * @param session to construct inside the Authorization header
      * @return a new instance of a Header that contains the Authorization access_token
      */
     private static Header createAuthroizationHeader(LiveConnectSession session) {
