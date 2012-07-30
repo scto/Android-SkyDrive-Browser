@@ -546,9 +546,10 @@ public class BrowserActivity extends SherlockListActivity
     @Override
     protected void onPause()
     {
-        if(audioPlaybackServiceConnection != null)
-        {
+        try{
             unbindService(audioPlaybackServiceConnection);
+        }catch (IllegalArgumentException e)
+        {
         }
     }
 
