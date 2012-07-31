@@ -1,5 +1,11 @@
 Changelog
 =========
+**2.6**
+- Reduced memory consumption of images and thumbnails
+
+**2.5.1**
+- Camera service stability, signs in when it doesn't have a valid session
+- MS API stability, caching an NPE in JSON handling and throwing on a LiveOperationException instead for graceful failure
 
 **2.5**
 - Updated automatic camera upload for broader device support. Scrapped FileObserver for ContentObserver.
