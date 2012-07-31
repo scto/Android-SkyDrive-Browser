@@ -138,9 +138,9 @@ public class SharingReceiverActivity extends Activity
             int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
             cursor.moveToFirst();
             selectedImagePath = cursor.getString(column_index);
+            cursor.close();
         }
 
-        cursor.close();
 
         if (selectedImagePath != null)
         {
