@@ -315,6 +315,7 @@ public class AudioControlActivity extends SherlockActivity implements View.OnCli
 
         int sampleSize = bitmapHeight / 800;
         BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inScaled = false;
         options.inSampleSize = sampleSize;
         options.inPurgeable = true;
 

@@ -421,6 +421,7 @@ public class FileBrowserActivity extends SherlockListActivity
 
                             options = new BitmapFactory.Options();
                             options.inSampleSize = sampleSize;
+                            options.inScaled = false;
 
                             Bitmap thumb = BitmapFactory.decodeFile(files[0].getPath(), options);
 

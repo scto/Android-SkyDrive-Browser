@@ -1313,8 +1313,11 @@ public class BrowserActivity extends SherlockListActivity
                     File thumb = new File(cacheFolder, file.getName());
                     if (thumb.exists())
                     {
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        options.inScaled = false;
+
                         ((ImageView) view.findViewById(R.id.skyDriveItemIcon))
-                                .setImageBitmap(BitmapFactory.decodeFile(thumb.getPath()));
+                                .setImageBitmap(BitmapFactory.decodeFile(thumb.getPath(), options));
                         Log.i(Constants.LOGTAG, "Thumb loaded from cache for image " + file.getName());
                         return true;
                     }

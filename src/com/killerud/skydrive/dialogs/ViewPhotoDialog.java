@@ -145,6 +145,7 @@ public class ViewPhotoDialog extends SherlockActivity
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inSampleSize = sampleSize;
         options.inPurgeable = true;
+        options.inScaled = false;
 
         return options;
     }
