@@ -20,11 +20,11 @@ import java.util.Arrays;
 
 public class SignInActivity extends SherlockActivity
 {
-    BrowserForSkyDriveApplication mApp;
-    TextView mResultTextView;
-    LiveAuthClient mAuthClient;
-    Button mSignInButton;
-    TextView mIntroText;
+    BrowserForSkyDriveApplication application;
+    TextView resultTextView;
+    LiveAuthClient liveAuthClient;
+    Button signInButton;
+    TextView introText;
 
     /**
      * Called when the activity is first created.
@@ -38,36 +38,39 @@ public class SignInActivity extends SherlockActivity
         setContentView(R.layout.sign_in);
         handleLocalCache();
 
-        mApp = (BrowserForSkyDriveApplication) getApplication();
+        application = (BrowserForSkyDriveApplication) getApplication();
 
-        mResultTextView = (TextView) findViewById(R.id.introTextView);
-        mAuthClient = new LiveAuthClient(this, Constants.APP_CLIENT_ID);
-        mApp.setAuthClient(mAuthClient);
+        resultTextView = (TextView) findViewById(R.id.introTextView);
+        liveAuthClient = new LiveAuthClient(this, Constants.APP_CLIENT_ID);
+        application.setAuthClient(liveAuthClient);
 
-        mSignInButton = (Button) findViewById(R.id.signInButton);
-        mIntroText = (TextView) findViewById(R.id.introTextView);
+        signInButton = (Button) findViewById(R.id.signInButton);
+        introText = (TextView) findViewById(R.id.introTextView);
 
         final TextView noAccountText = (TextView) findViewById(R.id.noAccountText);
         noAccountText.setText(getString(R.string.noAccountQuestion));
         Linkify.addLinks(noAccountText, Linkify.ALL);
 
-        mSignInButton.setOnClickListener(new View.OnClickListener()
+        signInButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View view)
             {
+                setSupportProgressBarIndeterminateVisibility(true);
+
                 try
                 {
-                    mAuthClient.login(SignInActivity.this, Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener()
+                    liveAuthClient.login(SignInActivity.this, Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener()
                     {
                         @Override
                         public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState)
                         {
+                            setSupportProgressBarIndeterminateVisibility(false);
+
                             if (status == LiveStatus.CONNECTED)
                             {
                                 startBrowserActivity(session);
-                            }
-                            else
+                            } else
                             {
                                 Toast.makeText(getApplicationContext(), R.string.manualSignInError, Toast.LENGTH_SHORT);
                                 Log.e(Constants.LOGTAG, "Login did not connect. Status is " + status + ".");
@@ -77,11 +80,13 @@ public class SignInActivity extends SherlockActivity
                         @Override
                         public void onAuthError(LiveAuthException exception, Object userState)
                         {
+                            setSupportProgressBarIndeterminateVisibility(false);
                             Log.e(Constants.LOGTAG, "Error: " + exception.getMessage());
                         }
                     });
                 } catch (IllegalStateException e)
                 {
+                    setSupportProgressBarIndeterminateVisibility(false);
                     /* Already logged in , or login in progress*/
                     Log.e("ASE", e.getMessage());
                 }
@@ -101,7 +106,7 @@ public class SignInActivity extends SherlockActivity
         try
         {
 
-            mAuthClient.initialize(Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener()
+            liveAuthClient.initialize(Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener()
             {
                 @Override
                 public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState)
@@ -110,8 +115,7 @@ public class SignInActivity extends SherlockActivity
                     if (status == LiveStatus.CONNECTED)
                     {
                         startBrowserActivity(session);
-                    }
-                    else
+                    } else
                     {
                         Toast.makeText(getApplicationContext(), R.string.automaticSignInError, Toast.LENGTH_SHORT);
                         Log.e(Constants.LOGTAG, "Initialize did not connect. Status is " + status + ".");
@@ -259,11 +263,11 @@ public class SignInActivity extends SherlockActivity
     {
         if (keyCode == KeyEvent.KEYCODE_BACK)
         {
-            if (mAuthClient != null)
+            if (liveAuthClient != null)
             {
                 try
                 {
-                    mAuthClient.logout(new LiveAuthListener()
+                    liveAuthClient.logout(new LiveAuthListener()
                     {
                         @Override
                         public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState)
@@ -297,8 +301,8 @@ public class SignInActivity extends SherlockActivity
     private void startBrowserActivity(LiveConnectSession session)
     {
         assert session != null;
-        mApp.setSession(session);
-        mApp.setConnectClient(new LiveConnectClient(session));
+        application.setSession(session);
+        application.setConnectClient(new LiveConnectClient(session));
         startActivity(new Intent(getApplicationContext(), BrowserActivity.class));
         finish();
     }

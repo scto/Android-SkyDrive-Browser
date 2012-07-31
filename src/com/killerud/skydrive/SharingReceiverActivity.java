@@ -1,10 +1,10 @@
 package com.killerud.skydrive;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -12,9 +12,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Window;
 import com.killerud.skydrive.constants.Constants;
 import com.microsoft.live.*;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -23,15 +26,14 @@ import java.util.Arrays;
  * Date: 03.05.12
  * Time: 21:27
  */
-public class SharingReceiverActivity extends Activity
+public class SharingReceiverActivity extends SherlockActivity
 {
-    BrowserForSkyDriveApplication mApp;
-    TextView mResultTextView;
-    LiveAuthClient mAuthClient;
-    ProgressDialog mInitializeDialog;
-    Button mSignInButton;
-    TextView mIntroText;
-    Intent mIntentThatStartedMe;
+    BrowserForSkyDriveApplication application;
+    TextView resultTextView;
+    LiveAuthClient authClient;
+    ProgressDialog initializeDialog;
+    Button signInButton;
+    TextView introText;
 
     /**
      * Called when the activity is first created.
@@ -40,39 +42,40 @@ public class SharingReceiverActivity extends Activity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.sign_in);
-        mApp = (BrowserForSkyDriveApplication) getApplication();
 
-        mResultTextView = (TextView) findViewById(R.id.introTextView);
-        mAuthClient = new LiveAuthClient(this, Constants.APP_CLIENT_ID);
-        mApp.setAuthClient(mAuthClient);
+        application = (BrowserForSkyDriveApplication) getApplication();
+        resultTextView = (TextView) findViewById(R.id.introTextView);
+        authClient = new LiveAuthClient(this, Constants.APP_CLIENT_ID);
+        application.setAuthClient(authClient);
 
-        mInitializeDialog = ProgressDialog.show(this, "", getString(R.string.initializingMessage), true);
+        signInButton = (Button) findViewById(R.id.signInButton);
+        introText = (TextView) findViewById(R.id.introTextView);
+        introText.setVisibility(View.INVISIBLE);
+        signInButton.setVisibility(View.INVISIBLE);
 
-        mSignInButton = (Button) findViewById(R.id.signInButton);
-        mIntroText = (TextView) findViewById(R.id.introTextView);
-        mIntroText.setVisibility(View.INVISIBLE);
-        mSignInButton.setVisibility(View.INVISIBLE);
-
-        mSignInButton.setOnClickListener(new View.OnClickListener()
+        signInButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View view)
             {
-                mAuthClient.login(SharingReceiverActivity.this, Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener()
+                setSupportProgressBarIndeterminateVisibility(true);
+                authClient.login(SharingReceiverActivity.this, Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener()
                 {
                     @Override
                     public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState)
                     {
+                        setSupportProgressBarIndeterminateVisibility(false);
+
                         if (status == LiveStatus.CONNECTED)
                         {
-                            startBrowserActivity(session);
-                        }
-                        else
+                            onLiveConnect(session);
+                        } else
                         {
                             Toast.makeText(getApplicationContext(), R.string.manualSignInError, Toast.LENGTH_SHORT);
-                            mIntroText.setVisibility(View.VISIBLE);
-                            mSignInButton.setVisibility(View.VISIBLE);
+                            introText.setVisibility(View.VISIBLE);
+                            signInButton.setVisibility(View.VISIBLE);
                             Log.e(Constants.LOGTAG, "Login did not connect. Status is " + status + ".");
                             finish();
                         }
@@ -81,6 +84,8 @@ public class SharingReceiverActivity extends Activity
                     @Override
                     public void onAuthError(LiveAuthException exception, Object userState)
                     {
+                        setSupportProgressBarIndeterminateVisibility(false);
+
                         Log.e(Constants.LOGTAG, "Error: " + exception.getMessage());
                         finish();
                     }
@@ -93,17 +98,18 @@ public class SharingReceiverActivity extends Activity
     protected void onStart()
     {
         super.onStart();
-        mAuthClient.initialize(Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener()
+        setSupportProgressBarIndeterminateVisibility(true);
+
+        authClient.initialize(Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener()
         {
             @Override
             public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState)
             {
-                mInitializeDialog.dismiss();
+                setSupportProgressBarIndeterminateVisibility(false);
                 if (status == LiveStatus.CONNECTED)
                 {
-                    startBrowserActivity(session);
-                }
-                else
+                    onLiveConnect(session);
+                } else
                 {
                     Toast.makeText(getApplicationContext(), R.string.automaticSignInError, Toast.LENGTH_SHORT);
                     Log.e(Constants.LOGTAG, "Initialize did not connect. Status is " + status + ".");
@@ -114,14 +120,181 @@ public class SharingReceiverActivity extends Activity
             @Override
             public void onAuthError(LiveAuthException exception, Object userState)
             {
-                mInitializeDialog.dismiss();
+                setSupportProgressBarIndeterminateVisibility(false);
                 Log.e(Constants.LOGTAG, "Error: " + exception.getMessage());
                 finish();
             }
         });
     }
 
-    public String parseUriToFilePath(Uri uri)
+    private void onLiveConnect(LiveConnectSession session)
+    {
+        setUpApplicationWithSessionDetails(session);
+        handleSharedFilesAndStartBrowserActivity();
+    }
+
+    private void setUpApplicationWithSessionDetails(LiveConnectSession session)
+    {
+        assert session != null;
+        application.setSession(session);
+        application.setConnectClient(new LiveConnectClient(session));
+    }
+
+    private void handleSharedFilesAndStartBrowserActivity()
+    {
+        Intent shareIntent = getIntent();
+        String action = shareIntent.getAction();
+        String fileType = shareIntent.getType();
+
+        Intent startIntent = new Intent();
+
+        if (action != null
+                && action.equals(Intent.ACTION_SEND))
+        {
+            if (fileType.equals("text/plain"))
+            {
+                startIntent = handleSentText(shareIntent);
+            }else if (fileType.startsWith("image/"))
+            {
+                handleSentImage(shareIntent);
+            }else if(fileType.equals("application/pdf"))
+            {
+                handleSentPdf(shareIntent);
+            }
+
+        } else if (action != null
+                && action.equals(Intent.ACTION_SEND_MULTIPLE))
+        {
+            if (fileType.startsWith("image/"))
+            {
+                handleSentMultipleImages(shareIntent);
+            }
+        }
+
+        startIntent.setClass(getApplicationContext(), BrowserActivity.class);
+        startActivity(startIntent);
+        finish();
+    }
+
+    private Intent handleSentPdf(Intent shareIntent)
+    {
+        Intent startIntent = new Intent();
+        Uri uri = shareIntent.getData();
+
+        ArrayList<String> filePath = new ArrayList<String>();
+        filePath.add(uri.toString());
+
+        startIntent.setAction("killerud.skydrive.UPLOAD_PICK_FOLDER");
+        startIntent.putExtra(UploadFileActivity.EXTRA_FILES_LIST, filePath);
+
+        return  startIntent;
+    }
+
+    private Intent handleSentMultipleImages(Intent shareIntent)
+    {
+        Intent startIntent = new Intent();
+
+        Bundle extras = shareIntent.getExtras();
+        if (extras.containsKey(Intent.EXTRA_STREAM))
+        {
+            ArrayList<Uri> fileList = shareIntent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+            ArrayList<String> filePaths = new ArrayList<String>();
+            try
+            {
+                for (int i = 0; i < fileList.size(); i++)
+                {
+                    Uri uri = fileList.get(i);
+                    if (uri != null)
+                    {
+                        filePaths.add(parseImageUriToFilePath(uri));
+                    }
+                }
+            } catch (UnsupportedOperationException e)
+            {
+                Toast.makeText(this, R.string.errorCouldNotFetchFileForSharing, Toast.LENGTH_SHORT).show();
+                finish();
+                return null;
+            }
+
+            startIntent.setAction("killerud.skydrive.UPLOAD_PICK_FOLDER");
+            startIntent.putExtra(UploadFileActivity.EXTRA_FILES_LIST, filePaths);
+        }
+
+        return startIntent;
+    }
+
+    private Intent handleSentImage(Intent shareIntent)
+    {
+        Intent startIntent = new Intent();
+
+        Bundle extras = shareIntent.getExtras();
+        if (extras.containsKey(Intent.EXTRA_STREAM))
+        {
+            Uri uri = (Uri) extras.getParcelable(Intent.EXTRA_STREAM);
+            ArrayList<String> filePath = new ArrayList<String>();
+            try
+            {
+                if (uri != null)
+                {
+                    filePath.add(parseImageUriToFilePath(uri));
+                }
+            } catch (UnsupportedOperationException e)
+            {
+                return null;
+            }
+            startIntent.setAction("killerud.skydrive.UPLOAD_PICK_FOLDER");
+            startIntent.putExtra(UploadFileActivity.EXTRA_FILES_LIST, filePath);
+        }
+
+        return startIntent;
+    }
+
+    private Intent handleSentText(Intent shareIntent)
+    {
+        final Intent startIntent = new Intent();
+
+        String plainText = shareIntent.getStringExtra(Intent.EXTRA_TEXT);
+        if(plainText != null)
+        {
+            AsyncTask<String, Void, File> writeToFile = new AsyncTask<String, Void, File>(){
+
+                @Override
+                protected File doInBackground(String... strings)
+                {
+                    try{
+                        File outFile = new File(getCacheDir(), "sharedText.txt");
+                        BufferedWriter outWriter = new BufferedWriter((new FileWriter(outFile.getPath())));
+                        outWriter.write(strings[0]);
+                        outWriter.close();
+
+                        return outFile;
+                    }catch (IOException e)
+                    {
+                        return null;
+                    }
+                }
+
+                protected void onPostExecute(File result) {
+                    if(result == null)
+                    {
+                        showErrorToast();
+                    }else {
+                        ArrayList<String> filePath = new ArrayList<String>();
+                        filePath.add(result.getPath());
+
+                        startIntent.setAction("killerud.skydrive.UPLOAD_PICK_FOLDER");
+                        startIntent.putExtra(UploadFileActivity.EXTRA_FILES_LIST, filePath);
+                    }
+                }
+            };
+        }
+
+        return startIntent;
+    }
+
+
+
+    public String parseImageUriToFilePath(Uri uri)
     {
         assert uri != null;
 
@@ -141,77 +314,19 @@ public class SharingReceiverActivity extends Activity
             cursor.close();
         }
 
-
         if (selectedImagePath != null)
         {
             return selectedImagePath;
-        }
-        else if (filemanagerPath != null)
+        } else if (filemanagerPath != null)
         {
             return filemanagerPath;
         }
         return null;
     }
 
-    private void startBrowserActivity(LiveConnectSession session)
+    private void showErrorToast()
     {
-        assert session != null;
-        mApp.setSession(session);
-        mApp.setConnectClient(new LiveConnectClient(session));
-
-        /* This is the key that opens up for uploading <|:D~ */
-        Intent intentThatStartedMe = getIntent();
-        Intent startIntent = new Intent(getApplicationContext(), BrowserActivity.class);
-        if (intentThatStartedMe.getAction() != null
-                && intentThatStartedMe.getAction().equals(Intent.ACTION_SEND))
-        {
-            Bundle extras = intentThatStartedMe.getExtras();
-            if (extras.containsKey(Intent.EXTRA_STREAM))
-            {
-                Uri uri = (Uri) extras.getParcelable(Intent.EXTRA_STREAM);
-
-                ArrayList<String> filePath = new ArrayList<String>();
-                try{
-
-                    if(uri!= null) filePath.add(parseUriToFilePath(uri));
-                }catch (UnsupportedOperationException e)
-                {
-                    Toast.makeText(this, R.string.errorCouldNotFetchFileForSharing, Toast.LENGTH_SHORT).show();
-                    finish();
-                    return;
-                }
-
-                startIntent.setAction("killerud.skydrive.UPLOAD_PICK_FOLDER");
-                startIntent.putExtra(UploadFileActivity.EXTRA_FILES_LIST, filePath);
-            }
-        }
-        else if (intentThatStartedMe.getAction() != null
-                && intentThatStartedMe.getAction().equals(Intent.ACTION_SEND_MULTIPLE))
-        {
-            Bundle extras = intentThatStartedMe.getExtras();
-            if (extras.containsKey(Intent.EXTRA_STREAM))
-            {
-                ArrayList<Uri> fileList = intentThatStartedMe.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
-                ArrayList<String> filePaths = new ArrayList<String>();
-                try{
-                    for (int i = 0; i < fileList.size(); i++)
-                    {
-                        Uri uri = fileList.get(i);
-                        if(uri != null) filePaths.add(parseUriToFilePath(uri));
-                    }
-                }catch (UnsupportedOperationException e)
-                {
-                    Toast.makeText(this, R.string.errorCouldNotFetchFileForSharing, Toast.LENGTH_SHORT).show();
-                    finish();
-                    return;
-                }
-
-                startIntent.setAction("killerud.skydrive.UPLOAD_PICK_FOLDER");
-                startIntent.putExtra(UploadFileActivity.EXTRA_FILES_LIST, filePaths);
-            }
-        }
-        startActivity(startIntent);
-        finish();
+        Toast.makeText(this, R.string.errorCouldNotFetchFileForSharing, Toast.LENGTH_SHORT).show();
     }
 
 }
