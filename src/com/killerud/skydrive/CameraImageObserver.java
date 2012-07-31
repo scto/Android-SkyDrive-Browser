@@ -131,6 +131,10 @@ public class CameraImageObserver extends ContentObserver
         Cursor cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null,
                 MediaStore.Images.Media._ID + " DESC");
 
+        if(cursor == null)
+        {
+            return -1;
+        }
         if (!cursor.moveToFirst())
         {
             cursor.close();
