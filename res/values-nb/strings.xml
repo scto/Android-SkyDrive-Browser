@@ -2,25 +2,23 @@
 <resources>
 
     <string name="appName">Utforsker for SkyDrive</string>
-    <string name="initializingMessage">Logger på Windows Live...</string>
-    <string name="firstWelcomeMessage">Velkommen til Android Utforsker for SkyDrive!\n\nLogg inn med din Windows Live-konto
-        og få sømløs tilgang til SkyDrive.
-    </string>
-    <string name="signInToWindowsLive">Logg inn på Windows Live</string>
+    <string name="initializingMessage">Logger inn...</string>
+    <string name="firstWelcomeMessage">Logg inn med en Microsoft-konto for å få tilgang til SkyDrive</string>
+    <string name="signInToWindowsLive">Logg inn</string>
     <string name="mySkyDrive">Min SkyDrive</string>
-    <string name="automaticSignInError">Kunne ikke logge på Windows Live automatisk. Prøv å logge på manuelt.</string>
-    <string name="manualSignInError">Kunne ikke logge på Windows Live. Har du en nettforbindelse?</string>
-    <string name="noAccountQuestion">Ingen Live-konto? Gå til live.com og registrer deg for 7GB gratis lagring!</string>
+    <string name="automaticSignInError">Kunne ikke logge på automatisk. Prøv å logge på manuelt.</string>
+    <string name="manualSignInError">Kunne ikke logge på. Har du en nettforbindelse?</string>
+    <string name="noAccountQuestion">Ingen Microsoft-konto? Gå til live.com og registrer deg for 7GB gratis lagring!</string>
 
     <string name="icon">Ikon</string>
-    <string name="noItemsInFolder">Ingen filer i denne mappen</string>
+    <string name="noItemsInFolder">Her var det ingenting</string>
     <string name="newFolderTitle">Lag en ny mappe her</string>
     <string name="newFolder">Ny mappe</string>
     <string name="uploadTo">Last opp til</string>
     <string name="talkingToSkyDriveWait">Snakker med SkyDrive...</string>
     <string name="imageDisplayError">Kunne ikke vise bildet</string>
-    <string name="copyCutSelectedFiles">Valgte filer klare til å limes inn</string>
-    <string name="imageLoading">Bildet lastes inn. Vennligst vent...</string>
+    <string name="copyCutSelectedFiles">Klar til å lime inn</string>
+    <string name="imageLoading">Laster bildet...</string>
     <string name="rootFolderTitle">Hjem</string>
     <string name="savedFilesTitle">Lagrede filer</string>
 
@@ -28,27 +26,24 @@
     <string name="movedFiles">Flyttet file(r)</string>
     <string name="copiedFiles">Kopierte file(r)</string>
     <string name="renamedFiles">Endret file(r)</string>
-    <string name="serviceLabel">Tjeneste for automatisk kameraopplasing til SkyDrive</string>
 
+    <string name="serviceLabel">Automatisk kameraopplasing til SkyDrive</string>
 
-
-    <string name="fileWillBeDownloaded">Filen lastes ned til telefonen</string>
+    <string name="fileWillBeDownloaded">Laster ned filen</string>
     <string name="ok">OK</string>
     <string name="downloading">Laster ned</string>
     <string name="uploading">Laster opp</string>
     <string name="downloadingFromSkyDrive">Laster ned fra SkyDrive...</string>
-    <string name="fileSaved">Filen lagret</string>
+    <string name="fileSaved">Lagret filen</string>
     <string name="downloadError">Noe gikk galt under nedlastingen. Filen ble ikke lagret.</string>
-    <string name="fileAlreadySaved">Filen finnes allerede</string>
-    <string name="fileAlreadySavedMessage">Den filen har blitt lastet ned før, men kan ha blitt endret siden da. Last ned på nytt?</string>
     <string name="savedFileCopy">Kopi</string>
     <string name="savedLowerCase">lagret</string>
     <string name="from">fra</string>
     <string name="to">til</string>
     <string name="skyDrive">SkyDrive</string>
 
-    <string name="downloadNoPreview">Kan ikke forhåndsvise</string>
-    <string name="downloadFileCannotBeViewed">Kan ikke forhåndsvise. Last ned istedet?</string>
+    <string name="downloadNoPreview">Ingen forhåndsvisning</string>
+    <string name="downloadFileCannotBeViewed">Forhåndsvisning er ikke mulig. Last ned istedet?</string>
     <string name="openWebBrowser">Åpne i...</string>
 
 
@@ -63,7 +58,7 @@
     <string name="uploadError">Noe skjedde under opplastingen. Filen ble ikke sendt til SkyDrive.</string>
     <string name="uploadToThisFolder">Last opp her</string>
     <string name="uploadSelected">Last opp valgte</string>
-    <string name="noFilesInFolder">Ingen filer i denne mappen</string>
+    <string name="noFilesInFolder">Her var det ingen filer</string>
 
     <string name="selectedOne">Ett element valgt</string>
     <string name="selectedSeveral">elementer valgt</string>
@@ -97,7 +92,7 @@
     <string name="sharingLinks">Delingslenker</string>
     <string name="sharingLinksSummary">Alle med lenken vil kunne se og laste ned filen</string>
     <string name="sharingGeneratingLinks">Genererer delingslenker...</string>
-    <string name="sharingEnableEditing">Tillat at de med lenken endrer filen</string>
+    <string name="sharingEnableEditing">De med lenken kan også endre filen</string>
 
     <string name="buffering">Buffrer</string>
     <string name="playing">Spiller</string>
@@ -108,7 +103,7 @@
     <string name="stop">Stopp</string>
     <string name="stopped">Stoppet</string>
 
-    <string name="errorFolderCouldNotBeCreated">Noe gikk galt så de nye mappen ble ikke laget. Prøv igjen.</string>
+    <string name="errorFolderCouldNotBeCreated">Den nye mappen ble ikke laget, noe gikk galt. Prøv igjen.</string>
     <string name="errorNoApplicationCouldOpenTheFile">Ingen app kunne åpne filen</string>
     <string name="errorOpeningAudioFile">Kunne ikke åpne musikkfilen</string>
     <string name="errorDuringLogin">Feil under innlogging</string>

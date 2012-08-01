@@ -17,8 +17,8 @@
     <string name="newFolder">New folder</string>
     <string name="talkingToSkyDriveWait">Talking to SkyDrive…</string>
     <string name="imageDisplayError">Couldn\'t show the image</string>
-    <string name="copyCutSelectedFiles">Selected files ready to paste</string>
-    <string name="imageLoading">Image is loading</string>
+    <string name="copyCutSelectedFiles">Ready to paste</string>
+    <string name="imageLoading">Loading image...</string>
     <string name="rootFolderTitle">Home</string>
     <string name="savedFilesTitle">Saved files</string>
 

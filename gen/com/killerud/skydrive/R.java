@@ -1152,8 +1152,6 @@ containing a value of this type.
         public static final int errorQuotaFetch=0x7f0a006d;
         public static final int errorRenamingFile=0x7f0a0067;
         public static final int errorTooManyFilesAtOnce=0x7f0a006b;
-        public static final int fileAlreadySaved=0x7f0a009b;
-        public static final int fileAlreadySavedMessage=0x7f0a009c;
         public static final int fileSaved=0x7f0a0026;
         public static final int fileWillBeDownloaded=0x7f0a0021;
         public static final int firstWelcomeMessage=0x7f0a000c;
