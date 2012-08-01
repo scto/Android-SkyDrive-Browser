@@ -238,7 +238,14 @@ public class SharingReceiverActivity extends SherlockActivity
             for (Parcelable item : sharedContent) {
                 Uri uri = (Uri) item;
                 if (uri != null) {
-                    paths.add(uri.toString().substring("file://".length()).replaceAll("%20", " "));
+                    try
+                    {
+                        String decodedPath = URLDecoder.decode(uri.toString().substring("file://".length()), "UTF-8");
+                        paths.add(decodedPath);
+                    } catch (UnsupportedEncodingException e)
+                    {
+                        paths.add(uri.toString().substring("file://".length()));
+                    }
                 }
             }
         }
