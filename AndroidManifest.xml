@@ -37,17 +37,43 @@
 
             <intent-filter>
                 <action android:name="android.intent.action.SEND"/>
-                <action android:name="android.intent.action.SEND_MULTIPLE"/>
 
-                <!-- Sadly most file types here are not allowed by MS-->
+                <data android:mimeType="audio/wav"/>
+                <data android:mimeType="audio/x-wav"/>
+
                 <data android:mimeType="image/*"/>
+
+                <data android:mimeType="application/mp4" />
+                <data android:mimeType="video/3gpp" />
+                <data android:mimeType="video/3gpp2" />
+                <data android:mimeType="video/x-ms-wmv" />
+                <data android:mimeType="video/x-ms-wm" />
+                <data android:mimeType="video/x-msvideo" />
+
                 <data android:mimeType="text/plain"/>
-                <data android:mimeType="video/*"/>
+
                 <data android:mimeType="application/pdf"/>
                 <data android:mimeType="application/msword"/>
                 <data android:mimeType="application/vnd.ms-powerpoint" />
                 <data android:mimeType="application/vnd.ms-excel" />
-                <data android:mimeType="audio/*"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE"/>
+
+                <data android:mimeType="audio/wav"/>
+                <data android:mimeType="audio/x-wav"/>
+
+                <data android:mimeType="image/*"/>
+
+                <data android:mimeType="application/mp4" />
+                <data android:mimeType="video/3gpp" />
+                <data android:mimeType="video/3gpp2" />
+                <data android:mimeType="video/x-ms-wmv" />
+                <data android:mimeType="video/x-ms-wm" />
+                <data android:mimeType="video/x-msvideo" />
+
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>

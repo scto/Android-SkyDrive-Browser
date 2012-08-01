@@ -890,7 +890,7 @@ public class XLoader
      */
     private void fileNotSupportedBySkyDriveNotification(File file)
     {
-        if (notificationIsAvailable)
+        if (!notificationIsAvailable)
         {
             return;
         }

@@ -151,29 +151,47 @@ public class SharingReceiverActivity extends SherlockActivity
         if (action != null
                 && action.equals(Intent.ACTION_SEND))
         {
-            if (fileType.equals("text/plain"))
+            if (fileType.startsWith("image/"))
             {
-                startIntent = handleSentText(shareIntent);
-            }else if (fileType.startsWith("image/"))
+                startIntent = handleSentImage(shareIntent);
+            }else if(fileType.startsWith("audio/"))
             {
-                handleSentImage(shareIntent);
+                startIntent = handleSentAudio(shareIntent);
+            }else if(fileType.startsWith("video/"))
+            {
+                startIntent = handleSentVideo(shareIntent);
             }else if(fileType.equals("application/pdf"))
             {
-                handleSentPdf(shareIntent);
+                startIntent = handleSentPdf(shareIntent);
+            }else if (fileType.equals("text/plain"))
+            {
+                startIntent = handleSentText(shareIntent);
             }
-
         } else if (action != null
                 && action.equals(Intent.ACTION_SEND_MULTIPLE))
         {
             if (fileType.startsWith("image/"))
             {
-                handleSentMultipleImages(shareIntent);
+                startIntent = handleSentMultipleImages(shareIntent);
+            }else if(fileType.startsWith("audio/"))
+            {
+                startIntent = handleSentMultipleAudio(shareIntent);
+            }else if(fileType.startsWith("video/"))
+            {
+                startIntent = handleSentMultipleVideos(shareIntent);
             }
         }
 
-        startIntent.setClass(getApplicationContext(), BrowserActivity.class);
-        startActivity(startIntent);
-        finish();
+        if(startIntent == null)
+        {
+            showErrorToast();
+            finish();
+            return;
+        }else {
+            startIntent.setClass(getApplicationContext(), BrowserActivity.class);
+            startActivity(startIntent);
+            finish();
+        }
     }
 
     private Intent handleSentPdf(Intent shareIntent)
@@ -206,7 +224,7 @@ public class SharingReceiverActivity extends SherlockActivity
                     Uri uri = fileList.get(i);
                     if (uri != null)
                     {
-                        filePaths.add(parseImageUriToFilePath(uri));
+                        filePaths.add(parseUriFromMediaStoreToFilePath(uri, MediaStore.Images.Media.DATA));
                     }
                 }
             } catch (UnsupportedOperationException e)
@@ -236,7 +254,125 @@ public class SharingReceiverActivity extends SherlockActivity
             {
                 if (uri != null)
                 {
-                    filePath.add(parseImageUriToFilePath(uri));
+                    filePath.add(parseUriFromMediaStoreToFilePath(uri, MediaStore.Images.Media.DATA));
+                }
+            } catch (UnsupportedOperationException e)
+            {
+                return null;
+            }
+            startIntent.setAction("killerud.skydrive.UPLOAD_PICK_FOLDER");
+            startIntent.putExtra(UploadFileActivity.EXTRA_FILES_LIST, filePath);
+        }
+
+        return startIntent;
+    }
+
+    private Intent handleSentMultipleVideos(Intent shareIntent)
+    {
+        Intent startIntent = new Intent();
+
+        Bundle extras = shareIntent.getExtras();
+        if (extras.containsKey(Intent.EXTRA_STREAM))
+        {
+            ArrayList<Uri> fileList = shareIntent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+            ArrayList<String> filePaths = new ArrayList<String>();
+            try
+            {
+                for (int i = 0; i < fileList.size(); i++)
+                {
+                    Uri uri = fileList.get(i);
+                    if (uri != null)
+                    {
+                        filePaths.add(parseUriFromMediaStoreToFilePath(uri, MediaStore.Video.Media.DATA));
+                    }
+                }
+            } catch (UnsupportedOperationException e)
+            {
+                Toast.makeText(this, R.string.errorCouldNotFetchFileForSharing, Toast.LENGTH_SHORT).show();
+                finish();
+                return null;
+            }
+
+            startIntent.setAction("killerud.skydrive.UPLOAD_PICK_FOLDER");
+            startIntent.putExtra(UploadFileActivity.EXTRA_FILES_LIST, filePaths);
+        }
+
+        return startIntent;
+    }
+
+    private Intent handleSentVideo(Intent shareIntent)
+    {
+        Intent startIntent = new Intent();
+
+        Bundle extras = shareIntent.getExtras();
+        if (extras.containsKey(Intent.EXTRA_STREAM))
+        {
+            Uri uri = (Uri) extras.getParcelable(Intent.EXTRA_STREAM);
+            ArrayList<String> filePath = new ArrayList<String>();
+            try
+            {
+                if (uri != null)
+                {
+                    filePath.add(parseUriFromMediaStoreToFilePath(uri, MediaStore.Video.Media.DATA));
+                }
+            } catch (UnsupportedOperationException e)
+            {
+                return null;
+            }
+            startIntent.setAction("killerud.skydrive.UPLOAD_PICK_FOLDER");
+            startIntent.putExtra(UploadFileActivity.EXTRA_FILES_LIST, filePath);
+        }
+
+        return startIntent;
+    }
+
+    private Intent handleSentMultipleAudio(Intent shareIntent)
+    {
+        Intent startIntent = new Intent();
+
+        Bundle extras = shareIntent.getExtras();
+        if (extras.containsKey(Intent.EXTRA_STREAM))
+        {
+            ArrayList<Uri> fileList = shareIntent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+            ArrayList<String> filePaths = new ArrayList<String>();
+            try
+            {
+                for (int i = 0; i < fileList.size(); i++)
+                {
+                    Uri uri = fileList.get(i);
+                    if (uri != null)
+                    {
+                        filePaths.add(parseUriFromMediaStoreToFilePath(uri, MediaStore.Audio.Media.DATA));
+                    }
+                }
+            } catch (UnsupportedOperationException e)
+            {
+                Toast.makeText(this, R.string.errorCouldNotFetchFileForSharing, Toast.LENGTH_SHORT).show();
+                finish();
+                return null;
+            }
+
+            startIntent.setAction("killerud.skydrive.UPLOAD_PICK_FOLDER");
+            startIntent.putExtra(UploadFileActivity.EXTRA_FILES_LIST, filePaths);
+        }
+
+        return startIntent;
+    }
+
+    private Intent handleSentAudio(Intent shareIntent)
+    {
+        Intent startIntent = new Intent();
+
+        Bundle extras = shareIntent.getExtras();
+        if (extras.containsKey(Intent.EXTRA_STREAM))
+        {
+            Uri uri = (Uri) extras.getParcelable(Intent.EXTRA_STREAM);
+            ArrayList<String> filePath = new ArrayList<String>();
+            try
+            {
+                if (uri != null)
+                {
+                    filePath.add(parseUriFromMediaStoreToFilePath(uri, MediaStore.Audio.Media.DATA));
                 }
             } catch (UnsupportedOperationException e)
             {
@@ -292,9 +428,7 @@ public class SharingReceiverActivity extends SherlockActivity
         return startIntent;
     }
 
-
-
-    public String parseImageUriToFilePath(Uri uri)
+    public String parseUriFromMediaStoreToFilePath(Uri uri, String mediaStore)
     {
         assert uri != null;
 
@@ -308,7 +442,7 @@ public class SharingReceiverActivity extends SherlockActivity
         {
             // Here you will get a null pointer if cursor is null
             // This can be if you used OI file manager for picking the media
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            int column_index = cursor.getColumnIndexOrThrow(mediaStore);
             cursor.moveToFirst();
             selectedImagePath = cursor.getString(column_index);
             cursor.close();

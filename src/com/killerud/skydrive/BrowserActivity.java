@@ -285,10 +285,7 @@ public class BrowserActivity extends SherlockListActivity
                 @Override
                 public void onClick(View view)
                 {
-                    if (!connectionIsUnavailable()) xLoader.uploadFile(liveConnectClient,
-                            getIntent().getStringArrayListExtra(UploadFileActivity.EXTRA_FILES_LIST),
-                            currentFolderId);
-                    finish();
+                    uploadFilesSentThroughShareButton(getIntent());
                 }
             });
 
@@ -505,22 +502,9 @@ public class BrowserActivity extends SherlockListActivity
         }
     }
 
-    @Override
-    protected void onStart()
-    {
-        super.onStart();
-
-        Intent intentThatStartedMe = getIntent();
-        if (intentThatStartedMe.getAction() != null &&
-                intentThatStartedMe.getAction().equalsIgnoreCase("killerud.skydrive.SHARE_UPLOAD"))
-        {
-            uploadFilesSentThroughShareButton(intentThatStartedMe);
-        }
-    }
-
     private void uploadFilesSentThroughShareButton(Intent intentThatStartedMe)
     {
-        if (intentThatStartedMe.getExtras().getString(UploadFileActivity.EXTRA_FILES_LIST) != null)
+        if (intentThatStartedMe.getExtras().getStringArrayList(UploadFileActivity.EXTRA_FILES_LIST) != null)
         {
             if (!connectionIsUnavailable()) xLoader.uploadFile(liveConnectClient,
                     intentThatStartedMe.getStringArrayListExtra(UploadFileActivity.EXTRA_FILES_LIST),
