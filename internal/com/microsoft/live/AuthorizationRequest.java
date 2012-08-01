@@ -96,8 +96,12 @@ class AuthorizationRequest implements ObservableOAuthRequest, OAuthRequestObserv
 
                 this.saveCookiesToPreferences();
 
-                AuthorizationRequest.this.onEndUri(uri);
-                OAuthDialog.this.dismiss();
+                try{
+                    AuthorizationRequest.this.onEndUri(uri);
+                    OAuthDialog.this.dismiss();
+                }catch (IllegalArgumentException e)
+                {
+                }
             }
 
             /**
@@ -115,8 +119,12 @@ class AuthorizationRequest implements ObservableOAuthRequest, OAuthRequestObserv
                                         int errorCode,
                                         String description,
                                         String failingUrl) {
-                AuthorizationRequest.this.onError("", description, failingUrl);
-                OAuthDialog.this.dismiss();
+                try{
+                    AuthorizationRequest.this.onError("", description, failingUrl);
+                    OAuthDialog.this.dismiss();
+                }catch (IllegalArgumentException e)
+                {
+                }
             }
 
             @Override
