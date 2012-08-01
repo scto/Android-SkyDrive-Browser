@@ -1,4 +1,4 @@
-package com.killerud.skydrive.dialogs;
+package com.killerud.skydrive;
 
 /**
  * User: William
@@ -28,7 +28,7 @@ import java.io.File;
  * The photo dialog. Downloads and displays an image, but does not save the
  * image unless the user presses the save button (i.e. acts as a cache)
  */
-public class ViewPhotoDialog extends SherlockActivity
+public class ImageGalleryActivity extends SherlockActivity
 {
     private boolean mSavePhoto;
     private File mFile;

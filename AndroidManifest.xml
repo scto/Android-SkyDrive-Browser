@@ -102,10 +102,6 @@
                   android:label="@string/savedFiles"
                 />
 
-        <activity android:name=".dialogs.NewFolderDialog"
-                  android:label="@string/createFolder"
-                  android:theme="@style/LightThemeDialog"
-                />
 
         <activity android:name=".AudioControlActivity"
                   android:uiOptions="none"
@@ -119,8 +115,14 @@
         <activity android:name=".PlayVideoActivity"
                   android:theme="@style/LightTheme"/>
 
-        <activity android:name=".dialogs.ViewPhotoDialog"
-                  android:theme="@style/LightThemeDialog"/>
+        <activity android:name=".ImageGalleryActivity"
+                  android:theme="@style/LightTheme"/>
+
+
+        <activity android:name=".dialogs.NewFolderDialog"
+                  android:label="@string/createFolder"
+                  android:theme="@style/LightThemeDialog"
+                />
 
         <activity android:name=".dialogs.RenameDialog"
                   android:theme="@style/LightThemeDialog"/>

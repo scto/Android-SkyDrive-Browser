@@ -402,7 +402,7 @@ public class BrowserActivity extends SherlockListActivity
             public void visit(SkyDrivePhoto photo)
             {
                 if (isUploadDialog) return;
-                Intent startPhotoDialog = new Intent(getApplicationContext(), ViewPhotoDialog.class);
+                Intent startPhotoDialog = new Intent(getApplicationContext(), ImageGalleryActivity.class);
                 startPhotoDialog.putExtra("killerud.skydrive.PHOTO_ID", photo.getId());
                 startPhotoDialog.putExtra("killerud.skydrive.PHOTO_NAME", photo.getName());
                 if (!connectionIsUnavailable()) startActivity(startPhotoDialog);

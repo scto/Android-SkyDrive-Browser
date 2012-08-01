@@ -33,9 +33,7 @@ public class SharingReceiverActivity extends SherlockActivity
     BrowserForSkyDriveApplication application;
     TextView resultTextView;
     LiveAuthClient authClient;
-    ProgressDialog initializeDialog;
     Button signInButton;
-    TextView introText;
 
     /**
      * Called when the activity is first created.
@@ -53,10 +51,6 @@ public class SharingReceiverActivity extends SherlockActivity
         application.setAuthClient(authClient);
 
         signInButton = (Button) findViewById(R.id.signInButton);
-        introText = (TextView) findViewById(R.id.introTextView);
-        introText.setVisibility(View.INVISIBLE);
-        signInButton.setVisibility(View.INVISIBLE);
-
         signInButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -76,8 +70,6 @@ public class SharingReceiverActivity extends SherlockActivity
                         } else
                         {
                             Toast.makeText(getApplicationContext(), R.string.manualSignInError, Toast.LENGTH_SHORT);
-                            introText.setVisibility(View.VISIBLE);
-                            signInButton.setVisibility(View.VISIBLE);
                             Log.e(Constants.LOGTAG, "Login did not connect. Status is " + status + ".");
                             finish();
                         }
