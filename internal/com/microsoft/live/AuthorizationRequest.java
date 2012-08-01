@@ -101,6 +101,11 @@ class AuthorizationRequest implements ObservableOAuthRequest, OAuthRequestObserv
                     OAuthDialog.this.dismiss();
                 }catch (IllegalArgumentException e)
                 {
+                    try{
+                        AuthorizationRequest.this.activity.recreate();
+                    }catch (Exception exc)
+                    {
+                    }
                 }
             }
 
@@ -124,6 +129,11 @@ class AuthorizationRequest implements ObservableOAuthRequest, OAuthRequestObserv
                     OAuthDialog.this.dismiss();
                 }catch (IllegalArgumentException e)
                 {
+                    try{
+                        AuthorizationRequest.this.activity.recreate();
+                    }catch (Exception exc)
+                    {
+                    }
                 }
             }
 
@@ -180,9 +190,7 @@ class AuthorizationRequest implements ObservableOAuthRequest, OAuthRequestObserv
         /**
          * Constructs a new OAuthDialog.
          *
-         * @param context to construct the Dialog in
          * @param requestUri to load in the WebView
-         * @param webViewClient to be placed in the WebView
          */
         public OAuthDialog(Uri requestUri) {
             super(AuthorizationRequest.this.activity, android.R.style.Theme_Translucent_NoTitleBar);
