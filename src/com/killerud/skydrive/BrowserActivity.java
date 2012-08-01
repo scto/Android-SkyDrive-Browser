@@ -294,6 +294,7 @@ public class BrowserActivity extends SherlockListActivity
         else
         {
             setContentView(R.layout.skydrive);
+            isUploadDialog = false;
         }
     }
 
@@ -660,6 +661,19 @@ public class BrowserActivity extends SherlockListActivity
             * We do nothing in this case, as it is pointless to update a UI that doesn't exist.
             * */
         }
+    }
+
+    public void setDefaultBrowserBehaviour()
+    {
+        setContentView(R.layout.skydrive);
+        isUploadDialog = false;
+        setupListView(getListView());
+
+        folderHierarchyView = (TextView) findViewById(R.id.folder_hierarchy);
+        folderHierarchy = new Stack<String>();
+        folderHierarchy.push(getString(R.string.rootFolderTitle));
+
+        updateFolderHierarchy(null);
     }
 
     private void loadSharedFiles()

@@ -1,6 +1,7 @@
 Changelog
 =========
 **2.6**
+- Updated Share integration. AES should only offer to upload supported file types.
 - Reduced memory consumption of images and thumbnails
 
 **2.5.1**

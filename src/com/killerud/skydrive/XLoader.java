@@ -80,7 +80,7 @@ public class XLoader
         {
             if (context != null)
             {
-                context.setContentView(R.layout.skydrive);
+                context.setDefaultBrowserBehaviour();
                 context.reloadFolder();
             }
             return;
