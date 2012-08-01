@@ -80,6 +80,7 @@ public class XLoader
         {
             if (context != null)
             {
+                context.setContentView(R.layout.skydrive);
                 context.reloadFolder();
             }
             return;
@@ -121,6 +122,7 @@ public class XLoader
 
         if (!file.exists())
         {
+            fileNotFoundNotification(file);
             localFilePaths.remove(localFilePaths.size() - 1);
             localFilePaths.trimToSize();
             uploadFile(client, localFilePaths, currentFolderId);
@@ -901,6 +903,35 @@ public class XLoader
 
         int icon = R.drawable.notification_icon;
         CharSequence tickerText = file.getName() + context.getString(R.string.thirdPartyError);
+        long when = System.currentTimeMillis();
+
+        Notification notification = new Notification(icon, tickerText, when);
+
+        Context context = this.context;
+        CharSequence contentTitle = this.context.getString(R.string.appName);
+        CharSequence contentText = tickerText;
+
+        Intent notificationIntent = new Intent(context, XLoader.class);
+        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
+        notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
+
+        notificationManager.notify(NOTIFICATION_XLOADED_ID, notification);
+    }
+
+
+    private void fileNotFoundNotification(File file)
+    {
+        if (!notificationIsAvailable)
+        {
+            return;
+        }
+        if (context == null)
+        {
+            return;
+        }
+
+        int icon = R.drawable.notification_icon;
+        CharSequence tickerText = file.getName() + context.getString(R.string.errorFileNotFound);
         long when = System.currentTimeMillis();
 
         Notification notification = new Notification(icon, tickerText, when);

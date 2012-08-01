@@ -4,8 +4,8 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -17,7 +17,9 @@ import com.actionbarsherlock.view.Window;
 import com.killerud.skydrive.constants.Constants;
 import com.microsoft.live.*;
 
-import java.io.*;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -160,13 +162,16 @@ public class SharingReceiverActivity extends SherlockActivity
             }else if(fileType.startsWith("video/"))
             {
                 startIntent = handleSentVideo(shareIntent);
-            }else if(fileType.equals("application/pdf"))
+            }else if(fileType.equals("application/pdf") ||
+                    fileType.equals("application/msword") ||
+                    fileType.equals("application/vnd.ms-powerpoint") ||
+                    fileType.equals("application/vnd.ms-excel") ||
+                    fileType.startsWith("application/vnd.openxmlformats-officedocument."))
             {
-                startIntent = handleSentPdf(shareIntent);
-            }else if (fileType.equals("text/plain"))
-            {
-                startIntent = handleSentText(shareIntent);
+                startIntent = handleSentDocument(shareIntent);
             }
+
+
         } else if (action != null
                 && action.equals(Intent.ACTION_SEND_MULTIPLE))
         {
@@ -179,7 +184,15 @@ public class SharingReceiverActivity extends SherlockActivity
             }else if(fileType.startsWith("video/"))
             {
                 startIntent = handleSentMultipleVideos(shareIntent);
+            }else if(fileType.equals("application/pdf") ||
+                    fileType.equals("application/msword") ||
+                    fileType.equals("application/vnd.ms-powerpoint") ||
+                    fileType.equals("application/vnd.ms-excel") ||
+                    fileType.startsWith("application/vnd.openxmlformats-officedocument."))
+            {
+                startIntent = handleSentMultipleDocuments(shareIntent);
             }
+
         }
 
         if(startIntent == null)
@@ -194,18 +207,45 @@ public class SharingReceiverActivity extends SherlockActivity
         }
     }
 
-    private Intent handleSentPdf(Intent shareIntent)
+    private Intent handleSentDocument(Intent shareIntent)
     {
         Intent startIntent = new Intent();
-        Uri uri = shareIntent.getData();
+        Uri uri = (Uri) shareIntent.getParcelableExtra(Intent.EXTRA_STREAM);
 
         ArrayList<String> filePath = new ArrayList<String>();
-        filePath.add(uri.toString());
+        try
+        {
+            String decodedPath = URLDecoder.decode(uri.toString().substring("file://".length()), "UTF-8");
+            filePath.add(decodedPath);
+        } catch (UnsupportedEncodingException e)
+        {
+            filePath.add(uri.toString().substring("file://".length()));
+        }
 
         startIntent.setAction("killerud.skydrive.UPLOAD_PICK_FOLDER");
         startIntent.putExtra(UploadFileActivity.EXTRA_FILES_LIST, filePath);
 
         return  startIntent;
+    }
+
+    private Intent handleSentMultipleDocuments(Intent shareIntent)
+    {
+        Intent startIntent = new Intent();
+        ArrayList<String> paths = new ArrayList<String>();
+        ArrayList<Parcelable> sharedContent = shareIntent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+
+        if (sharedContent != null) {
+            for (Parcelable item : sharedContent) {
+                Uri uri = (Uri) item;
+                if (uri != null) {
+                    paths.add(uri.toString().substring("file://".length()).replaceAll("%20", " "));
+                }
+            }
+        }
+
+        startIntent.setAction("killerud.skydrive.UPLOAD_PICK_FOLDER");
+        startIntent.putExtra(UploadFileActivity.EXTRA_FILES_LIST, paths);
+        return startIntent;
     }
 
     private Intent handleSentMultipleImages(Intent shareIntent)
@@ -380,49 +420,6 @@ public class SharingReceiverActivity extends SherlockActivity
             }
             startIntent.setAction("killerud.skydrive.UPLOAD_PICK_FOLDER");
             startIntent.putExtra(UploadFileActivity.EXTRA_FILES_LIST, filePath);
-        }
-
-        return startIntent;
-    }
-
-    private Intent handleSentText(Intent shareIntent)
-    {
-        final Intent startIntent = new Intent();
-
-        String plainText = shareIntent.getStringExtra(Intent.EXTRA_TEXT);
-        if(plainText != null)
-        {
-            AsyncTask<String, Void, File> writeToFile = new AsyncTask<String, Void, File>(){
-
-                @Override
-                protected File doInBackground(String... strings)
-                {
-                    try{
-                        File outFile = new File(getCacheDir(), "sharedText.txt");
-                        BufferedWriter outWriter = new BufferedWriter((new FileWriter(outFile.getPath())));
-                        outWriter.write(strings[0]);
-                        outWriter.close();
-
-                        return outFile;
-                    }catch (IOException e)
-                    {
-                        return null;
-                    }
-                }
-
-                protected void onPostExecute(File result) {
-                    if(result == null)
-                    {
-                        showErrorToast();
-                    }else {
-                        ArrayList<String> filePath = new ArrayList<String>();
-                        filePath.add(result.getPath());
-
-                        startIntent.setAction("killerud.skydrive.UPLOAD_PICK_FOLDER");
-                        startIntent.putExtra(UploadFileActivity.EXTRA_FILES_LIST, filePath);
-                    }
-                }
-            };
         }
 
         return startIntent;

@@ -120,6 +120,7 @@
     <string name="errorCouldNotFetchFileForSharing">Kunne ikke finne filen du delte, beklager!</string>
     <string name="errorTooManyFilesAtOnce">Klarer ikke gjøre mer enn 99 ting om gangen. Gjør så godt jeg kan!</string>
     <string name="errorLoggedOut">Du har blitt logget ut og må logge inn igjen for å bruke appen</string>
+    <string name="errorFileNotFound">Fant ikke filen, den ble ikke lastet opp</string>
 
     <string name="settings">Instillinger</string>
     <string name="cameraUploadHeader">Atomatisk kameraopplasting</string>
