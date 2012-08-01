@@ -21,22 +21,6 @@
                    android:adjustViewBounds="true"
                 />
 
-        <RelativeLayout android:id="@+id/imageButtonLayout"
-                        android:layout_height="wrap_content"
-                        android:layout_width="fill_parent"
-                >
-            <ImageButton android:id="@+id/imageSave"
-                         android:layout_alignRight="@id/imageButtonLayout"
-                         android:layout_height="wrap_content"
-                         android:layout_width="wrap_content"
-                         android:src="@drawable/ic_menu_save"/>
-            <ImageButton android:id="@+id/imageCancel"
-                         android:layout_toRightOf="@id/imageSave"
-                         android:layout_height="wrap_content"
-                         android:layout_width="wrap_content"
-                         android:src="@drawable/ic_menu_close_clear_cancel"/>
-        </RelativeLayout>
-
     </LinearLayout>
 
 </ScrollView>

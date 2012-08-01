@@ -116,6 +116,7 @@
                   android:theme="@style/LightTheme"/>
 
         <activity android:name=".ImageGalleryActivity"
+                  android:uiOptions="none"
                   android:theme="@style/LightTheme"/>
 
 

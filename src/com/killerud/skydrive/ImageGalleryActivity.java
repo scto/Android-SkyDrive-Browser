@@ -11,12 +11,11 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
-import android.view.View;
 import android.widget.*;
 import com.actionbarsherlock.app.SherlockActivity;
-import com.killerud.skydrive.BrowserForSkyDriveApplication;
-import com.killerud.skydrive.R;
-import com.killerud.skydrive.XLoader;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.microsoft.live.LiveConnectClient;
 import com.microsoft.live.LiveDownloadOperation;
 import com.microsoft.live.LiveDownloadOperationListener;
@@ -30,17 +29,17 @@ import java.io.File;
  */
 public class ImageGalleryActivity extends SherlockActivity
 {
-    private boolean mSavePhoto;
-    private File mFile;
-    private XLoader mXLoader;
+    private boolean savePhoto;
+    private File image;
+    private XLoader xLoader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.photo_dialog);
+        setContentView(R.layout.image_gallery);
 
-        mSavePhoto = false;
+        savePhoto = false;
 
         Intent photoDetails = getIntent();
         String photoId = photoDetails.getStringExtra("killerud.skydrive.PHOTO_ID");
@@ -49,41 +48,18 @@ public class ImageGalleryActivity extends SherlockActivity
 
         BrowserForSkyDriveApplication app = (BrowserForSkyDriveApplication) getApplication();
         LiveConnectClient client = app.getConnectClient();
-        mXLoader = new XLoader(app.getCurrentBrowser());
+        xLoader = new XLoader(app.getCurrentBrowser());
         final LinearLayout layout = (LinearLayout) findViewById(R.id.photo_dialog);
         final TextView textView = (TextView) layout.findViewById(R.id.imageText);
         final ImageView imageView = (ImageView) layout.findViewById(R.id.imageDialogImage);
 
-        final ImageButton saveButton = (ImageButton) layout.findViewById(R.id.imageSave);
-        saveButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-                mSavePhoto = true;
-                mXLoader.showFileXloadedNotification(mFile, true);
-                finish();
-            }
-        });
 
-        final ImageButton cancel = (ImageButton) layout.findViewById(R.id.imageCancel);
-        cancel.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-                mSavePhoto = false;
-                finish();
-            }
-        });
+        image = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/", photoName);
 
-
-        mFile = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/", photoName);
-
-        if (mFile.exists())
+        if (image.exists())
         {
             BitmapFactory.Options options = determineBitmapDecodeOptions();
-            imageView.setImageBitmap(BitmapFactory.decodeFile(mFile.getPath(), options));
+            imageView.setImageBitmap(BitmapFactory.decodeFile(image.getPath(), options));
             try
             {
                 layout.removeView(textView);
@@ -96,7 +72,7 @@ public class ImageGalleryActivity extends SherlockActivity
         {
             final LiveDownloadOperation operation =
                     client.downloadAsync(photoId + "/content",
-                            mFile,
+                            image,
                             new LiveDownloadOperationListener()
                             {
                                 @Override
@@ -118,7 +94,7 @@ public class ImageGalleryActivity extends SherlockActivity
                                 public void onDownloadCompleted(LiveDownloadOperation operation)
                                 {
                                     BitmapFactory.Options options = determineBitmapDecodeOptions();
-                                    imageView.setImageBitmap(BitmapFactory.decodeFile(mFile.getPath(), options));
+                                    imageView.setImageBitmap(BitmapFactory.decodeFile(image.getPath(), options));
                                     layout.removeView(textView);
                                 }
                             });
@@ -129,7 +105,7 @@ public class ImageGalleryActivity extends SherlockActivity
         BitmapFactory.Options scoutOptions = new BitmapFactory.Options();
         scoutOptions.inJustDecodeBounds = true;
 
-        Bitmap bitmapBounds = BitmapFactory.decodeFile(mFile.getPath(), scoutOptions);
+        Bitmap bitmapBounds = BitmapFactory.decodeFile(image.getPath(), scoutOptions);
 
         int bitmapHeight = scoutOptions.outHeight;
         int bitmapWidth = scoutOptions.outWidth;
@@ -151,6 +127,36 @@ public class ImageGalleryActivity extends SherlockActivity
     }
 
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+
+        MenuInflater inflater = getSupportMenuInflater();
+        inflater.inflate(R.menu.image_gallery_menu, menu);
+        return true;
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        switch (item.getItemId())
+        {
+            case android.R.id.home:
+                savePhoto = false;
+                finish();
+                return true;
+            case R.id.galleryCancel:
+                savePhoto = false;
+                finish();
+                return true;
+            case R.id.gallerySave:
+                savePhoto = true;
+                finish();
+                return true;
+            default:
+                return false;
+        }
+    }
+
     /* Known "feature": pressing the Home-button (or rather, not pressing
     * Cancel or the Back-button, triggering Dismiss) causes the file to
     * stay saved even if the user didn't explicitly ask for it. The user
@@ -161,13 +167,13 @@ public class ImageGalleryActivity extends SherlockActivity
     protected void onStop()
     {
         super.onStop();
-        if (mSavePhoto)
+        if (savePhoto)
         {
-            mXLoader.showFileXloadedNotification(mFile, true);
+            xLoader.showFileXloadedNotification(image, true);
         }
         else
         {
-            if (mFile != null) mFile.delete();
+            if (image != null) image.delete();
         }
     }
 }

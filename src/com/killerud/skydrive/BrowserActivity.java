@@ -100,9 +100,14 @@ public class BrowserActivity extends SherlockListActivity
             {
                 XLoader loader = new XLoader(this);
                 ArrayList<SkyDriveObject> file = new ArrayList<SkyDriveObject>();
-                file.add(
-                        ((SkyDriveListAdapter) getListAdapter())
-                                .getItem(data.getIntExtra(DownloadDialog.EXTRA_FILE_POSITION, 0)));
+
+                SkyDriveObject fileToAdd = ((SkyDriveListAdapter) getListAdapter())
+                        .getItem(data.getIntExtra(DownloadDialog.EXTRA_FILE_POSITION, 0));
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
+                fileToAdd.setLocalDownloadLocation(preferences.getString("download_location",
+                        Environment.getExternalStorageState() + "/SkyDrive/"));
+
+                file.add(fileToAdd);
                 loader.downloadFiles(((BrowserForSkyDriveApplication) getApplication()).getConnectClient(), file);
             }
         }
@@ -224,8 +229,13 @@ public class BrowserActivity extends SherlockListActivity
                     }
                     else
                     {
-                        currentlySelectedFiles.add(
-                                ((SkyDriveListAdapter) getListAdapter()).getItem(position));
+                        SkyDriveObject fileToAdd = ((SkyDriveListAdapter) getListAdapter()).getItem(position);
+                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
+
+                        fileToAdd.setLocalDownloadLocation(preferences.getString("download_location",
+                                Environment.getExternalStorageState() + "/SkyDrive/"));
+
+                        currentlySelectedFiles.add(fileToAdd);
                     }
                     skyDriveListAdapter.setChecked(position, !rowIsChecked);
 
@@ -249,8 +259,13 @@ public class BrowserActivity extends SherlockListActivity
                 {
                     actionMode = startActionMode(new SkyDriveActionMode());
                     skyDriveListAdapter.setChecked(position, true);
-                    currentlySelectedFiles.add(
-                            ((SkyDriveListAdapter) getListAdapter()).getItem(position));
+                    SkyDriveObject fileToAdd = ((SkyDriveListAdapter) getListAdapter()).getItem(position);
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
+
+                    fileToAdd.setLocalDownloadLocation(preferences.getString("download_location",
+                            Environment.getExternalStorageState() + "/SkyDrive/"));
+
+                    currentlySelectedFiles.add(fileToAdd);
                     updateActionModeTitleWithSelectedCount();
                 }
                 return true;

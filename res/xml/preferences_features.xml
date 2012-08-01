@@ -15,6 +15,11 @@
                         android:summary="@string/confirmExitSummary"
                         android:defaultValue="false" />
 
+        <EditTextPreference android:title="@string/downloadLocation"
+                            android:key="download_location"
+                            android:summary="@string/downloadLocationSummary"
+                            android:defaultValue="/sdcard/SkyDrive/" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

@@ -169,13 +169,16 @@ public abstract class SkyDriveObject
         {
             return Environment.getExternalStorageDirectory() + "/SkyDrive/";
         }
-
         return this.localDownloadLocation;
     }
 
     public void setLocalDownloadLocation(String localDownloadLocation)
     {
-        this.localDownloadLocation = localDownloadLocation + "/"; //Must always be a directory path
+        if(localDownloadLocation.endsWith("/")){
+            this.localDownloadLocation = localDownloadLocation;
+        }else {
+            this.localDownloadLocation = localDownloadLocation + "/";
+        }
     }
 
     public SharedWith getSharedWith()

@@ -130,6 +130,8 @@
     <string name="limitDataToWiFiHeader">Limit all app traffic to WiFi</string>
     <string name="limitDataToWiFiSummary">Use this if you do not have a data plan. Changes require app restart.</string>
     <string name="noInternetConnection">No available WiFi connection. Enable mobile data in settings to use the app.</string>
+    <string name="downloadLocation">Download location</string>
+    <string name="downloadLocationSummary">Where you want your files to be downloaded</string>
 
     <string name="preferencesFeatures">App features</string>
     <string name="preferencesData">Data usage</string>

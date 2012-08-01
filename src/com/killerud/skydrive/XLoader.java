@@ -263,8 +263,11 @@ public class XLoader
             return;
         }
 
-        final File fileToCreateLocally = checkForFileDuplicateAndCreateCopy(
-                new File(skyDriveFile.getLocalDownloadLocation() + skyDriveFile.getName()));
+        final File fileToCreateLocally = checkForFileDuplicateAndCreateCopy(skyDriveFile);
+        if(!fileToCreateLocally.getParentFile().exists())
+        {
+            fileToCreateLocally.getParentFile().mkdirs();
+        }
 
         try
         {
@@ -779,32 +782,36 @@ public class XLoader
     /**
      * Checks the local storage for duplicates. If they exist, finds the next available name recursively.
      *
-     * @param file The file to check for duplicates
+     * @param skyDriveFile The skyDriveFile to check for duplicates
      * @return The reference to the file with its available file name
      */
-    private File checkForFileDuplicateAndCreateCopy(File file)
+    private File checkForFileDuplicateAndCreateCopy(SkyDriveObject skyDriveFile)
     {
+        File file = new File(skyDriveFile.getLocalDownloadLocation(), skyDriveFile.getName());
         if (!file.exists())
         {
             return file;
         }
+
         int index = file.getName().lastIndexOf(".");
         String extension = "";
         String fileName = file.getName();
+
         if (index != -1)
         {
             extension = file.getName().substring(index, fileName.length());
             fileName = fileName.substring(0, index);
         }
+
         int copyNr = 1;
+
         File result;
-        try
-        {
-            result = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/" +
+        if(context != null){
+            result = new File(skyDriveFile.getLocalDownloadLocation() +
                     fileName + " " + context.getString(R.string.savedFileCopy) + " " + copyNr + extension);
-        } catch (NullPointerException e)
+        } else
         {
-            result = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/" +
+            result = new File(skyDriveFile.getLocalDownloadLocation() +
                     fileName + " Copy " + copyNr + extension);
         }
         boolean availableFileNameFound = false;
