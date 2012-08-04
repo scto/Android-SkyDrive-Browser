@@ -147,8 +147,13 @@ public class PreferencesActivity extends SherlockPreferenceActivity
                 {
                     quotaPreference = context.findPreference("skydrive_storage_quota");
                 }
-                quotaPreference.setSummary(createReadableSkyDriveQuotaString(baseString, unusedSpace, totalAvailableSpace));
 
+                try{
+                    quotaPreference.setSummary(createReadableSkyDriveQuotaString(baseString, unusedSpace, totalAvailableSpace));
+                }catch(NumberFormatException e)
+                {
+                    errorOnSkyDriveFetch(context);
+                }
             }
 
             @Override
@@ -172,7 +177,7 @@ public class PreferencesActivity extends SherlockPreferenceActivity
         quotaPreference.setSummary(getString(R.string.errorQuotaFetch));
     }
 
-    private String createReadableSkyDriveQuotaString(String baseString, String unusedSpace, String totalAvailableSpace)
+    private String createReadableSkyDriveQuotaString(String baseString, String unusedSpace, String totalAvailableSpace) throws NumberFormatException
     {
         long unused = Long.parseLong(unusedSpace);
         long totalAvailable = Long.parseLong(totalAvailableSpace);
