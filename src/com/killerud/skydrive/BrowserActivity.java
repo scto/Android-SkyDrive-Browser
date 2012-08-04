@@ -233,7 +233,7 @@ public class BrowserActivity extends SherlockListActivity
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
 
                         fileToAdd.setLocalDownloadLocation(preferences.getString("download_location",
-                                Environment.getExternalStorageState() + "/SkyDrive/"));
+                                Environment.getExternalStorageDirectory() + "/SkyDrive/"));
 
                         currentlySelectedFiles.add(fileToAdd);
                     }
@@ -263,7 +263,7 @@ public class BrowserActivity extends SherlockListActivity
                     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
 
                     fileToAdd.setLocalDownloadLocation(preferences.getString("download_location",
-                            Environment.getExternalStorageState() + "/SkyDrive/"));
+                            Environment.getExternalStorageDirectory() + "/SkyDrive/"));
 
                     currentlySelectedFiles.add(fileToAdd);
                     updateActionModeTitleWithSelectedCount();

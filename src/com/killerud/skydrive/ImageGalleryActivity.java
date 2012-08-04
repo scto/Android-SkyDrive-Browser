@@ -68,8 +68,9 @@ public class ImageGalleryActivity extends SherlockActivity
                 //View does not exist
             }
         }
-        else
+        else if(client != null)
         {
+
             final LiveDownloadOperation operation =
                     client.downloadAsync(photoId + "/content",
                             image,

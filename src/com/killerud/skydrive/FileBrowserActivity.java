@@ -408,12 +408,8 @@ public class FileBrowserActivity extends SherlockListActivity
                         protected Bitmap doInBackground(File... files)
                         {
                             File thumbCacheFile = new File(files[0].getAbsolutePath());
-                            if (thumbCacheFile.exists())
-                            {
-                                return BitmapFactory.decodeFile(thumbCacheFile.getPath());
-                            }
-
                             BitmapFactory.Options options = new BitmapFactory.Options();
+
                             options.inJustDecodeBounds = true;
                             BitmapFactory.decodeFile(files[0].getPath(), options);
 

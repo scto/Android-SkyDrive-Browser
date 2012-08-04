@@ -42,13 +42,6 @@ public class XLoader
 
     private IOUtil ioUtil;
 
-    private String[] supportedFileTypes = new String[]{
-            "3g2", "3gp", "ai", "bmp", "chm", "doc", "docm", "docx", "dot", "dotx", "epub", "gif",
-            "jpeg", "jpg", "mp4", "one", "pdf", "png", "pot", "potm", "potx", "pps", "ppsm", "ppsx",
-            "ppt", "pptm", "pptx", "psd", "tif", "tiff", "txt", "xls", "xlsb", "xlsm", "xlsx",
-            "wav", "webp", "wmv"};
-
-
     public XLoader(BrowserActivity browserActivity)
     {
         context = browserActivity;
@@ -100,25 +93,6 @@ public class XLoader
 
         String localFilePath = localFilePaths.get(localFilePaths.size() - 1);
         final File file = new File(localFilePath);
-
-        String fileExtension = file.getName().substring(file.getName().lastIndexOf(".") + 1);
-        boolean supported = false;
-        for (int i = 0; i < supportedFileTypes.length; i++)
-        {
-            if (fileExtension.equals(supportedFileTypes[i]))
-            {
-                supported = true;
-            }
-        }
-
-        if (!supported)
-        {
-            fileNotSupportedBySkyDriveNotification(file);
-            localFilePaths.remove(localFilePaths.size() - 1);
-            localFilePaths.trimToSize();
-            uploadFile(client, localFilePaths, currentFolderId);
-            return;
-        }
 
         if (!file.exists())
         {
@@ -890,41 +864,6 @@ public class XLoader
 
         notificationManager.notify(NOTIFICATION_XLOADED_ID, notification);
     }
-
-
-    /**
-     * Notifies the user that the given file is unsupported by SkyDrive and has promptly been skipped for upload
-     *
-     * @param file
-     */
-    private void fileNotSupportedBySkyDriveNotification(File file)
-    {
-        if (!notificationIsAvailable)
-        {
-            return;
-        }
-        if (context == null)
-        {
-            return;
-        }
-
-        int icon = R.drawable.notification_icon;
-        CharSequence tickerText = file.getName() + context.getString(R.string.thirdPartyError);
-        long when = System.currentTimeMillis();
-
-        Notification notification = new Notification(icon, tickerText, when);
-
-        Context context = this.context;
-        CharSequence contentTitle = this.context.getString(R.string.appName);
-        CharSequence contentText = tickerText;
-
-        Intent notificationIntent = new Intent(context, XLoader.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
-        notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
-
-        notificationManager.notify(NOTIFICATION_XLOADED_ID, notification);
-    }
-
 
     private void fileNotFoundNotification(File file)
     {
