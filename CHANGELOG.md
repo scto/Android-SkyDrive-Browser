@@ -1,5 +1,11 @@
 Changelog
 =========
+**2.7**
+- All file types can now be uploaded, and images ar eno longer shrunk on upload
+- Fixed issue with download path on fresh install
+- Fixed NPE in ImageGalleryActivity
+- Reduced memory consumption in local file browser when thumbs were cached
+
 **2.6**
 - Updated Share integration. AES should only offer to upload supported file types.
 - Reduced memory consumption of images and thumbnails
