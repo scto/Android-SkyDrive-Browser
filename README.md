@@ -14,7 +14,7 @@ SkyDrive sharing functionality is also supported. Files shared with the user can
 Dependencies
 ============
 - [ActionBarSherlock][1]
-- [LiveSDK for Android][2]
+- [LiveSDK for Android][2] NB: to enable full resolution uploads UploadRequest.java needs some work [5]
 - [CWAC TouchListView][3]
 
 License
@@ -41,3 +41,4 @@ License
 [2]: https://github.com/liveservices/LiveSDK-for-Android
 [3]: https://github.com/commonsguy/cwac-touchlist
 [4]: http://openiconlibrary.sourceforge.net/
+[5]: http://social.msdn.microsoft.com/Forums/en-US/messengerconnect/thread/65ce4e05-d9d9-4bbd-bfb3-d889d6967698
