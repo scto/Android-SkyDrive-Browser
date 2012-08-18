@@ -6,7 +6,7 @@
     <string name="firstWelcomeMessage">Sign in with your Microsoft account to get
         started!</string>
     <string name="signInToWindowsLive">Sign in</string>
-    <string name="mySkyDrive">My SkyDrive</string>
+    <string name="mySkyDrive">Your SkyDrive</string>
     <string name="automaticSignInError">Couldn\'t connect automatically. Try manually. </string>
     <string name="manualSignInError">Couldn\'t connect. Do you have an internet connection? </string>
     <string name="noAccountQuestion">No Microsoft account? Go to live.com and register for 7GB of free storage!</string>

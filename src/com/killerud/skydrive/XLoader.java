@@ -21,7 +21,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
+import java.io.*;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -94,7 +95,10 @@ public class XLoader
         String localFilePath = localFilePaths.get(localFilePaths.size() - 1);
         final File file = new File(localFilePath);
 
-        if (!file.exists())
+        InputStream fileStream;
+        try{
+            fileStream = new FileInputStream(file);
+        }catch (FileNotFoundException e)
         {
             fileNotFoundNotification(file);
             localFilePaths.remove(localFilePaths.size() - 1);
@@ -109,23 +113,19 @@ public class XLoader
         {
             final LiveOperation operation =
                     client.uploadAsync(currentFolderId,
-                            file.getName(),
-                            file, true,
-                            new LiveUploadOperationListener()
-                            {
+                            file.getName(), fileStream, OverwriteOption.Overwrite,
+                            new LiveUploadOperationListener() {
                                 int lastPercent = 0;
 
                                 @Override
                                 public void onUploadProgress(int totalBytes,
                                                              int bytesRemaining,
-                                                             LiveOperation operation)
-                                {
+                                                             LiveOperation operation) {
                                     int newPercent = computePercentCompleted(totalBytes, bytesRemaining);
                                     /* This is done to limit the amount of updates to the notification
                                     * Restrictionles updating makes the system crash, so beware!
                                     */
-                                    if (newPercent > lastPercent + 5 && notificationIsAvailable)
-                                    {
+                                    if (newPercent > lastPercent + 5 && notificationIsAvailable) {
                                         lastPercent = newPercent;
                                         notificationProgress.contentView.setProgressBar(R.id.progressBar, 100,
                                                 lastPercent, false);
@@ -135,60 +135,49 @@ public class XLoader
 
                                 @Override
                                 public void onUploadFailed(LiveOperationException exception,
-                                                           LiveOperation operation)
-                                {
-                                    if (notificationIsAvailable)
-                                    {
+                                                           LiveOperation operation) {
+                                    if (notificationIsAvailable) {
                                         notificationManager.cancel(NOTIFICATION_PROGRESS_ID);
                                     }
-                                    if (context != null)
-                                    {
+                                    if (context != null) {
                                         Toast.makeText(context, context.getString(R.string.uploadError), Toast.LENGTH_SHORT).show();
                                     }
 
-                                    try
-                                    {
+                                    try {
                                         localFilePaths.remove(localFilePaths.size() - 1);
                                         localFilePaths.trimToSize();
                                         uploadFile(client, localFilePaths, currentFolderId);
-                                    } catch (IndexOutOfBoundsException e)
-                                    {
+                                    } catch (IndexOutOfBoundsException e) {
                                         return;
                                     }
                                 }
 
                                 @Override
-                                public void onUploadCompleted(LiveOperation operation)
-                                {
-                                    if (notificationIsAvailable)
-                                    {
+                                public void onUploadCompleted(LiveOperation operation) {
+                                    if (notificationIsAvailable) {
                                         notificationManager.cancel(NOTIFICATION_PROGRESS_ID);
                                     }
                                     JSONObject result = operation.getResult();
-                                    if (result.has(JsonKeys.ERROR))
-                                    {
+                                    if (result.has(JsonKeys.ERROR)) {
                                         JSONObject error = result.optJSONObject(JsonKeys.ERROR);
                                         String message = error.optString(JsonKeys.MESSAGE);
                                         String code = error.optString(JsonKeys.CODE);
-                                        if (context != null)
-                                        {
+                                        if (context != null) {
                                             Toast.makeText(context,
                                                     context.getString(R.string.uploadError), Toast.LENGTH_SHORT).show();
                                         }
                                         return;
                                     }
                                     showFileXloadedNotification(file, false);
-                                    try
-                                    {
+                                    try {
                                         localFilePaths.remove(localFilePaths.size() - 1);
                                         localFilePaths.trimToSize();
                                         uploadFile(client, localFilePaths, currentFolderId);
-                                    } catch (IndexOutOfBoundsException e)
-                                    {
+                                    } catch (IndexOutOfBoundsException e) {
                                         return;
                                     }
                                 }
-                            });
+                            }, null);
         } catch (IllegalStateException e)
         {
             handleIllegalConnectionState();

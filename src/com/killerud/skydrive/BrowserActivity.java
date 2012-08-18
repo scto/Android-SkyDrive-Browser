@@ -105,7 +105,7 @@ public class BrowserActivity extends SherlockListActivity
                         .getItem(data.getIntExtra(DownloadDialog.EXTRA_FILE_POSITION, 0));
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
                 fileToAdd.setLocalDownloadLocation(preferences.getString("download_location",
-                        Environment.getExternalStorageState() + "/SkyDrive/"));
+                        Environment.getExternalStorageDirectory() + "/SkyDrive/"));
 
                 file.add(fileToAdd);
                 loader.downloadFiles(((BrowserForSkyDriveApplication) getApplication()).getConnectClient(), file);

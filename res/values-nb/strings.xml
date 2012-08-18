@@ -5,7 +5,7 @@
     <string name="initializingMessage">Logger inn...</string>
     <string name="firstWelcomeMessage">Logg inn med en Microsoft-konto for å få tilgang til SkyDrive</string>
     <string name="signInToWindowsLive">Logg inn</string>
-    <string name="mySkyDrive">Min SkyDrive</string>
+    <string name="mySkyDrive">Din SkyDrive</string>
     <string name="automaticSignInError">Kunne ikke logge på automatisk. Prøv å logge på manuelt.</string>
     <string name="manualSignInError">Kunne ikke logge på. Har du en nettforbindelse?</string>
     <string name="noAccountQuestion">Ingen Microsoft-konto? Gå til live.com og registrer deg for 7GB gratis lagring!</string>

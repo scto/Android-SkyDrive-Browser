@@ -6,6 +6,7 @@ import eu.medsea.mimeutil.MimeUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -21,13 +22,19 @@ public class IOUtil
 
     }
 
-    public void findMimeTypeOfFile(String fileName) throws IOException
+    public static String toHex(String arg) {
+        return String.format("%040x", new BigInteger(arg.getBytes(/*YOUR_CHARSET?*/)));
+    }
+
+    public static void findMimeTypeOfFile(String fileName) throws IOException
     {
         File file = new File(fileName);
         findMimeTypeOfFile(file);
     }
 
-    public String findMimeTypeOfFile(File file)
+
+
+    public static String findMimeTypeOfFile(File file)
     {
         MimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.MagicMimeMimeDetector");
         Collection mimeTypes = MimeUtil.getMimeTypes(file);

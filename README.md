@@ -14,8 +14,8 @@ SkyDrive sharing functionality is also supported. Files shared with the user can
 Dependencies
 ============
 - [ActionBarSherlock][1]
-- [LiveSDK for Android][2]. Included in this repo.
-- [CWAC TouchListView][3]. Included in this repo.
+- [LiveSDK for Android][2]
+- [CWAC TouchListView][3]
 
 License
 ========
