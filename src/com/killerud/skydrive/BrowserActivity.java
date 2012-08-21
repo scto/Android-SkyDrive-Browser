@@ -1,5 +1,6 @@
 package com.killerud.skydrive;
 
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.*;
 import android.graphics.Bitmap;
@@ -7,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.os.*;
 import android.preference.PreferenceManager;
+import android.support.v4.util.LruCache;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
@@ -20,7 +22,10 @@ import com.actionbarsherlock.app.SherlockListActivity;
 import com.actionbarsherlock.view.*;
 import com.killerud.skydrive.constants.Constants;
 import com.killerud.skydrive.constants.SortCriteria;
-import com.killerud.skydrive.dialogs.*;
+import com.killerud.skydrive.dialogs.DownloadDialog;
+import com.killerud.skydrive.dialogs.NewFolderDialog;
+import com.killerud.skydrive.dialogs.RenameDialog;
+import com.killerud.skydrive.dialogs.SharingDialog;
 import com.killerud.skydrive.objects.*;
 import com.killerud.skydrive.util.IOUtil;
 import com.killerud.skydrive.util.JsonKeys;
@@ -32,6 +37,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Stack;
@@ -57,6 +63,8 @@ public class BrowserActivity extends SherlockListActivity
     private Stack<String> folderHierarchy;
     private TextView folderHierarchyView;
     private ActionBar actionBar;
+    private Stack<ArrayList<SkyDriveObject>> navigationCache;
+
 
     /* File manipulation */
     private boolean isCutNotPaste;
@@ -79,6 +87,8 @@ public class BrowserActivity extends SherlockListActivity
     private boolean isDataOnWifiOnly;
     private ConnectivityManager connectivityManager;
 
+    private LruCache thumbCache;
+
     /**
      * Handles the chosen file from the UploadFile dialog
      */
@@ -94,9 +104,9 @@ public class BrowserActivity extends SherlockListActivity
                         data.getStringArrayListExtra(UploadFileActivity.EXTRA_FILES_LIST),
                         currentFolderId);
             }
-        }else if(requestCode == DownloadDialog.DOWNLOAD_REQUEST)
+        } else if (requestCode == DownloadDialog.DOWNLOAD_REQUEST)
         {
-            if(resultCode == RESULT_OK)
+            if (resultCode == RESULT_OK)
             {
                 XLoader loader = new XLoader(this);
                 ArrayList<SkyDriveObject> file = new ArrayList<SkyDriveObject>();
@@ -113,12 +123,33 @@ public class BrowserActivity extends SherlockListActivity
         }
     }
 
+    public void addBitmapToThumbCache(String key, Bitmap bitmap)
+    {
+        if (getBitmapFromThumbCache(key) == null)
+        {
+            thumbCache.put(key, bitmap);
+        }
+    }
+
+    public Bitmap getBitmapFromThumbCache(String key)
+    {
+        return (Bitmap) thumbCache.get(key);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+
+        // Get memory class of this device, exceeding this amount will throw an
+        // OutOfMemory exception.
+        final int memClass = ((ActivityManager) getSystemService(
+                Context.ACTIVITY_SERVICE)).getMemoryClass();
+        final int cacheSize = 1024 * 1024 * memClass / 10;
+
+        thumbCache = new LruCache(cacheSize);
 
         xLoader = new XLoader(this);
         skyDriveListAdapter = new SkyDriveListAdapter(this);
@@ -141,6 +172,8 @@ public class BrowserActivity extends SherlockListActivity
         folderHierarchy = new Stack<String>();
         folderHierarchy.push(getString(R.string.rootFolderTitle));
 
+        navigationCache = new Stack<ArrayList<SkyDriveObject>>();
+
         updateFolderHierarchy(null);
         app.setCurrentBrowser(this);
 
@@ -149,10 +182,13 @@ public class BrowserActivity extends SherlockListActivity
         {
             restoreSavedInstanceState(savedInstanceState);
         }
+
+
         loadFolder(currentFolderId);
     }
 
-    private void createLocalSkyDriveFolderIfNotExists() {
+    private void createLocalSkyDriveFolderIfNotExists()
+    {
         File sdcard = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/");
         if (!sdcard.exists())
         {
@@ -202,7 +238,7 @@ public class BrowserActivity extends SherlockListActivity
         ((SkyDriveListAdapter) getListAdapter()).setCheckedPositions(((BrowserForSkyDriveApplication) getApplication())
                 .getCurrentlyCheckedPositions());
 
-        if(actionMode != null)
+        if (actionMode != null)
         {
             updateActionModeTitleWithSelectedCount();
         }
@@ -221,13 +257,15 @@ public class BrowserActivity extends SherlockListActivity
                 if (actionMode != null)
                 {
                     boolean rowIsChecked = skyDriveListAdapter.isChecked(position);
-                    if(position >= skyDriveListAdapter.getCount()) return;
+                    if (position >= skyDriveListAdapter.getCount())
+                    {
+                        return;
+                    }
                     if (rowIsChecked)
                     {
                         currentlySelectedFiles.remove(
                                 ((SkyDriveListAdapter) getListAdapter()).getItem(position));
-                    }
-                    else
+                    } else
                     {
                         SkyDriveObject fileToAdd = ((SkyDriveListAdapter) getListAdapter()).getItem(position);
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
@@ -240,8 +278,7 @@ public class BrowserActivity extends SherlockListActivity
                     skyDriveListAdapter.setChecked(position, !rowIsChecked);
 
                     updateActionModeTitleWithSelectedCount();
-                }
-                else
+                } else
                 {
                     handleListItemClick(parent, position);
                 }
@@ -273,9 +310,11 @@ public class BrowserActivity extends SherlockListActivity
         });
     }
 
-    private void updateActionModeTitleWithSelectedCount() {
+    private void updateActionModeTitleWithSelectedCount()
+    {
         final int checkedCount = ((SkyDriveListAdapter) getListAdapter()).getCheckedCount();
-        switch (checkedCount) {
+        switch (checkedCount)
+        {
             case 0:
                 actionMode.setTitle(null);
                 break;
@@ -305,8 +344,7 @@ public class BrowserActivity extends SherlockListActivity
             });
 
             isUploadDialog = true;
-        }
-        else
+        } else
         {
             setContentView(R.layout.skydrive);
             isUploadDialog = false;
@@ -322,37 +360,40 @@ public class BrowserActivity extends SherlockListActivity
             {
                 navigateBack();
                 return true;
-            }
-            else
+            } else
             {
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
                 if (preferences.getBoolean(Constants.CONFIRM_EXIT, false))
                 {
-                    AlertDialog.Builder  builder = new AlertDialog.Builder(this);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setMessage(R.string.appExitConfirmationHeader)
-                        .setCancelable(false)
-                        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                BrowserActivity.this.finish();
-                            }
-                        })
-                        .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                dialogInterface.cancel();
-                            }
-                        });
+                            .setCancelable(false)
+                            .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener()
+                            {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i)
+                                {
+                                    BrowserActivity.this.finish();
+                                }
+                            })
+                            .setNegativeButton(R.string.no, new DialogInterface.OnClickListener()
+                            {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i)
+                                {
+                                    dialogInterface.cancel();
+                                }
+                            });
                     AlertDialog alertDialog = builder.create();
                     alertDialog.show();
 
                     return true;
-                }else{
+                } else
+                {
                     return super.onKeyDown(keyCode, event);
                 }
             }
-        }
-        else
+        } else
         {
             return super.onKeyDown(keyCode, event);
         }
@@ -360,7 +401,10 @@ public class BrowserActivity extends SherlockListActivity
 
     private boolean canNavigateBack()
     {
-        if (connectionIsUnavailable()) return false;
+        if (connectionIsUnavailable())
+        {
+            return false;
+        }
 
         if (previousFolderIds.isEmpty())
         {
@@ -374,8 +418,34 @@ public class BrowserActivity extends SherlockListActivity
         return true;
     }
 
-    private void navigateBack() {
-        loadFolder(previousFolderIds.pop());
+    private void navigateBack()
+    {
+        if(navigationCache.peek() != null)
+        {
+
+            if (actionBar != null && !previousFolderIds.empty())
+            {
+                actionBar.setDisplayHomeAsUpEnabled(true);
+            } else
+            {
+                actionBar.setDisplayHomeAsUpEnabled(false);
+            }
+
+            currentFolderId = previousFolderIds.pop();
+
+            if (currentlySelectedFiles != null)
+            {
+                currentlySelectedFiles.clear();
+            }
+
+
+            ArrayList<SkyDriveObject> adapterContent = ((SkyDriveListAdapter) getListAdapter()).getSkyDriveObjects();
+            adapterContent.clear();
+
+            adapterContent.addAll(navigationCache.pop());
+            ((SkyDriveListAdapter) getListAdapter()).notifyDataSetChanged();
+        }
+       // loadFolder(previousFolderIds.pop());
 
         if (!folderHierarchy.isEmpty())
         {
@@ -391,8 +461,7 @@ public class BrowserActivity extends SherlockListActivity
                 && previousFolderIds.peek().equals(folderId))
         {
             return;
-        }
-        else
+        } else
         {
             previousFolderIds.push(folderId);
         }
@@ -416,11 +485,17 @@ public class BrowserActivity extends SherlockListActivity
             @Override
             public void visit(SkyDrivePhoto photo)
             {
-                if (isUploadDialog) return;
+                if (isUploadDialog)
+                {
+                    return;
+                }
                 Intent startPhotoDialog = new Intent(getApplicationContext(), ImageGalleryActivity.class);
                 startPhotoDialog.putExtra("killerud.skydrive.PHOTO_ID", photo.getId());
                 startPhotoDialog.putExtra("killerud.skydrive.PHOTO_NAME", photo.getName());
-                if (!connectionIsUnavailable()) startActivity(startPhotoDialog);
+                if (!connectionIsUnavailable())
+                {
+                    startActivity(startPhotoDialog);
+                }
             }
 
             @Override
@@ -434,9 +509,12 @@ public class BrowserActivity extends SherlockListActivity
             @Override
             public void visit(SkyDriveFile file)
             {
-                if (isUploadDialog || connectionIsUnavailable()) return;
+                if (isUploadDialog || connectionIsUnavailable())
+                {
+                    return;
+                }
 
-                if(isDisplayableByWebBrowser(file))
+                if (isDisplayableByWebBrowser(file))
                 {
                     Intent startWebBrowser = new Intent(getApplicationContext(), WebActivity.class);
                     startWebBrowser.putExtra(WebActivity.EXTRA_FILE_LINK, file.getLink());
@@ -452,24 +530,36 @@ public class BrowserActivity extends SherlockListActivity
             @Override
             public void visit(SkyDriveVideo video)
             {
-                if (isUploadDialog) return;
+                if (isUploadDialog)
+                {
+                    return;
+                }
                 ((BrowserForSkyDriveApplication) getApplication()).setCurrentVideo(video);
                 Intent startVideoDialog = new Intent(getApplicationContext(), PlayVideoActivity.class);
-                if (!connectionIsUnavailable()) startActivity(startVideoDialog);
+                if (!connectionIsUnavailable())
+                {
+                    startActivity(startVideoDialog);
+                }
             }
 
             @Override
             public void visit(SkyDriveAudio audio)
             {
-                if (isUploadDialog) return;
-                if(connectionIsUnavailable()) return;
-                if(audioPlaybackService != null){
-                    if(!audioServiceHasSongsToPlay())
+                if (isUploadDialog)
+                {
+                    return;
+                }
+                if (connectionIsUnavailable())
+                {
+                    return;
+                }
+                if (audioPlaybackService != null)
+                {
+                    if (!audioServiceHasSongsToPlay())
                     {
                         startActivity(new Intent(getApplicationContext(), AudioControlActivity.class));
                     }
                     audioPlaybackService.NOW_PLAYING.add(audio);
-
 
 
                     Toast.makeText(getApplicationContext(),
@@ -482,10 +572,11 @@ public class BrowserActivity extends SherlockListActivity
 
     private boolean audioServiceHasSongsToPlay()
     {
-        return audioPlaybackService.NOW_PLAYING.size()>0;
+        return audioPlaybackService.NOW_PLAYING.size() > 0;
     }
 
-    private boolean isDisplayableByWebBrowser(SkyDriveFile file) {
+    private boolean isDisplayableByWebBrowser(SkyDriveFile file)
+    {
         String fileExtension = IOUtil.getFileExtension(file.getName());
         if (fileExtension.equalsIgnoreCase("doc") ||
                 fileExtension.equalsIgnoreCase("odt") ||
@@ -494,8 +585,7 @@ public class BrowserActivity extends SherlockListActivity
                 fileExtension.equalsIgnoreCase("odf"))
         {
             return true;
-        }
-        else if (fileExtension.equalsIgnoreCase("ppt") ||
+        } else if (fileExtension.equalsIgnoreCase("ppt") ||
                 fileExtension.equalsIgnoreCase("pps") ||
                 fileExtension.equalsIgnoreCase("pptx") ||
                 fileExtension.equalsIgnoreCase("ppsx") ||
@@ -503,16 +593,14 @@ public class BrowserActivity extends SherlockListActivity
                 fileExtension.equalsIgnoreCase("fodp"))
         {
             return true;
-        }
-        else if (fileExtension.equalsIgnoreCase("ods") ||
+        } else if (fileExtension.equalsIgnoreCase("ods") ||
                 fileExtension.equalsIgnoreCase("xls") ||
                 fileExtension.equalsIgnoreCase("xlr") ||
                 fileExtension.equalsIgnoreCase("xlsx") ||
                 fileExtension.equalsIgnoreCase("ots"))
         {
             return true;
-        }
-        else
+        } else
         {
             return false;
         }
@@ -522,9 +610,12 @@ public class BrowserActivity extends SherlockListActivity
     {
         if (intentThatStartedMe.getExtras().getStringArrayList(UploadFileActivity.EXTRA_FILES_LIST) != null)
         {
-            if (!connectionIsUnavailable()) xLoader.uploadFile(liveConnectClient,
-                    intentThatStartedMe.getStringArrayListExtra(UploadFileActivity.EXTRA_FILES_LIST),
-                    currentFolderId);
+            if (!connectionIsUnavailable())
+            {
+                xLoader.uploadFile(liveConnectClient,
+                        intentThatStartedMe.getStringArrayListExtra(UploadFileActivity.EXTRA_FILES_LIST),
+                        currentFolderId);
+            }
         }
     }
 
@@ -537,8 +628,7 @@ public class BrowserActivity extends SherlockListActivity
         if (preferences.getBoolean("automatic_camera_upload", false))
         {
             startService(new Intent(this, CameraObserverService.class));
-        }
-        else
+        } else
         {
             stopService(new Intent(this, CameraObserverService.class));
         }
@@ -549,38 +639,45 @@ public class BrowserActivity extends SherlockListActivity
     protected void onPause()
     {
         super.onPause();
-        try{
-            unbindService(audioPlaybackServiceConnection);
-        }catch (IllegalArgumentException e)
+        try
         {
-        }catch (RuntimeException e)
+            unbindService(audioPlaybackServiceConnection);
+        } catch (IllegalArgumentException e)
+        {
+        } catch (RuntimeException e)
         {
         }
     }
 
-    private void handleIllegalConnectionState() {
+    private void handleIllegalConnectionState()
+    {
         ((BrowserForSkyDriveApplication) getApplication())
                 .getAuthClient()
-                .initialize(Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener() {
+                .initialize(Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener()
+                {
                     @Override
-                    public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState) {
-                        if (status == LiveStatus.CONNECTED) {
+                    public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState)
+                    {
+                        if (status == LiveStatus.CONNECTED)
+                        {
                             reloadFolder();
-                        }else
+                        } else
                         {
                             informUserOfConnectionProblemAndDismiss();
                         }
                     }
 
                     @Override
-                    public void onAuthError(LiveAuthException exception, Object userState) {
+                    public void onAuthError(LiveAuthException exception, Object userState)
+                    {
                         Log.e(Constants.LOGTAG, "Error: " + exception.getMessage());
                         informUserOfConnectionProblemAndDismiss();
                     }
                 });
     }
 
-    private void informUserOfConnectionProblemAndDismiss() {
+    private void informUserOfConnectionProblemAndDismiss()
+    {
         Toast.makeText(this, R.string.errorLoggedOut, Toast.LENGTH_LONG).show();
         startActivity(new Intent(this, SignInActivity.class));
         finish();
@@ -628,8 +725,7 @@ public class BrowserActivity extends SherlockListActivity
         if (folder == null)
         {
             newText = updateFolderHierarchyWhenNavigatingUp();
-        }
-        else
+        } else
         {
             if (!folderHierarchy.empty() &&
                     !folderHierarchy.peek().equals(folder.getName()))
@@ -637,8 +733,7 @@ public class BrowserActivity extends SherlockListActivity
                 folderHierarchy.push(folder.getName());
                 newText = currentText + ">" + folderHierarchy.peek();
                 setTitle(folder.getName());
-            }
-            else
+            } else
             {
                 newText = currentText;
             }
@@ -666,11 +761,12 @@ public class BrowserActivity extends SherlockListActivity
 
     public void reloadFolder()
     {
-        try{
+        try
+        {
             setSupportProgressBarIndeterminateVisibility(false);
             supportInvalidateOptionsMenu();
             loadFolder(currentFolderId);
-        }catch (NullPointerException e)
+        } catch (NullPointerException e)
         {
             /* At this point an XLoader object has attempted a reload of a BrowserActivity that no longer exists.
             * We do nothing in this case, as it is pointless to update a UI that doesn't exist.
@@ -700,7 +796,10 @@ public class BrowserActivity extends SherlockListActivity
 
     private void loadFolder(String folderId)
     {
-        if (folderId == null) return;
+        if (folderId == null)
+        {
+            return;
+        }
         if (connectionIsUnavailable())
         {
             return;
@@ -711,15 +810,23 @@ public class BrowserActivity extends SherlockListActivity
         if (actionBar != null && !previousFolderIds.empty())
         {
             actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-        else
+        } else
         {
             actionBar.setDisplayHomeAsUpEnabled(false);
         }
 
+        if(!previousFolderIds.empty())
+        {
+            navigationCache.push((ArrayList<SkyDriveObject>)
+                    ((SkyDriveListAdapter) getListAdapter()).getSkyDriveObjects().clone());
+        }
+
         currentFolderId = folderId;
 
-        if (currentlySelectedFiles != null) currentlySelectedFiles.clear();
+        if (currentlySelectedFiles != null)
+        {
+            currentlySelectedFiles.clear();
+        }
 
         if (actionMode == null)
         {
@@ -730,56 +837,65 @@ public class BrowserActivity extends SherlockListActivity
 
         try
         {
-            if (liveConnectClient != null) liveConnectClient.getAsync(folderId + "/files?sort_by=" +
-                    SortCriteria.NAME + "&sort_order=" + SortCriteria.ASCENDING, new LiveOperationListener()
+            if (liveConnectClient != null)
             {
-                @Override
-                public void onComplete(LiveOperation operation)
+                liveConnectClient.getAsync(folderId + "/files?sort_by=" +
+                        SortCriteria.NAME + "&sort_order=" + SortCriteria.ASCENDING, new LiveOperationListener()
                 {
-                    setSupportProgressBarIndeterminateVisibility(false);
-
-                    JSONObject result = operation.getResult();
-                    if (result.has(JsonKeys.ERROR))
+                    @Override
+                    public void onComplete(LiveOperation operation)
                     {
-                        JSONObject error = result.optJSONObject(JsonKeys.ERROR);
-                        String message = error.optString(JsonKeys.MESSAGE);
-                        String code = error.optString(JsonKeys.CODE);
-                        Log.e("ASE", code + ": " + message);
-                        return;
+                        setSupportProgressBarIndeterminateVisibility(false);
+
+                        JSONObject result = operation.getResult();
+                        if (result.has(JsonKeys.ERROR))
+                        {
+                            JSONObject error = result.optJSONObject(JsonKeys.ERROR);
+                            String message = error.optString(JsonKeys.MESSAGE);
+                            String code = error.optString(JsonKeys.CODE);
+                            Log.e("ASE", code + ": " + message);
+                            return;
+                        }
+
+                        ArrayList<SkyDriveObject> skyDriveObjects = skyDriveListAdapter.getSkyDriveObjects();
+                        skyDriveObjects.clear();
+
+                        JSONArray data = result.optJSONArray(JsonKeys.DATA);
+                        for (int i = 0; i < data.length(); i++)
+                        {
+                            SkyDriveObject skyDriveObject = SkyDriveObject.create(data.optJSONObject(i));
+                            skyDriveObjects.add(skyDriveObject);
+                        }
+
+
+                        skyDriveListAdapter.notifyDataSetChanged();
+
+
+
+                        SparseBooleanArray checkedPositions = skyDriveListAdapter.getCheckedPositions();
+                        for (int i = 0; i < checkedPositions.size(); i++)
+                        {
+                            int adapterPosition = checkedPositions.keyAt(i);
+                            if (adapterPosition >= skyDriveListAdapter.getCount())
+                            {
+                                continue;
+                            }
+
+                            SkyDriveObject objectSelected = skyDriveListAdapter.getItem(adapterPosition);
+                            currentlySelectedFiles.add(objectSelected);
+                        }
                     }
 
-                    ArrayList<SkyDriveObject> skyDriveObjs = skyDriveListAdapter.getSkyDriveObjects();
-                    skyDriveObjs.clear();
 
-                    JSONArray data = result.optJSONArray(JsonKeys.DATA);
-                    for (int i = 0; i < data.length(); i++)
+                    @Override
+                    public void onError(LiveOperationException exception, LiveOperation operation)
                     {
-                        SkyDriveObject skyDriveObj = SkyDriveObject.create(data.optJSONObject(i));
-                        skyDriveObjs.add(skyDriveObj);
+                        setSupportProgressBarIndeterminateVisibility(false);
+                        Log.e("ASE", exception.getMessage());
                     }
-
-                    skyDriveListAdapter.notifyDataSetChanged();
-
-                    SparseBooleanArray checkedPositions = skyDriveListAdapter.getCheckedPositions();
-                    for (int i = 0; i < checkedPositions.size(); i++)
-                    {
-                        int adapterPosition = checkedPositions.keyAt(i);
-                        if(adapterPosition >= skyDriveListAdapter.getCount()) continue;
-
-                        SkyDriveObject objectSelected = skyDriveListAdapter.getItem(adapterPosition);
-                        currentlySelectedFiles.add(objectSelected);
-                    }
-                }
-
-
-                @Override
-                public void onError(LiveOperationException exception, LiveOperation operation)
-                {
-                    setSupportProgressBarIndeterminateVisibility(false);
-                    Log.e("ASE", exception.getMessage());
-                }
-            });
-        }catch (IllegalStateException e)
+                });
+            }
+        } catch (IllegalStateException e)
         {
             handleIllegalConnectionState();
         }
@@ -811,8 +927,7 @@ public class BrowserActivity extends SherlockListActivity
         if (filesToBePasted.size() > 0)
         {
             menu.getItem(3).setVisible(true); //Paste
-        }
-        else if (filesToBePasted.size() < 1)
+        } else if (filesToBePasted.size() < 1)
         {
             menu.getItem(3).setVisible(false); //Paste
         }
@@ -833,7 +948,7 @@ public class BrowserActivity extends SherlockListActivity
         switch (item.getItemId())
         {
             case android.R.id.home:
-                if(canNavigateBack())
+                if (canNavigateBack())
                 {
                     navigateBack();
                 }
@@ -842,13 +957,19 @@ public class BrowserActivity extends SherlockListActivity
             case R.id.newFolder:
                 Intent startNewFolderDialog = new Intent(getApplicationContext(), NewFolderDialog.class);
                 startNewFolderDialog.putExtra("killerud.skydrive.CURRENT_FOLDER", currentFolderId);
-                if (!connectionIsUnavailable()) startActivity(startNewFolderDialog);
+                if (!connectionIsUnavailable())
+                {
+                    startActivity(startNewFolderDialog);
+                }
                 supportInvalidateOptionsMenu();
                 return true;
             case R.id.uploadFile:
                 Intent intent = new Intent(getApplicationContext(), UploadFileActivity.class);
                 intent.putExtra(UploadFileActivity.EXTRA_CURRENT_FOLDER_NAME, getTitle());
-                if (!connectionIsUnavailable()) startActivityForResult(intent, UploadFileActivity.PICK_FILE_REQUEST);
+                if (!connectionIsUnavailable())
+                {
+                    startActivityForResult(intent, UploadFileActivity.PICK_FILE_REQUEST);
+                }
                 supportInvalidateOptionsMenu();
                 return true;
             case R.id.reload:
@@ -858,7 +979,9 @@ public class BrowserActivity extends SherlockListActivity
             case R.id.paste:
                 setSupportProgressBarIndeterminateVisibility(true);
                 if (!connectionIsUnavailable())
+                {
                     xLoader.pasteFiles(liveConnectClient, filesToBePasted, currentFolderId, isCutNotPaste);
+                }
                 return true;
             case R.id.sharedFiles:
                 loadSharedFiles();
@@ -902,22 +1025,24 @@ public class BrowserActivity extends SherlockListActivity
     }
 
 
-
     private class SkyDriveListAdapter extends BaseAdapter
     {
-        private final LayoutInflater mInflater;
-        private final ArrayList<SkyDriveObject> mSkyDriveObjs;
-        private View mView;
-        private SparseBooleanArray mCheckedPositions;
-        private int mPosition;
-        private int mChecked;
+        private final LayoutInflater inflater;
+        private final ArrayList<SkyDriveObject> skyDriveObjs;
+        private View view;
+        private SparseBooleanArray checkedPositions;
+        private int position;
+        private int checked;
+        private Stack<Runnable> taskQueue;
+
 
         public SkyDriveListAdapter(Context context)
         {
-            mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            mSkyDriveObjs = new ArrayList<SkyDriveObject>();
-            mCheckedPositions = new SparseBooleanArray();
-            mChecked = 0;
+            inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            skyDriveObjs = new ArrayList<SkyDriveObject>();
+            checkedPositions = new SparseBooleanArray();
+            checked = 0;
+            taskQueue = new Stack<Runnable>();
         }
 
         /**
@@ -926,72 +1051,71 @@ public class BrowserActivity extends SherlockListActivity
          */
         public ArrayList<SkyDriveObject> getSkyDriveObjects()
         {
-            return mSkyDriveObjs;
+            return skyDriveObjs;
         }
 
         @Override
         public int getCount()
         {
-            return mSkyDriveObjs.size();
+            return skyDriveObjs.size();
         }
 
         public int getCheckedCount()
         {
-            return this.mChecked;
+            return this.checked;
         }
 
         public boolean isChecked(int pos)
         {
-            return mCheckedPositions.get(pos, false);
+            return checkedPositions.get(pos, false);
         }
-
 
 
         public void setChecked(int pos, boolean checked)
         {
-            if(checked && !isChecked(pos))
+            if (checked && !isChecked(pos))
             {
-                mChecked++;
-            }else if(isChecked(pos) && !checked)
+                this.checked++;
+            } else if (isChecked(pos) && !checked)
             {
-                mChecked--;
+                this.checked--;
             }
 
-            mCheckedPositions.put(pos, checked);
+            checkedPositions.put(pos, checked);
             notifyDataSetChanged();
         }
 
 
         public void setCheckedPositions(SparseBooleanArray checkedPositions)
         {
-            mChecked = checkedPositions.size();
-            this.mCheckedPositions = checkedPositions;
+            checked = checkedPositions.size();
+            this.checkedPositions = checkedPositions;
             notifyDataSetChanged();
         }
 
         public SparseBooleanArray getCheckedPositions()
         {
-            return this.mCheckedPositions;
+            return this.checkedPositions;
         }
 
         public void clearChecked()
         {
-            mChecked = 0;
-            mCheckedPositions = new SparseBooleanArray();
+            checked = 0;
+            checkedPositions = new SparseBooleanArray();
             currentlySelectedFiles = new ArrayList<SkyDriveObject>();
             notifyDataSetChanged();
         }
 
         public void checkAll()
         {
-            for (int i = 0; i < mSkyDriveObjs.size(); i++)
+            for (int i = 0; i < skyDriveObjs.size(); i++)
             {
-                if(!isChecked(i))
+                if (!isChecked(i))
                 {
-                    mChecked++;
+                    checked++;
                 }
-                mCheckedPositions.put(i, true);
-                currentlySelectedFiles.add(mSkyDriveObjs.get(i));
+                checkedPositions.put(i, true);
+                currentlySelectedFiles.add(skyDriveObjs.get(i));
             }
             notifyDataSetChanged();
         }
@@ -999,12 +1123,12 @@ public class BrowserActivity extends SherlockListActivity
         @Override
         public SkyDriveObject getItem(int position)
         {
-            if(position >= mSkyDriveObjs.size())
+            if (position >= skyDriveObjs.size())
             {
                 return null;
             }
 
-            return mSkyDriveObjs.get(position);
+            return skyDriveObjs.get(position);
         }
 
         @Override
@@ -1013,106 +1137,132 @@ public class BrowserActivity extends SherlockListActivity
             return position;
         }
 
-        @Override
-        public View getView(int position, View convertView, final ViewGroup parent)
+        private void loadThumbnail(View view, SkyDriveObject skyDriveObject)
         {
-            SkyDriveObject skyDriveObj = getItem(position);
-            mView = convertView;
-            mPosition = position;
-            skyDriveObj.accept(new SkyDriveObject.Visitor()
+            final WeakReference viewReference = new WeakReference(view);
+            final WeakReference objectReference = new WeakReference(skyDriveObject);
+
+            if (viewReference == null || objectReference == null)
             {
-                @Override
-                public void visit(final SkyDriveVideo video)
+                return;
+            }
+
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            if (preferences.getBoolean(Constants.THUMBNAILS_DISABLED, false))
+            {
+                return;
+            }
+
+            /* Take something relatively unique as a key if the reference has been lost, so no bitmap is found */
+            final long time = System.currentTimeMillis();
+            final String imageKey = String.valueOf(
+                    (objectReference != null ? skyDriveObject.getName() : "" + time));
+
+
+            final Bitmap bitmap = getBitmapFromThumbCache(imageKey);
+            if (bitmap != null)
+            {
+                ImageView imgView = (ImageView) view.findViewById(R.id.skyDriveItemIcon);
+                imgView.setImageBitmap(bitmap);
+            } else if (objectReference != null && viewReference != null)
+            {
+                File cacheFolder = new File(Environment.getExternalStorageDirectory()
+                        + "/Android/data/com.killerud.skydrive/thumbs/");
+                if (!cacheFolder.exists())
                 {
-
-                    if (mView == null)
-                    {
-                        mView = inflateNewSkyDriveListItem();
-                    }
-
-                    setIcon(R.drawable.video_x_generic);
-                    setName(video);
-                    setSelected(isChecked(mPosition));
-
-                    final View view = mView;
-                    if (!setThumbnailFromCacheIfExists(view, video))
-                    {
-                        handleThumbnail(video, view);
-                    }
+                    cacheFolder.mkdir();
+                    return;
                 }
 
-                private void handleThumbnail(final SkyDriveObject skyDriveObject, final View view) {
-                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                    if (preferences.getBoolean(Constants.THUMBNAILS_DISABLED, false))
-                    {
-                        return;
-                    }
+                File thumbCache = new File(cacheFolder,
+                        (objectReference != null ? skyDriveObject.getName() : "" + time));
+                if (thumbCache.exists())
+                {
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inScaled = false;
 
-                    try
+                    addBitmapToThumbCache(skyDriveObject.getName(), BitmapFactory.decodeFile(thumbCache.getPath(), options));
+                    loadThumbnail(view, skyDriveObject);
+                    Log.i(Constants.LOGTAG, "Thumb loaded from cache for image " + skyDriveObject.getName());
+                }else if (objectReference != null && viewReference != null)
+                {
+                try
+                {
+                    liveConnectClient.downloadAsync(
+                            ((SkyDriveObject) objectReference.get()).getId() + "/picture?type=thumbnail", new LiveDownloadOperationListener()
                     {
-                        liveConnectClient.downloadAsync(skyDriveObject.getId() + "/picture?type=thumbnail", new LiveDownloadOperationListener()
+                        @Override
+                        public void onDownloadProgress(int totalBytes,
+                                                       int bytesRemaining,
+                                                       LiveDownloadOperation operation)
                         {
-                            @Override
-                            public void onDownloadProgress(int totalBytes,
-                                                           int bytesRemaining,
-                                                           LiveDownloadOperation operation)
-                            {
-                            }
+                        }
 
-                            @Override
-                            public void onDownloadFailed(LiveOperationException exception,
-                                                         LiveDownloadOperation operation)
+                        @Override
+                        public void onDownloadFailed(LiveOperationException exception,
+                                                     LiveDownloadOperation operation)
+                        {
+                            if (objectReference != null)
                             {
-                                Log.i(Constants.LOGTAG, "Thumb download failed for " + skyDriveObject.getName()
+                                Log.i(Constants.LOGTAG, "Thumb download failed for " + ((SkyDriveObject) objectReference.get()).getName()
                                         + ". " + exception.getMessage());
-                                setIcon(R.drawable.image_x_generic);
                             }
+                            setIcon(R.drawable.image_x_generic);
+                        }
 
-                            @Override
-                            public void onDownloadCompleted(LiveDownloadOperation operation)
+                        @Override
+                        public void onDownloadCompleted(LiveDownloadOperation operation)
+                        {
+                            if (objectReference != null)
                             {
-                                Log.i(Constants.LOGTAG, "Thumb loaded from web for image " + skyDriveObject.getName());
-                                if (Build.VERSION.SDK_INT >= 11)
+                                Log.i(Constants.LOGTAG, "Thumb loaded from web for image " + ((SkyDriveObject) objectReference.get()).getName());
+                            }
+                            if (Build.VERSION.SDK_INT >= 11)
+                            {
+                                try
                                 {
-                                    try
+                                    AsyncTask task = new AsyncTask<Object, Void, Bitmap>()
                                     {
-                                        AsyncTask task = new AsyncTask<Object, Void, Bitmap>()
+
+                                        @Override
+                                        protected Bitmap doInBackground(Object... inputStreams)
                                         {
+                                            Bitmap bm = null;
 
-                                            @Override
-                                            protected Bitmap doInBackground(Object... inputStreams)
+                                            try
                                             {
-                                                Bitmap bm = null;
-
-                                                try
+                                                bm = BitmapFactory.decodeStream(
+                                                        ((LiveDownloadOperation) inputStreams[0]).getStream());
+                                            } catch (Exception e)
+                                            {
+                                                if (objectReference != null)
                                                 {
-                                                    bm = BitmapFactory.decodeStream(
-                                                            ((LiveDownloadOperation) inputStreams[0]).getStream());
-                                                } catch (Exception e)
-                                                {
-                                                    Log.i(Constants.LOGTAG, "doInBackground failed for "
-                                                            + skyDriveObject.getName() + ". " + e.getMessage());
+                                                    Log.i(Constants.LOGTAG, "Thumb download failed for " + ((SkyDriveObject) objectReference.get()).getName()
+                                                            + ". " + e.getMessage());
                                                 }
-
-                                                return bm;
                                             }
 
-                                            protected void onPostExecute(Bitmap bm)
+                                            return bm;
+                                        }
+
+                                        protected void onPostExecute(Bitmap bm)
+                                        {
+                                            File cacheFolder = new File(Environment.getExternalStorageDirectory()
+                                                    + "/Android/data/com.killerud.skydrive/thumbs/");
+
+                                            if (!cacheFolder.exists())
                                             {
-                                                File cacheFolder = new File(Environment.getExternalStorageDirectory()
-                                                        + "/Android/data/com.killerud.skydrive/thumbs/");
-
-                                                if (!cacheFolder.exists())
-                                                {
-                                                    cacheFolder.mkdirs();
-                                                    /*
-                                                    VERY important that this is mkdirS, not mkdir,
-                                                    or just the last folder will be created, which won't
-                                                    work with the other folders absent...
-                                                    */
-                                                }
-
-                                                File thumb = new File(cacheFolder, skyDriveObject.getName());
+                                                cacheFolder.mkdirs();
+                                                /*
+                                                VERY important that this is mkdirS, not mkdir,
+                                                or just the last folder will be created, which won't
+                                                work with the other folders absent...
+                                                */
+                                            }
+                                            if (objectReference != null)
+                                            {
+                                                File thumb = new File(cacheFolder,
+                                                        ((SkyDriveObject) objectReference.get()).getName());
                                                 OutputStream out;
                                                 try
                                                 {
@@ -1120,7 +1270,8 @@ public class BrowserActivity extends SherlockListActivity
                                                     bm.compress(Bitmap.CompressFormat.PNG, 85, out);
                                                     out.flush();
                                                     out.close();
-                                                    Log.i(Constants.LOGTAG, "Thumb cached for image " + skyDriveObject.getName());
+                                                    Log.i(Constants.LOGTAG, "Thumb cached for image " +
+                                                            thumb.getName());
                                                 } catch (Exception e)
                                                 {
                                                     /* Couldn't save thumbnail. No biggie.
@@ -1128,51 +1279,61 @@ public class BrowserActivity extends SherlockListActivity
                                                    * doe to rare cases of crashes when activity
                                                    * loses focus during load.
                                                    * */
-                                                    Log.e(Constants.LOGTAG, "Could not cache thumbnail for " + skyDriveObject.getName()
-                                                            + ". " + e.toString());
+                                                    if (objectReference != null)
+                                                    {
+                                                        Log.e(Constants.LOGTAG, "Could not cache thumbnail for " +
+                                                                thumb.getName() + ". " + e.toString());
+                                                    }
                                                 }
 
-                                                ImageView imgView = (ImageView) view.findViewById(R.id.skyDriveItemIcon);
-                                                imgView.setImageBitmap(bm);
+                                                addBitmapToThumbCache(thumb.getName(), bm);
+                                                if (objectReference != null && viewReference != null)
+                                                {
+                                                    loadThumbnail((View) viewReference.get(),
+                                                            (SkyDriveObject) objectReference.get());
+                                                }
                                             }
+                                        }
 
-                                        };
+                                    };
 
-                                        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, operation);
-                                    } catch (Exception e)
-                                    {
-                                        Log.i(Constants.LOGTAG, "OnDownloadCompleted failed for "
-                                                + skyDriveObject.getName() + ". " + e.getMessage());
-
-                                        setIcon(R.drawable.image_x_generic);
-
-                                    }
-
-                                } else
+                                    task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, operation);
+                                } catch (Exception e)
                                 {
-                                    Bitmap bm = BitmapFactory.decodeStream(operation.getStream());
+                                    Log.i(Constants.LOGTAG, "OnDownloadCompleted failed for " +
+                                            (objectReference != null ? ((SkyDriveObject) objectReference.get()).getName() : " file")
+                                            + ". " + e.getMessage());
+                                    setIcon(R.drawable.image_x_generic);
+                                }
 
-                                    File cacheFolder = new File(Environment.getExternalStorageDirectory()
-                                            + "/Android/data/com.killerud.skydrive/thumbs/");
+                            } else
+                            {
+                                Bitmap bm = BitmapFactory.decodeStream(operation.getStream());
 
-                                    if (!cacheFolder.exists())
-                                    {
-                                        cacheFolder.mkdirs();
-                                        /*
-                                        VERY important that this is mkdirS, not mkdir,
-                                        or just the last folder will be created, which won't
-                                        work with the other folders absent...
-                                        */
-                                    }
+                                File cacheFolder = new File(Environment.getExternalStorageDirectory()
+                                        + "/Android/data/com.killerud.skydrive/thumbs/");
 
-                                    File thumb = new File(cacheFolder, skyDriveObject.getName());
+                                if (!cacheFolder.exists())
+                                {
+                                    cacheFolder.mkdirs();
+                                    /*
+                                    VERY important that this is mkdirS, not mkdir,
+                                    or just the last folder will be created, which won't
+                                    work with the other folders absent...
+                                    */
+                                }
+
+                                if (objectReference != null)
+                                {
+                                    File thumb = new File(cacheFolder,
+                                            ((SkyDriveObject) objectReference.get()).getName());
                                     try
                                     {
                                         FileOutputStream fileOut = new FileOutputStream(thumb);
                                         bm.compress(Bitmap.CompressFormat.PNG, 85, fileOut);
                                         fileOut.flush();
                                         fileOut.close();
-                                        Log.i(Constants.LOGTAG, "Thumb cached for image " + skyDriveObject.getName());
+                                        Log.i(Constants.LOGTAG, "Thumb cached for image " + thumb.getName());
                                     } catch (Exception e)
                                     {
                                         /* Couldn't save thumbnail. No biggie.
@@ -1180,68 +1341,101 @@ public class BrowserActivity extends SherlockListActivity
                                        * doe to rare cases of crashes when activity
                                        * loses focus during load.
                                        * */
-                                        Log.e(Constants.LOGTAG, "Could not cache thumbnail for " + skyDriveObject.getName()
+                                        Log.e(Constants.LOGTAG, "Could not cache thumbnail for " + thumb.getName()
                                                 + ". " + e.getMessage());
                                     }
 
-                                    ImageView imgView = (ImageView) view.findViewById(R.id.skyDriveItemIcon);
-                                    imgView.setImageBitmap(bm);
+                                    addBitmapToThumbCache(thumb.getName(), bm);
+                                    if (viewReference != null && objectReference != null)
+                                    {
+                                        loadThumbnail((View) viewReference.get(), (SkyDriveObject) objectReference.get());
+                                    }
                                 }
-
                             }
 
-                        });
-                    }catch (IllegalStateException e)
+                        }
+
+                    });
+                } catch (IllegalStateException e)
+                {
+                    handleIllegalConnectionState();
+                }
+            }
+
+            }
+        }
+
+
+        @Override
+        public View getView(int position, View convertView, final ViewGroup parent)
+        {
+            SkyDriveObject skyDriveObj = getItem(position);
+            view = convertView;
+            this.position = position;
+            skyDriveObj.accept(new SkyDriveObject.Visitor()
+            {
+                @Override
+                public void visit(final SkyDriveVideo video)
+                {
+
+                    if (view == null)
                     {
-                        handleIllegalConnectionState();
+                        view = inflateNewSkyDriveListItem();
                     }
+
+                    setIcon(R.drawable.video_x_generic);
+                    setName(video);
+                    setSelected(isChecked(SkyDriveListAdapter.this.position));
+
+                    View view = SkyDriveListAdapter.this.view;
+                    loadThumbnail(view, video);
                 }
 
                 @Override
                 public void visit(SkyDriveFile file)
                 {
 
-                    if (mView == null)
+                    if (view == null)
                     {
-                        mView = inflateNewSkyDriveListItem();
+                        view = inflateNewSkyDriveListItem();
                     }
 
                     setIcon(determineFileIcon(file));
                     setName(file);
-                    setSelected(isChecked(mPosition));
+                    setSelected(isChecked(SkyDriveListAdapter.this.position));
                 }
 
                 @Override
                 public void visit(SkyDriveFolder folder)
                 {
-                    if (mView == null)
+                    if (view == null)
                     {
-                        mView = inflateNewSkyDriveListItem();
+                        view = inflateNewSkyDriveListItem();
                     }
 
                     setIcon(R.drawable.folder);
                     setName(folder);
-                    setSelected(isChecked(mPosition));
+                    setSelected(isChecked(SkyDriveListAdapter.this.position));
                 }
 
                 @Override
                 public void visit(SkyDriveAlbum album)
                 {
-                    if (mView == null)
+                    if (view == null)
                     {
-                        mView = inflateNewSkyDriveListItem();
+                        view = inflateNewSkyDriveListItem();
                     }
                     setIcon(R.drawable.folder_image);
                     setName(album);
-                    setSelected(isChecked(mPosition));
+                    setSelected(isChecked(SkyDriveListAdapter.this.position));
                 }
 
                 @Override
                 public void visit(SkyDriveAudio audio)
                 {
-                    if (mView == null)
+                    if (view == null)
                     {
-                        mView = inflateNewSkyDriveListItem();
+                        view = inflateNewSkyDriveListItem();
                     }
 
                     startService(new Intent(getApplicationContext(), AudioPlaybackService.class));
@@ -1249,115 +1443,78 @@ public class BrowserActivity extends SherlockListActivity
                             audioPlaybackServiceConnection, Context.BIND_ABOVE_CLIENT);
                     setIcon(R.drawable.audio_x_generic);
                     setName(audio);
-                    setSelected(isChecked(mPosition));
+                    setSelected(isChecked(SkyDriveListAdapter.this.position));
                 }
 
                 @Override
                 public void visit(final SkyDrivePhoto photo)
                 {
-                    if (mView == null)
+                    if (view == null)
                     {
-                        mView = inflateNewSkyDriveListItem();
+                        view = inflateNewSkyDriveListItem();
                     }
-                    final View view = mView;
-                    // Since we are doing async calls and mView is constantly changing,
+                    final View view = SkyDriveListAdapter.this.view;
+                    // Since we are doing async calls and view is constantly changing,
                     // we need to hold on to this reference.
 
                     setIcon(R.drawable.image_x_generic);
                     setName(photo);
-                    setSelected(isChecked(mPosition));
+                    setSelected(isChecked(SkyDriveListAdapter.this.position));
 
 
-                    if (!setThumbnailFromCacheIfExists(view, photo))
-                    {
-                        handleThumbnail(photo, view);
-                    }
+                    loadThumbnail(view, photo);
                 }
 
-
-                private void setName(SkyDriveObject skyDriveObj)
-                {
-                    TextView tv = (TextView) mView.findViewById(R.id.nameTextView);
-                    tv.setText(skyDriveObj.getName());
-                }
 
                 private View inflateNewSkyDriveListItem()
                 {
-                    return mInflater.inflate(R.layout.skydrive_list_item, parent, false);
-                }
-
-                private void setIcon(int iconResId)
-                {
-                    ImageView img = (ImageView) mView.findViewById(R.id.skyDriveItemIcon);
-                    img.setImageResource(iconResId);
-                }
-
-                private void setSelected(boolean checked)
-                {
-                    if (checked)
-                    {
-                        mView.setBackgroundResource(R.color.HightlightBlue);
-                    }
-                    else
-                    {
-                        mView.setBackgroundResource(android.R.color.white);
-                    }
-                }
-
-                private boolean setThumbnailFromCacheIfExists(View view, SkyDriveObject file)
-                {
-                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                    if (preferences.getBoolean(Constants.THUMBNAILS_DISABLED, false))
-                    {
-                        return false;
-                    }
-
-                    /* Store stuff in app data folder, so it is deleted on uninstall */
-                    File cacheFolder = new File(Environment.getExternalStorageDirectory()
-                            + "/Android/data/com.killerud.skydrive/thumbs/");
-
-                    if (!cacheFolder.exists())
-                    {
-                        cacheFolder.mkdir();
-                        /* Directory didn't exist, the thumbnail sure as hell doesn't */
-                        return false;
-                    }
-
-                    File thumb = new File(cacheFolder, file.getName());
-                    if (thumb.exists())
-                    {
-                        BitmapFactory.Options options = new BitmapFactory.Options();
-                        options.inScaled = false;
-
-                        ((ImageView) view.findViewById(R.id.skyDriveItemIcon))
-                                .setImageBitmap(BitmapFactory.decodeFile(thumb.getPath(), options));
-                        Log.i(Constants.LOGTAG, "Thumb loaded from cache for image " + file.getName());
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-
-                private int determineFileIcon(SkyDriveFile file)
-                {
-                    int index = file.getName().lastIndexOf(".");
-                    if (index != -1)
-                    {
-                        /* Starting from the index includes the dot, so we add one  */
-                        String extension = file.getName().substring(index + 1,
-                                file.getName().length());
-
-                        return IOUtil.determineFileTypeDrawable(extension);
-                    }
-
-                    return R.drawable.text_x_preview;
+                    return inflater.inflate(R.layout.skydrive_list_item, parent, false);
                 }
 
             });
 
-            return mView;
+            return view;
+        }
+
+        private void setName(SkyDriveObject skyDriveObj)
+        {
+            TextView tv = (TextView) view.findViewById(R.id.nameTextView);
+            tv.setText(skyDriveObj.getName());
+        }
+
+
+
+        private void setIcon(int iconResId)
+        {
+            ImageView img = (ImageView) view.findViewById(R.id.skyDriveItemIcon);
+            img.setImageResource(iconResId);
+        }
+
+        private void setSelected(boolean checked)
+        {
+            if (checked)
+            {
+                view.setBackgroundResource(R.color.HightlightBlue);
+            } else
+            {
+                view.setBackgroundResource(android.R.color.white);
+            }
+        }
+
+
+        private int determineFileIcon(SkyDriveFile file)
+        {
+            int index = file.getName().lastIndexOf(".");
+            if (index != -1)
+            {
+                /* Starting from the index includes the dot, so we add one  */
+                String extension = file.getName().substring(index + 1,
+                        file.getName().length());
+
+                return IOUtil.determineFileTypeDrawable(extension);
+            }
+
+            return R.drawable.text_x_preview;
         }
     }
 
@@ -1406,51 +1563,45 @@ public class BrowserActivity extends SherlockListActivity
                 *  Create a clone so selected aren't cleared logically.
                 */
                 if (!connectionIsUnavailable())
+                {
                     xLoader.downloadFiles(liveConnectClient, (ArrayList<SkyDriveObject>) currentlySelectedFiles.clone());
+                }
 
                 resetSelection();
                 mode.finish();
                 return true;
-            }
-            else if (title.equalsIgnoreCase(getString(R.string.copy)))
+            } else if (title.equalsIgnoreCase(getString(R.string.copy)))
             {
                 copySelectedFiles(mode);
                 return true;
-            }
-            else if (title.equalsIgnoreCase(getString(R.string.cut)))
+            } else if (title.equalsIgnoreCase(getString(R.string.cut)))
             {
                 cutSelectedFiles(mode);
                 return true;
-            }
-            else if (title.equalsIgnoreCase(getString(R.string.delete)))
+            } else if (title.equalsIgnoreCase(getString(R.string.delete)))
             {
                 createDeleteDialog(mode);
                 return true;
-            }
-            else if (title.equalsIgnoreCase(getString(R.string.rename)))
+            } else if (title.equalsIgnoreCase(getString(R.string.rename)))
             {
                 createRenameDialog();
                 return true;
-            }
-            else if(title.equalsIgnoreCase(getString((R.string.share))))
+            } else if (title.equalsIgnoreCase(getString((R.string.share))))
             {
                 createSharingDialog();
                 return true;
-            }
-            else if (title.equalsIgnoreCase(getString(R.string.selectAll)))
+            } else if (title.equalsIgnoreCase(getString(R.string.selectAll)))
             {
                 ((SkyDriveListAdapter) getListAdapter()).checkAll();
                 item.setTitle(getString(R.string.selectNone));
                 updateActionModeTitleWithSelectedCount();
                 return true;
-            }
-            else if (title.equalsIgnoreCase(getString(R.string.selectNone)))
+            } else if (title.equalsIgnoreCase(getString(R.string.selectNone)))
             {
                 resetSelection();
                 item.setTitle(getString(R.string.selectAll));
                 return true;
-            }
-            else
+            } else
             {
                 return false;
             }
@@ -1468,7 +1619,8 @@ public class BrowserActivity extends SherlockListActivity
 
     }
 
-    private void copySelectedFiles(ActionMode mode) {
+    private void copySelectedFiles(ActionMode mode)
+    {
         filesToBePasted = (ArrayList<SkyDriveObject>) currentlySelectedFiles.clone();
         isCutNotPaste = false;
 
@@ -1478,7 +1630,8 @@ public class BrowserActivity extends SherlockListActivity
         mode.finish();
     }
 
-    private void cutSelectedFiles(ActionMode mode) {
+    private void cutSelectedFiles(ActionMode mode)
+    {
         filesToBePasted = (ArrayList<SkyDriveObject>) currentlySelectedFiles.clone();
         isCutNotPaste = true;
 
@@ -1488,7 +1641,8 @@ public class BrowserActivity extends SherlockListActivity
         mode.finish();
     }
 
-    private void createDeleteDialog(final ActionMode mode) {
+    private void createDeleteDialog(final ActionMode mode)
+    {
         final AlertDialog dialog = new AlertDialog.Builder(getSupportActionBar().getThemedContext()).create();
         dialog.setTitle(getString(R.string.deleteConfirmationTitle));
         dialog.setIcon(R.drawable.warning_triangle);
@@ -1509,7 +1663,9 @@ public class BrowserActivity extends SherlockListActivity
             {
                 setSupportProgressBarIndeterminateVisibility(true);
                 if (!connectionIsUnavailable())
+                {
                     xLoader.deleteFiles(liveConnectClient, (ArrayList<SkyDriveObject>) currentlySelectedFiles.clone());
+                }
                 resetSelection();
                 mode.finish();
 
@@ -1526,7 +1682,8 @@ public class BrowserActivity extends SherlockListActivity
         dialog.show();
     }
 
-    private void createRenameDialog() {
+    private void createRenameDialog()
+    {
         Intent startRenameDialog = new Intent(getSupportActionBar().getThemedContext(), RenameDialog.class);
         ArrayList<String> fileIds = new ArrayList<String>();
         ArrayList<String> fileNames = new ArrayList<String>();
@@ -1539,7 +1696,10 @@ public class BrowserActivity extends SherlockListActivity
         startRenameDialog.putExtra(RenameDialog.EXTRAS_FILE_NAMES, fileNames);
         resetSelection();
 
-        if (!connectionIsUnavailable()) startActivity(startRenameDialog);
+        if (!connectionIsUnavailable())
+        {
+            startActivity(startRenameDialog);
+        }
     }
 
     private void createSharingDialog()
@@ -1551,10 +1711,14 @@ public class BrowserActivity extends SherlockListActivity
             fileIds.add(currentlySelectedFiles.get(i).getId());
         }
         startSharingDialog.putExtra(RenameDialog.EXTRAS_FILE_IDS, fileIds);
-        if (!connectionIsUnavailable()) startActivity(startSharingDialog);
+        if (!connectionIsUnavailable())
+        {
+            startActivity(startSharingDialog);
+        }
     }
 
-    private void resetSelection() {
+    private void resetSelection()
+    {
         ((SkyDriveListAdapter) getListAdapter()).clearChecked();
         currentlySelectedFiles.clear();
         updateActionModeTitleWithSelectedCount();
@@ -1575,5 +1739,8 @@ public class BrowserActivity extends SherlockListActivity
             audioPlaybackService = null;
         }
     };
+
 }
+
+
 

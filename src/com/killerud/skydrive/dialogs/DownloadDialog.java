@@ -15,7 +15,8 @@ import com.killerud.skydrive.R;
  * Time: 21:12
  * To change this template use File | Settings | File Templates.
  */
-public class DownloadDialog extends SherlockActivity {
+public class DownloadDialog extends SherlockActivity
+{
 
     public static final String EXTRA_FILE_POSITION = "file_position";
     public static final int DOWNLOAD_REQUEST = 5;
@@ -27,17 +28,21 @@ public class DownloadDialog extends SherlockActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.download_dialog);
-        ((Button) findViewById(R.id.cancelButton)).setOnClickListener(new View.OnClickListener() {
+        ((Button) findViewById(R.id.cancelButton)).setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view)
+            {
                 setResult(Activity.RESULT_CANCELED);
                 finish();
             }
         });
 
-        ((Button) findViewById(R.id.saveButton)).setOnClickListener(new View.OnClickListener() {
+        ((Button) findViewById(R.id.saveButton)).setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view)
+            {
                 Intent data = new Intent();
                 data.putExtra(EXTRA_FILE_POSITION, getIntent().getIntExtra(EXTRA_FILE_POSITION, 0));
                 setResult(Activity.RESULT_OK, data);

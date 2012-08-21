@@ -22,7 +22,8 @@ public class IOUtil
 
     }
 
-    public static String toHex(String arg) {
+    public static String toHex(String arg)
+    {
         return String.format("%040x", new BigInteger(arg.getBytes(/*YOUR_CHARSET?*/)));
     }
 
@@ -31,7 +32,6 @@ public class IOUtil
         File file = new File(fileName);
         findMimeTypeOfFile(file);
     }
-
 
 
     public static String findMimeTypeOfFile(File file)
@@ -43,8 +43,7 @@ public class IOUtil
         {
             /* Unknown file type, so here we just give Jesus the wheel and open it as a plain text file */
             return "text/plain";
-        }
-        else
+        } else
         {
             Iterator iterator = mimeTypes.iterator();
             MimeType mimeType = (MimeType) iterator.next();
@@ -65,16 +64,14 @@ public class IOUtil
                 fileExtension.equalsIgnoreCase("raw"))
         {
             return R.drawable.image_x_generic;
-        }
-        else if (fileExtension.equalsIgnoreCase("mp3") ||
+        } else if (fileExtension.equalsIgnoreCase("mp3") ||
                 fileExtension.equalsIgnoreCase("wav") ||
                 fileExtension.equalsIgnoreCase("wma") ||
                 fileExtension.equalsIgnoreCase("acc") ||
                 fileExtension.equalsIgnoreCase("ogg"))
         {
             return R.drawable.audio_x_generic;
-        }
-        else if (fileExtension.equalsIgnoreCase("mov") ||
+        } else if (fileExtension.equalsIgnoreCase("mov") ||
                 fileExtension.equalsIgnoreCase("avi") ||
                 fileExtension.equalsIgnoreCase("divx") ||
                 fileExtension.equalsIgnoreCase("wmv") ||
@@ -83,16 +80,14 @@ public class IOUtil
                 fileExtension.equalsIgnoreCase("mp4"))
         {
             return R.drawable.video_x_generic;
-        }
-        else if (fileExtension.equalsIgnoreCase("doc") ||
+        } else if (fileExtension.equalsIgnoreCase("doc") ||
                 fileExtension.equalsIgnoreCase("odt") ||
                 fileExtension.equalsIgnoreCase("fodt") ||
                 fileExtension.equalsIgnoreCase("docx") ||
                 fileExtension.equalsIgnoreCase("odf"))
         {
             return R.drawable.office_document;
-        }
-        else if (fileExtension.equalsIgnoreCase("ppt") ||
+        } else if (fileExtension.equalsIgnoreCase("ppt") ||
                 fileExtension.equalsIgnoreCase("pps") ||
                 fileExtension.equalsIgnoreCase("pptx") ||
                 fileExtension.equalsIgnoreCase("ppsx") ||
@@ -100,20 +95,17 @@ public class IOUtil
                 fileExtension.equalsIgnoreCase("fodp"))
         {
             return R.drawable.office_presentation;
-        }
-        else if (fileExtension.equalsIgnoreCase("ods") ||
+        } else if (fileExtension.equalsIgnoreCase("ods") ||
                 fileExtension.equalsIgnoreCase("xls") ||
                 fileExtension.equalsIgnoreCase("xlr") ||
                 fileExtension.equalsIgnoreCase("xlsx") ||
                 fileExtension.equalsIgnoreCase("ots"))
         {
             return R.drawable.office_spreadsheet;
-        }
-        else if (fileExtension.equalsIgnoreCase("pdf"))
+        } else if (fileExtension.equalsIgnoreCase("pdf"))
         {
             return R.drawable.document_pdf;
-        }
-        else if (fileExtension.equalsIgnoreCase("zip") ||
+        } else if (fileExtension.equalsIgnoreCase("zip") ||
                 fileExtension.equalsIgnoreCase("rar") ||
                 fileExtension.equalsIgnoreCase("gz") ||
                 fileExtension.equalsIgnoreCase("bz2") ||
@@ -121,72 +113,59 @@ public class IOUtil
                 fileExtension.equalsIgnoreCase("jar"))
         {
             return R.drawable.archive_generic;
-        }
-        else if (fileExtension.equalsIgnoreCase("7z"))
+        } else if (fileExtension.equalsIgnoreCase("7z"))
         {
-            return R.drawable.archive_sevenzip;
-        }
-        else if (fileExtension.equalsIgnoreCase("torrent"))
+            return R.drawable.archive_generic;
+        } else if (fileExtension.equalsIgnoreCase("torrent"))
         {
-            return R.drawable.document_torrent;
-        }
-        else if (fileExtension.equalsIgnoreCase("exe") ||
+            return R.drawable.text_x_preview;
+        } else if (fileExtension.equalsIgnoreCase("exe") ||
                 fileExtension.equalsIgnoreCase("msi"))
         {
             return R.drawable.executable_generic;
-        }
-        else if (fileExtension.equalsIgnoreCase("iso") ||
+        } else if (fileExtension.equalsIgnoreCase("iso") ||
                 fileExtension.equalsIgnoreCase("nrg") ||
                 fileExtension.equalsIgnoreCase("img") ||
                 fileExtension.equalsIgnoreCase("bin"))
         {
-            return R.drawable.archive_disc_image;
-        }
-        else if (fileExtension.equalsIgnoreCase("apk"))
+            return R.drawable.archive_generic;
+        } else if (fileExtension.equalsIgnoreCase("apk"))
         {
             return R.drawable.executable_apk;
-        }
-        else if (fileExtension.equalsIgnoreCase("html") ||
+        } else if (fileExtension.equalsIgnoreCase("html") ||
                 fileExtension.equalsIgnoreCase("htm"))
         {
-            return R.drawable.text_html;
-        }
-        else if (fileExtension.equalsIgnoreCase("css"))
+            return R.drawable.text_x_preview;
+        } else if (fileExtension.equalsIgnoreCase("css"))
         {
-            return R.drawable.text_css;
-        }
-        else if (fileExtension.equalsIgnoreCase("deb"))
+            return R.drawable.text_x_preview;
+        } else if (fileExtension.equalsIgnoreCase("deb"))
         {
-            return R.drawable.executable_deb;
-        }
-        else if (fileExtension.equalsIgnoreCase("rpm"))
+            return R.drawable.executable_generic;
+        } else if (fileExtension.equalsIgnoreCase("rpm"))
         {
-            return R.drawable.executable_rpm;
-        }
-        else if (fileExtension.equalsIgnoreCase("java") ||
+            return R.drawable.executable_generic;
+        } else if (fileExtension.equalsIgnoreCase("java") ||
                 fileExtension.equalsIgnoreCase("class"))
         {
-            return R.drawable.document_java;
-        }
-        else if (fileExtension.equalsIgnoreCase("pl") ||
+            return R.drawable.text_x_preview;
+        } else if (fileExtension.equalsIgnoreCase("pl") ||
                 fileExtension.equalsIgnoreCase("plc"))
         {
-            return R.drawable.document_perl;
-        }
-        else if (fileExtension.equalsIgnoreCase("php"))
+            return R.drawable.text_x_preview;
+        } else if (fileExtension.equalsIgnoreCase("php"))
         {
-            return R.drawable.document_php;
-        }
-        else if (fileExtension.equalsIgnoreCase("py"))
+            return R.drawable.text_x_preview;
+        } else if (fileExtension.equalsIgnoreCase("py"))
         {
-            return R.drawable.document_python;
-        }
-        else if (fileExtension.equalsIgnoreCase("rb"))
+            return R.drawable.text_x_preview;
+        } else if (fileExtension.equalsIgnoreCase("rb"))
         {
-            return R.drawable.document_ruby;
+            return R.drawable.text_x_preview;
         }
         return R.drawable.text_x_preview;
     }
+
 
     public static String getFileExtension(File file)
     {

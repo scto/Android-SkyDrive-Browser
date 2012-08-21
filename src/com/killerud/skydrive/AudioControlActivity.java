@@ -59,7 +59,8 @@ public class AudioControlActivity extends SherlockActivity implements View.OnCli
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         super.onCreateOptionsMenu(menu);
 
         MenuInflater inflater = getSupportMenuInflater();
@@ -249,7 +250,8 @@ public class AudioControlActivity extends SherlockActivity implements View.OnCli
         {
             ((ImageView) findViewById(R.id.audioAlbumArt))
                     .setImageResource(R.drawable.audio_album_generic);
-        }else{
+        } else
+        {
             if (albumArtExistsInCache(skyDriveAudio))
             {
                 loadAlbumArtFromCache(skyDriveAudio);
@@ -346,7 +348,7 @@ public class AudioControlActivity extends SherlockActivity implements View.OnCli
         public void onServiceConnected(ComponentName componentName, IBinder iBinder)
         {
             audioPlaybackService = ((AudioPlaybackService.AudioPlaybackServiceBinder) iBinder).getService();
-            if(audioPlaybackService.NOW_PLAYING.size()==1)
+            if (audioPlaybackService.NOW_PLAYING.size() == 1)
             {
                 audioPlaybackService.startFirstSong();
             }

@@ -1,6 +1,7 @@
 package com.killerud.skydrive;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -13,6 +14,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.support.v4.util.LruCache;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
@@ -33,21 +35,36 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Stack;
 
 public class FileBrowserActivity extends SherlockListActivity
 {
-    private ArrayList<String> mCurrentlySelectedFiles;
+    private ArrayList<String> currentlySelectedFiles;
 
     public static final String EXTRA_FILES_LIST = "filePaths";
 
-    private File mCurrentFolder;
-    private Stack<File> mPreviousFolders;
-    private FileBrowserListAdapter mFileBrowserAdapter;
-    private ActionMode mActionMode;
+    private File currentFolder;
+    private Stack<File> previousFolders;
+    private FileBrowserListAdapter fileBrowserListAdapter;
+    private ActionMode actionMode;
+    private LruCache thumbCache;
 
+
+    public void addBitmapToThumbCache(String key, Bitmap bitmap)
+    {
+        if (getBitmapFromThumbCache(key) == null)
+        {
+            thumbCache.put(key, bitmap);
+        }
+    }
+
+    public Bitmap getBitmapFromThumbCache(String key)
+    {
+        return (Bitmap) thumbCache.get(key);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -59,10 +76,17 @@ public class FileBrowserActivity extends SherlockListActivity
         setContentView(R.layout.saved_files_activity);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mCurrentlySelectedFiles = new ArrayList<String>();
-        mPreviousFolders = new Stack<File>();
-        mFileBrowserAdapter = new FileBrowserListAdapter(getApplicationContext());
-        setListAdapter(mFileBrowserAdapter);
+        // Get memory class of this device, exceeding this amount will throw an
+        // OutOfMemory exception.
+        final int memClass = ((ActivityManager) getSystemService(
+                Context.ACTIVITY_SERVICE)).getMemoryClass();
+        final int cacheSize = 1024 * 1024 * memClass / 10;
+        thumbCache = new LruCache(cacheSize);
+
+        currentlySelectedFiles = new ArrayList<String>();
+        previousFolders = new Stack<File>();
+        fileBrowserListAdapter = new FileBrowserListAdapter(getApplicationContext());
+        setListAdapter(fileBrowserListAdapter);
 
         File skyDriveFolder = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/");
         if (!skyDriveFolder.exists())
@@ -70,7 +94,7 @@ public class FileBrowserActivity extends SherlockListActivity
             skyDriveFolder.mkdirs();
         }
 
-        mCurrentFolder = skyDriveFolder;
+        currentFolder = skyDriveFolder;
 
         ListView lv = getListView();
         lv.setTextFilterEnabled(true);
@@ -80,11 +104,11 @@ public class FileBrowserActivity extends SherlockListActivity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
                 File file = (File) parent.getItemAtPosition(position);
-                if (mActionMode == null)
+                if (actionMode == null)
                 {
                     if (file.isDirectory())
                     {
-                        mPreviousFolders.push(mCurrentFolder);
+                        previousFolders.push(currentFolder);
                         loadFolder(file);
                     } else
                     {
@@ -97,16 +121,16 @@ public class FileBrowserActivity extends SherlockListActivity
                     }
                 } else
                 {
-                    boolean isChecked = mFileBrowserAdapter.isChecked(position);
+                    boolean isChecked = fileBrowserListAdapter.isChecked(position);
                     if (isChecked)
                     {
-                        mFileBrowserAdapter.setChecked(position, false);
-                        mCurrentlySelectedFiles.remove(
+                        fileBrowserListAdapter.setChecked(position, false);
+                        currentlySelectedFiles.remove(
                                 ((FileBrowserListAdapter) getListAdapter()).getItem(position).getPath());
                     } else
                     {
-                        mFileBrowserAdapter.setChecked(position, true);
-                        mCurrentlySelectedFiles.add(
+                        fileBrowserListAdapter.setChecked(position, true);
+                        currentlySelectedFiles.add(
                                 ((FileBrowserListAdapter) getListAdapter()).getItem(position).getPath());
                     }
                     updateActionModeTitleWithSelectedCount();
@@ -118,11 +142,11 @@ public class FileBrowserActivity extends SherlockListActivity
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long l)
             {
-                if (mActionMode == null)
+                if (actionMode == null)
                 {
-                    mActionMode = startActionMode(new FileBrowserActionMode());
-                    mFileBrowserAdapter.setChecked(position, true);
-                    mCurrentlySelectedFiles.add(
+                    actionMode = startActionMode(new FileBrowserActionMode());
+                    fileBrowserListAdapter.setChecked(position, true);
+                    currentlySelectedFiles.add(
                             ((FileBrowserListAdapter) getListAdapter()).getItem(position).getPath());
                     updateActionModeTitleWithSelectedCount();
                 }
@@ -143,16 +167,16 @@ public class FileBrowserActivity extends SherlockListActivity
 
         if (savedInstanceState.containsKey(Constants.STATE_CURRENT_FOLDER))
         {
-            mCurrentFolder = new File(savedInstanceState.getString(Constants.STATE_CURRENT_FOLDER));
+            currentFolder = new File(savedInstanceState.getString(Constants.STATE_CURRENT_FOLDER));
         }
 
         if (savedInstanceState.containsKey(Constants.STATE_PREVIOUS_FOLDERS))
         {
-            mPreviousFolders = new Stack<File>();
+            previousFolders = new Stack<File>();
             String[] folderIds = savedInstanceState.getStringArray(Constants.STATE_PREVIOUS_FOLDERS);
             for (int i = 0; i < folderIds.length; i++)
             {
-                mPreviousFolders.push(new File(folderIds[i]));
+                previousFolders.push(new File(folderIds[i]));
             }
         }
 
@@ -160,14 +184,14 @@ public class FileBrowserActivity extends SherlockListActivity
         {
             if (savedInstanceState.getBoolean(Constants.STATE_ACTION_MODE_CURRENTLY_ON))
             {
-                mActionMode = startActionMode(new FileBrowserActionMode());
+                actionMode = startActionMode(new FileBrowserActionMode());
             }
         }
 
         ((FileBrowserListAdapter) getListAdapter()).setCheckedPositions(((BrowserForSkyDriveApplication) getApplication())
                 .getCurrentlyCheckedPositions());
 
-        if (mActionMode != null)
+        if (actionMode != null)
         {
             updateActionModeTitleWithSelectedCount();
         }
@@ -178,18 +202,18 @@ public class FileBrowserActivity extends SherlockListActivity
     {
         super.onSaveInstanceState(savedInstanceState);
 
-        savedInstanceState.putString(Constants.STATE_CURRENT_FOLDER, mCurrentFolder.getPath());
+        savedInstanceState.putString(Constants.STATE_CURRENT_FOLDER, currentFolder.getPath());
 
 
-        String[] previous = new String[mPreviousFolders.size()];
+        String[] previous = new String[previousFolders.size()];
         for (int i = 0; i < previous.length; i++)
         {
-            previous[i] = mPreviousFolders.get(i).getPath();
+            previous[i] = previousFolders.get(i).getPath();
         }
 
         savedInstanceState.putStringArray(Constants.STATE_PREVIOUS_FOLDERS, previous);
 
-        if (mActionMode != null)
+        if (actionMode != null)
         {
             savedInstanceState.putBoolean(Constants.STATE_ACTION_MODE_CURRENTLY_ON, true);
         }
@@ -203,9 +227,9 @@ public class FileBrowserActivity extends SherlockListActivity
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event)
     {
-        if (keyCode == KeyEvent.KEYCODE_BACK && !mPreviousFolders.isEmpty())
+        if (keyCode == KeyEvent.KEYCODE_BACK && !previousFolders.isEmpty())
         {
-            File folder = mPreviousFolders.pop();
+            File folder = previousFolders.pop();
             loadFolder(folder);
             return true;
         } else
@@ -219,7 +243,7 @@ public class FileBrowserActivity extends SherlockListActivity
     {
         super.onStart();
 
-        loadFolder(mCurrentFolder);
+        loadFolder(currentFolder);
     }
 
     public boolean onOptionsItemSelected(MenuItem item)
@@ -236,36 +260,36 @@ public class FileBrowserActivity extends SherlockListActivity
 
     private void navigateBack()
     {
-        if (mPreviousFolders.isEmpty())
+        if (previousFolders.isEmpty())
         {
             finish();
             return;
         }
-        loadFolder(mPreviousFolders.pop());
+        loadFolder(previousFolders.pop());
     }
 
     private void loadFolder(File folder)
     {
         assert folder.isDirectory();
-        mCurrentFolder = folder;
+        currentFolder = folder;
         setSupportProgressBarIndeterminateVisibility(true);
-        ArrayList<File> adapterFiles = mFileBrowserAdapter.getFiles();
+        ArrayList<File> adapterFiles = fileBrowserListAdapter.getFiles();
         adapterFiles.clear();
         adapterFiles.addAll(Arrays.asList(folder.listFiles()));
-        if (mActionMode == null)
+        if (actionMode == null)
         {
-            mFileBrowserAdapter.clearChecked();
+            fileBrowserListAdapter.clearChecked();
         }
-        mFileBrowserAdapter.notifyDataSetChanged();
+        fileBrowserListAdapter.notifyDataSetChanged();
 
-        SparseBooleanArray checkedPositions = mFileBrowserAdapter.getCheckedPositions();
+        SparseBooleanArray checkedPositions = fileBrowserListAdapter.getCheckedPositions();
         for (int i = 0; i < checkedPositions.size(); i++)
         {
             int adapterPosition = checkedPositions.keyAt(i);
             try
             {
-                File fileSelected = mFileBrowserAdapter.getItem(adapterPosition);
-                mCurrentlySelectedFiles.add(fileSelected.getPath());
+                File fileSelected = fileBrowserListAdapter.getItem(adapterPosition);
+                currentlySelectedFiles.add(fileSelected.getPath());
             } catch (IndexOutOfBoundsException e)
             {
                 break;
@@ -341,7 +365,7 @@ public class FileBrowserActivity extends SherlockListActivity
         {
             mChecked = 0;
             mCheckedPositions = new SparseBooleanArray();
-            mCurrentlySelectedFiles.clear();
+            currentlySelectedFiles.clear();
             notifyDataSetChanged();
         }
 
@@ -355,7 +379,7 @@ public class FileBrowserActivity extends SherlockListActivity
                 }
 
                 mCheckedPositions.put(i, true);
-                mCurrentlySelectedFiles.add(mFiles.get(i).getPath());
+                currentlySelectedFiles.add(mFiles.get(i).getPath());
             }
             notifyDataSetChanged();
         }
@@ -392,24 +416,28 @@ public class FileBrowserActivity extends SherlockListActivity
             TextView name = (TextView) mView.findViewById(R.id.nameTextView);
             ImageView type = (ImageView) mView.findViewById(R.id.skyDriveItemIcon);
 
-            final View view = mView; //Changes all the time, so we need a reference
+            final WeakReference viewReference = new WeakReference(convertView);
+
             File file = getItem(position);
             name.setText(file.getName());
 
             int fileDrawable = determineFileDrawable(file);
+            type.setImageResource(fileDrawable);
+
             if (fileDrawable == R.drawable.image_x_generic)
             {
+
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                 if (!preferences.getBoolean(Constants.THUMBNAILS_DISABLED, false))
                 {
+
+                    final Bitmap bitmap = getBitmapFromThumbCache(file.getName());
                     AsyncTask getThumb = new AsyncTask<File, Void, Bitmap>()
                     {
                         @Override
                         protected Bitmap doInBackground(File... files)
                         {
-                            File thumbCacheFile = new File(files[0].getAbsolutePath());
                             BitmapFactory.Options options = new BitmapFactory.Options();
-
                             options.inJustDecodeBounds = true;
                             BitmapFactory.decodeFile(files[0].getPath(), options);
 
@@ -421,29 +449,74 @@ public class FileBrowserActivity extends SherlockListActivity
 
                             Bitmap thumb = BitmapFactory.decodeFile(files[0].getPath(), options);
 
-                            cacheThumb(thumbCacheFile, thumb);
+                            cacheThumb(files[0], thumb);
                             return thumb;
                         }
 
                         protected void onPostExecute(Bitmap thumb)
                         {
-                            ((ImageView) view.findViewById(R.id.skyDriveItemIcon)).setImageBitmap(thumb);
+                            if (viewReference != null && viewReference.get() != null)
+                            {
+                                ((ImageView)
+                                        ((View) viewReference.get())
+                                                .findViewById(R.id.skyDriveItemIcon))
+                                        .setImageBitmap(thumb);
+                            }
                         }
                     };
-                    if (Build.VERSION.SDK_INT >= 11)
+
+                    File thumbCache = cacheOfThumbExists(file);
+
+                    if (bitmap != null)
                     {
-                        getThumb.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new File[]{file});
-                    } else
+                        if (viewReference != null  && viewReference.get() != null)
+                        {
+                            ((ImageView)
+                                    ((View) viewReference.get())
+                                            .findViewById(R.id.skyDriveItemIcon))
+                                    .setImageBitmap(bitmap);
+                        }
+                    }
+                    else if(thumbCache != null)
                     {
-                        getThumb.execute(new File[]{file});
+                        if(viewReference != null
+                                && viewReference.get() != null)
+                        {
+                            getThumb.execute(new File[]{thumbCache});
+                        }
+                    }
+                    else
+                    {
+                        if(viewReference != null
+                                && viewReference.get() != null)
+                        {
+                            getThumb.execute(new File[]{file});
+                        }
                     }
                 }
-            } else
-            {
-                type.setImageResource(fileDrawable);
             }
             setChecked(isChecked(position));
             return mView;
+        }
+
+        private File cacheOfThumbExists(File file)
+        {
+            File cacheFolder = new File(Environment.getExternalStorageDirectory()
+                    + "/Android/data/com.killerud.skydrive/thumbs/");
+            if (!cacheFolder.exists())
+            {
+                cacheFolder.mkdirs();
+                return null;
+            }
+
+            File thumbFile = new File(cacheFolder, file.getName());
+            if (thumbFile.exists())
+            {
+                return thumbFile;
+            } else
+            {
+                return null;
+            }
         }
 
         private void cacheThumb(File thumbCacheFile, Bitmap thumb)
@@ -458,7 +531,7 @@ public class FileBrowserActivity extends SherlockListActivity
             OutputStream out;
             try
             {
-                out = new BufferedOutputStream(new FileOutputStream(thumbCacheFile));
+                out = new BufferedOutputStream(new FileOutputStream(new File(cacheFolder, thumbCacheFile.getName())));
                 thumb.compress(Bitmap.CompressFormat.PNG, 85, out);
                 out.flush();
                 out.close();
@@ -511,13 +584,13 @@ public class FileBrowserActivity extends SherlockListActivity
             String title = item.getTitle().toString();
             if (title.equalsIgnoreCase(getString(R.string.selectAll)))
             {
-                mFileBrowserAdapter.checkAll();
+                fileBrowserListAdapter.checkAll();
                 item.setTitle(getString(R.string.selectNone));
                 updateActionModeTitleWithSelectedCount();
                 return true;
             } else if (title.equalsIgnoreCase(getString(R.string.selectNone)))
             {
-                mFileBrowserAdapter.clearChecked();
+                fileBrowserListAdapter.clearChecked();
                 item.setTitle(getString(R.string.selectAll));
                 updateActionModeTitleWithSelectedCount();
                 return true;
@@ -528,12 +601,12 @@ public class FileBrowserActivity extends SherlockListActivity
                 dialog.setIcon(R.drawable.warning_triangle);
                 StringBuilder deleteMessage = new StringBuilder();
                 deleteMessage.append(getString(R.string.deleteConfirmationBody));
-                for (int i = 0; i < mCurrentlySelectedFiles.size(); i++)
+                for (int i = 0; i < currentlySelectedFiles.size(); i++)
                 {
-                    int index = mCurrentlySelectedFiles.get(i).lastIndexOf("/");
+                    int index = currentlySelectedFiles.get(i).lastIndexOf("/");
                     if (index != -1)
                     {
-                        deleteMessage.append(mCurrentlySelectedFiles.get(i)
+                        deleteMessage.append(currentlySelectedFiles.get(i)
                                 .substring(index + 1));
                         deleteMessage.append("\n");
                     }
@@ -546,7 +619,7 @@ public class FileBrowserActivity extends SherlockListActivity
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i)
                     {
-                        ArrayList<String> files = mCurrentlySelectedFiles;
+                        ArrayList<String> files = currentlySelectedFiles;
                         for (int j = 0; j < files.size(); j++)
                         {
                             File file = new File(files.get(j));
@@ -574,7 +647,7 @@ public class FileBrowserActivity extends SherlockListActivity
                         }
 
                         ((FileBrowserListAdapter) getListAdapter()).clearChecked();
-                        loadFolder(mCurrentFolder);
+                        loadFolder(currentFolder);
                         mode.finish();
                     }
                 });
@@ -599,7 +672,7 @@ public class FileBrowserActivity extends SherlockListActivity
         @Override
         public void onDestroyActionMode(com.actionbarsherlock.view.ActionMode mode)
         {
-            mActionMode = null;
+            actionMode = null;
             ((FileBrowserListAdapter) getListAdapter()).clearChecked();
             ((FileBrowserListAdapter) getListAdapter()).notifyDataSetChanged();
             supportInvalidateOptionsMenu();
@@ -612,13 +685,13 @@ public class FileBrowserActivity extends SherlockListActivity
         switch (checkedCount)
         {
             case 0:
-                mActionMode.setTitle(null);
+                actionMode.setTitle(null);
                 break;
             case 1:
-                mActionMode.setTitle(getString(R.string.selectedOne));
+                actionMode.setTitle(getString(R.string.selectedOne));
                 break;
             default:
-                mActionMode.setTitle("" + checkedCount + " " + getString(R.string.selectedSeveral));
+                actionMode.setTitle("" + checkedCount + " " + getString(R.string.selectedSeveral));
                 break;
         }
     }

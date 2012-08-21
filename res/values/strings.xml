@@ -4,11 +4,12 @@
     <string name="appName">Explorer for SkyDrive</string>
     <string name="initializingMessage">Connecting to your Microsoft account…</string>
     <string name="firstWelcomeMessage">Sign in with your Microsoft account to get
-        started!</string>
+        started!
+    </string>
     <string name="signInToWindowsLive">Sign in</string>
     <string name="mySkyDrive">Your SkyDrive</string>
-    <string name="automaticSignInError">Couldn\'t connect automatically. Try manually. </string>
-    <string name="manualSignInError">Couldn\'t connect. Do you have an internet connection? </string>
+    <string name="automaticSignInError">Couldn\'t connect automatically. Try manually.</string>
+    <string name="manualSignInError">Couldn\'t connect. Do you have an internet connection?</string>
     <string name="noAccountQuestion">No Microsoft account? Go to live.com and register for 7GB of free storage!</string>
 
     <string name="icon">Icon</string>
@@ -29,8 +30,6 @@
     <string name="serviceLabel">Camera AutoUploader for SkyDrive</string>
 
 
-
-
     <string name="fileWillBeDownloaded">The file will be downloaded to your phone</string>
     <string name="ok">OK</string>
     <string name="downloading">Downloading</string>
@@ -39,7 +38,7 @@
     <string name="fileSaved">File saved</string>
     <string name="downloadError">Something went wrong while downloading. The file was not saved on your phone.</string>
 
-    <string name="savedFileCopy"> Copy </string>
+    <string name="savedFileCopy">Copy</string>
     <string name="savedLowerCase">saved</string>
     <string name="from">from</string>
     <string name="to">to</string>
@@ -90,9 +89,11 @@
 
     <string name="appExitConfirmationHeader">Are you sure you want to close?</string>
     <string name="confirmExitHeader">Confirm on app exit</string>
-    <string name="confirmExitSummary">Stops you from accidentally closing the app by presenting a confirmation dialog on exit</string>
+    <string name="confirmExitSummary">Stops you from accidentally closing the app by presenting a confirmation dialog on
+        exit
+    </string>
 
-   <string name="sharedFiles">Shared files</string>
+    <string name="sharedFiles">Shared files</string>
     <string name="sharingLinks">Sharing links</string>
     <string name="sharingLinksSummary">Anyone with these links will be able to see the file</string>
     <string name="sharingGeneratingLinks">Generating sharing links…</string>
@@ -116,7 +117,9 @@
     <string name="errorRenamingFile">Error renaming file(s)</string>
     <string name="errorCopyingFile">Error copying file(s)</string>
     <string name="errorCouldNotFetchFileForSharing">Could not find the file you shared, sorry!</string>
-    <string name="errorTooManyFilesAtOnce">Can\'t handle more than 99 files in one go, sorry. Handling as many as I can!</string>
+    <string name="errorTooManyFilesAtOnce">Can\'t handle more than 99 files in one go, sorry. Handling as many as I
+        can!
+    </string>
     <string name="errorLoggedOut">You\'ve been logged out and have to log in again to keep using the app</string>
     <string name="errorQuotaFetch">Couldn\'t get numbers</string>
     <string name="errorFileNotFound">Couldn\'t find the file, it has not been uploaded</string>
@@ -125,10 +128,12 @@
     <string name="cameraUploadHeader">Camera upload</string>
     <string name="cameraUploadSummary">Upload camera images automatically</string>
     <string name="limitCameraToWifiHeader">Only upload while on WiFi</string>
-    <string name="limitCameraToWifiSummary">Use this if you do not have a data plan. Changes require app restart.</string>
+    <string name="limitCameraToWifiSummary">Use this if you do not have a data plan. Changes require app restart.
+    </string>
     <string name="limitDataToWiFiHeader">Limit all app traffic to WiFi</string>
     <string name="limitDataToWiFiSummary">Use this if you do not have a data plan. Changes require app restart.</string>
-    <string name="noInternetConnection">No available WiFi connection. Enable mobile data in settings to use the app.</string>
+    <string name="noInternetConnection">No available WiFi connection. Enable mobile data in settings to use the app.
+    </string>
     <string name="downloadLocation">Download location</string>
     <string name="downloadLocationSummary">Where you want your files to be downloaded</string>
 
@@ -136,7 +141,8 @@
     <string name="preferencesData">Data usage</string>
     <string name="preferencesAbout">About the app</string>
     <string name="disableThumb">Disable thumbnails</string>
-    <string name="disableThumbSummary">Conserves memory and bandwidth. Disable thumbnails if you experience crashes.</string>
+    <string name="disableThumbSummary">Conserves memory and bandwidth. Disable thumbnails if you experience crashes.
+    </string>
     <string name="donate">Donate</string>
     <string name="donateSummary">Click to donate a small amount to help out the developer.</string>
     <string name="skyDriveQuota">Space on SkyDrive</string>
@@ -170,14 +176,6 @@
     <string name="audioControls">Music controls</string>
 
     <string name="audioQueueClear">Clear</string>
-
-
-
-
-
-
-
-
 
 
 </resources>

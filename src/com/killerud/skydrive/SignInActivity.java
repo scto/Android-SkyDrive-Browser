@@ -291,8 +291,7 @@ public class SignInActivity extends SherlockActivity
             setSupportProgressBarIndeterminateVisibility(false);
 
             return super.onKeyDown(keyCode, event);
-        }
-        else
+        } else
         {
             return super.onKeyDown(keyCode, event);
         }

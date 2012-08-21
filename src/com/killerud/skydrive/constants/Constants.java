@@ -42,7 +42,7 @@ final public class Constants
     public static final long CACHE_MAX_SIZE = 104857600; //100MB
 
     /* Settings */
-    public static final String  CONFIRM_EXIT = "confirm_exit";
+    public static final String CONFIRM_EXIT = "confirm_exit";
     public static final String THUMBNAILS_DISABLED = "thumbnails_disabled";
 
 

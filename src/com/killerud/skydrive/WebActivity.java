@@ -19,9 +19,10 @@ import com.killerud.skydrive.util.WebViewFixed;
 
 /**
  * In large part taken from the Reddit is fun/Diode open source project available here:
- *  https://github.com/zagaberoo/diode/
+ * https://github.com/zagaberoo/diode/
  */
-public class WebActivity extends SherlockActivity {
+public class WebActivity extends SherlockActivity
+{
     public static final String EXTRA_FILE_LINK = "extra_file_link";
 
     private String mTitle;
@@ -48,21 +49,27 @@ public class WebActivity extends SherlockActivity {
         mWebView.getSettings().setUseWideViewPort(true);
 
         mWebView.setBackgroundColor(0);
-        mWebView.setWebViewClient(new WebViewClient() {
+        mWebView.setWebViewClient(new WebViewClient()
+        {
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            public boolean shouldOverrideUrlLoading(WebView view, String url)
+            {
                 view.loadUrl(url);
                 return true;
             }
 
             @Override
-            public void onPageFinished(WebView view, String url) {
+            public void onPageFinished(WebView view, String url)
+            {
                 String host = Uri.parse(url).getHost();
-                if (host != null && mTitle != null) {
+                if (host != null && mTitle != null)
+                {
                     setTitle(host + " : " + mTitle);
-                } else if (host != null) {
+                } else if (host != null)
+                {
                     setTitle(host);
-                } else if (mTitle != null) {
+                } else if (mTitle != null)
+                {
                     setTitle(mTitle);
                 }
             }
@@ -70,32 +77,38 @@ public class WebActivity extends SherlockActivity {
 
         final Activity activity = this;
 
-        mWebView.setWebChromeClient(new WebChromeClient() {
+        mWebView.setWebChromeClient(new WebChromeClient()
+        {
             @Override
-            public void onProgressChanged(WebView view, int progress) {
+            public void onProgressChanged(WebView view, int progress)
+            {
                 // Activities and WebViews measure progress with different scales.
                 // The progress meter will automatically disappear when we reach 100%
                 activity.setProgress(progress * 100);
             }
 
             @Override
-            public void onReceivedTitle(WebView view, String title) {
+            public void onReceivedTitle(WebView view, String title)
+            {
                 mTitle = title;
                 setTitle(title);
             }
         }
         );
 
-        if (savedInstanceState != null) {
+        if (savedInstanceState != null)
+        {
             mWebView.restoreState(savedInstanceState);
-        } else {
+        } else
+        {
             mWebView.loadUrl(mUri);
         }
 
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         super.onCreateOptionsMenu(menu);
 
         MenuInflater inflater = getSupportMenuInflater();
@@ -113,7 +126,9 @@ public class WebActivity extends SherlockActivity {
                 return true;
             case R.id.openBrowser:
                 if (mUri == null)
+                {
                     return true;
+                }
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUri));
                 startActivity(browserIntent);
                 return true;
@@ -126,8 +141,10 @@ public class WebActivity extends SherlockActivity {
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if ((keyCode == KeyEvent.KEYCODE_BACK) && mWebView.canGoBack()) {
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        if ((keyCode == KeyEvent.KEYCODE_BACK) && mWebView.canGoBack())
+        {
             mWebView.goBack();
             return true;
         }
@@ -135,7 +152,8 @@ public class WebActivity extends SherlockActivity {
     }
 
     @Override
-    public void onDestroy() {
+    public void onDestroy()
+    {
         super.onDestroy();
         // Must remove the WebView from the view system before destroying.
         mWebView.setVisibility(View.GONE);
@@ -144,7 +162,8 @@ public class WebActivity extends SherlockActivity {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(Bundle outState)
+    {
         mWebView.saveState(outState);
     }
 

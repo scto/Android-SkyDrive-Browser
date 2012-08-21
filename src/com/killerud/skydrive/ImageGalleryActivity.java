@@ -11,7 +11,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
-import android.widget.*;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -38,6 +41,7 @@ public class ImageGalleryActivity extends SherlockActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.image_gallery);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         savePhoto = false;
 
@@ -63,12 +67,11 @@ public class ImageGalleryActivity extends SherlockActivity
             try
             {
                 layout.removeView(textView);
-            }catch (NullPointerException e)
+            } catch (NullPointerException e)
             {
                 //View does not exist
             }
-        }
-        else if(client != null)
+        } else if (client != null)
         {
 
             final LiveDownloadOperation operation =
@@ -102,7 +105,8 @@ public class ImageGalleryActivity extends SherlockActivity
         }
     }
 
-    private BitmapFactory.Options determineBitmapDecodeOptions() {
+    private BitmapFactory.Options determineBitmapDecodeOptions()
+    {
         BitmapFactory.Options scoutOptions = new BitmapFactory.Options();
         scoutOptions.inJustDecodeBounds = true;
 
@@ -111,9 +115,9 @@ public class ImageGalleryActivity extends SherlockActivity
         int bitmapHeight = scoutOptions.outHeight;
         int bitmapWidth = scoutOptions.outWidth;
 
-        int dividend  = bitmapWidth;
+        int dividend = bitmapWidth;
 
-        if(bitmapHeight > bitmapWidth)
+        if (bitmapHeight > bitmapWidth)
         {
             dividend = bitmapHeight;
         }
@@ -129,7 +133,8 @@ public class ImageGalleryActivity extends SherlockActivity
 
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         super.onCreateOptionsMenu(menu);
 
         MenuInflater inflater = getSupportMenuInflater();
@@ -171,10 +176,12 @@ public class ImageGalleryActivity extends SherlockActivity
         if (savePhoto)
         {
             xLoader.showFileXloadedNotification(image, true);
-        }
-        else
+        } else
         {
-            if (image != null) image.delete();
+            if (image != null)
+            {
+                image.delete();
+            }
         }
     }
 }

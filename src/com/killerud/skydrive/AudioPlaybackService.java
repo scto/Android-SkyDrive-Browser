@@ -184,14 +184,15 @@ public class AudioPlaybackService extends Service
 
     private void startPlayback(SkyDriveAudio skyDriveAudio)
     {
-        if(mediaPlayer == null)
+        if (mediaPlayer == null)
         {
             mediaPlayer = createMediaPlayer();
         }
 
         if (skyDriveAudio == null && repeatPlaylist)
         {
-            if(NOW_PLAYING.size()>0){
+            if (NOW_PLAYING.size() > 0)
+            {
                 populateNowPlayingWithPlayed();
                 startPlayback(NOW_PLAYING.peek());
             }
@@ -212,7 +213,8 @@ public class AudioPlaybackService extends Service
             } else
             {
 
-                if(connectionIsUnavailable()){
+                if (connectionIsUnavailable())
+                {
                     stopSong();
                     return;
                 }
@@ -247,7 +249,8 @@ public class AudioPlaybackService extends Service
         for (int i = 0; i < PLAYED.size(); i++)
         {
             audio = PLAYED.pop();
-            if(audio != null){
+            if (audio != null)
+            {
                 NOW_PLAYING.add(PLAYED.pop());
             }
         }
@@ -424,7 +427,7 @@ public class AudioPlaybackService extends Service
     public void populateNowPlayingWithUpdatedQueue(List<SkyDriveAudio> newQueue)
     {
         NOW_PLAYING.clear();
-        for(SkyDriveAudio skyDriveAudio : newQueue)
+        for (SkyDriveAudio skyDriveAudio : newQueue)
         {
             NOW_PLAYING.add(skyDriveAudio);
         }
@@ -462,7 +465,7 @@ public class AudioPlaybackService extends Service
 
     public void startFirstSong()
     {
-        if(NOW_PLAYING.size() != 1)
+        if (NOW_PLAYING.size() != 1)
         {
             return;
         }

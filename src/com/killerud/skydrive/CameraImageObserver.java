@@ -10,7 +10,6 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.widget.Toast;
 import com.killerud.skydrive.constants.Constants;
 import com.killerud.skydrive.util.Stopwatch;
 import com.microsoft.live.*;
@@ -46,18 +45,18 @@ public class CameraImageObserver extends ContentObserver
         }
 
         String imagePath = getLatestCameraImagePathFromMediaStore();
-        if(imagePath == null)
+        if (imagePath == null)
         {
             return;
         }
 
         final ArrayList<String> path = new ArrayList<String>();
         path.add(imagePath);
-        if(!connectionIsUnavailable())
+        if (!connectionIsUnavailable())
         {
 
             final LiveConnectClient client = ((BrowserForSkyDriveApplication) context.getApplication()).getConnectClient();
-            if(client == null)
+            if (client == null)
             {
                 final LiveAuthClient authClient = new LiveAuthClient(context, Constants.APP_CLIENT_ID);
                 ((BrowserForSkyDriveApplication) context.getApplication()).setAuthClient(authClient);
@@ -87,7 +86,8 @@ public class CameraImageObserver extends ContentObserver
                         Log.e(Constants.LOGTAG, "Error: " + exception.getMessage());
                     }
                 });
-            }else{
+            } else
+            {
                 loader.uploadFile(client, path, "me/skydrive/camera_roll");
             }
 
@@ -99,7 +99,8 @@ public class CameraImageObserver extends ContentObserver
     {
         getPreferences();
         boolean unavailable;
-        try{
+        try
+        {
             unavailable = (isWiFiOnly &&
                     (connectivityManager.getActiveNetworkInfo().getType()
                             != ConnectivityManager.TYPE_WIFI))
@@ -111,7 +112,7 @@ public class CameraImageObserver extends ContentObserver
             {
                 unavailable = true;
             }
-        }catch (NullPointerException e)
+        } catch (NullPointerException e)
         {
             unavailable = true;
         }
@@ -131,7 +132,7 @@ public class CameraImageObserver extends ContentObserver
         Cursor cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null,
                 MediaStore.Images.Media._ID + " DESC");
 
-        if(cursor == null)
+        if (cursor == null)
         {
             return -1;
         }
@@ -179,7 +180,7 @@ public class CameraImageObserver extends ContentObserver
 
         Uri image = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, latestMediaId);
         Cursor cursor = context.getContentResolver().query(image, columns, null, null, null);
-        if(cursor == null)
+        if (cursor == null)
         {
             cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null,
                     MediaStore.Images.Media._ID + " DESC");
@@ -190,7 +191,7 @@ public class CameraImageObserver extends ContentObserver
             while (true)
             {
 
-                if(stopwatch.elapsedTimeInSeconds()>10)
+                if (stopwatch.elapsedTimeInSeconds() > 10)
                 {
                     path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
                     break;

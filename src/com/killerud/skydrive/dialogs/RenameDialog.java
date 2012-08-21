@@ -41,7 +41,7 @@ public class RenameDialog extends SherlockActivity
         {
             name.setText(fileNames.get(0)
                     .substring(0, fileNames.get(0).lastIndexOf(".")));
-        }catch (IndexOutOfBoundsException e)
+        } catch (IndexOutOfBoundsException e)
         {
             name.setText(getString(R.string.rename));
         }
@@ -70,7 +70,6 @@ public class RenameDialog extends SherlockActivity
                 finish();
             }
         });
-
 
 
     }

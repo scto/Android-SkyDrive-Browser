@@ -44,7 +44,7 @@ public class BrowserForSkyDriveApplication extends Application
 
     public LiveAuthClient getAuthClient()
     {
-        if(authClient == null)
+        if (authClient == null)
         {
             return new LiveAuthClient(getApplicationContext(), Constants.APP_CLIENT_ID);
         }

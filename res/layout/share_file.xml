@@ -3,12 +3,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
-        android:orientation="vertical">
+              android:orientation="vertical">
 
     <TextView android:id="@+id/sharingLinksSummary"
               android:text="@string/sharingLinksSummary"
               android:layout_height="wrap_content"
-              android:layout_width="fill_parent" />
+              android:layout_width="fill_parent"/>
 
     <EditText android:text="@string/sharingGeneratingLinks"
               android:id="@+id/sharingLinks"
@@ -16,12 +16,12 @@
               android:lines="5"
               android:layout_height="wrap_content"
               android:layout_width="fill_parent"
-            android:paddingBottom="10dp" />
+              android:paddingBottom="10dp"/>
 
     <CheckBox android:id="@+id/sharingEditable"
-             android:layout_height="wrap_content"
-             android:layout_width="fill_parent"
-             android:text="@string/sharingEnableEditing"
+              android:layout_height="wrap_content"
+              android:layout_width="fill_parent"
+              android:text="@string/sharingEnableEditing"
             />
 
 
@@ -40,7 +40,7 @@
                 android:text="@string/share"
                 android:layout_weight="1"
                 android:layout_width="wrap_content"
-                android:layout_height="fill_parent" />
+                android:layout_height="fill_parent"/>
 
     </LinearLayout>
 

@@ -18,6 +18,6 @@ public class Stopwatch
 
     public double elapsedTimeInSeconds()
     {
-        return (System.currentTimeMillis() - start)/1000d;
+        return (System.currentTimeMillis() - start) / 1000d;
     }
 }

@@ -4,8 +4,8 @@
               android:layout_width="fill_parent"
               android:layout_height="fill_parent">
     <com.killerud.skydrive.util.WebViewFixed android:layout_height="fill_parent"
-             android:layout_width="fill_parent"
-             android:id="@+id/webBrowserView"
-             />
+                                             android:layout_width="fill_parent"
+                                             android:id="@+id/webBrowserView"
+            />
 
 </LinearLayout>

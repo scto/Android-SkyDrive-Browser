@@ -8,10 +8,10 @@
               android:id="@+id/audioLayout">
 
     <ImageView android:id="@+id/audioAlbumArt"
-            android:layout_height="wrap_content"
+               android:layout_height="wrap_content"
                android:layout_width="fill_parent"
                android:padding="15dp"
-                android:src="@drawable/audio_album_generic"
+               android:src="@drawable/audio_album_generic"
             />
 
     <TextView android:id="@+id/audioTitleText"
@@ -20,6 +20,7 @@
               android:padding="2dp"
               android:textSize="20dp"
               android:text="@string/audioNotPlaying"/>
+
 
     <TextView android:id="@+id/audioArtistText"
               android:layout_height="wrap_content"

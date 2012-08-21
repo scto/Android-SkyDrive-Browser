@@ -7,7 +7,6 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Environment;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
@@ -21,8 +20,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.*;
-import java.net.URLEncoder;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -96,9 +97,10 @@ public class XLoader
         final File file = new File(localFilePath);
 
         InputStream fileStream;
-        try{
+        try
+        {
             fileStream = new FileInputStream(file);
-        }catch (FileNotFoundException e)
+        } catch (FileNotFoundException e)
         {
             fileNotFoundNotification(file);
             localFilePaths.remove(localFilePaths.size() - 1);
@@ -113,19 +115,22 @@ public class XLoader
         {
             final LiveOperation operation =
                     client.uploadAsync(currentFolderId,
-                            file.getName(), fileStream, OverwriteOption.Overwrite,
-                            new LiveUploadOperationListener() {
+                            file.getName(), file, OverwriteOption.Overwrite,
+                            new LiveUploadOperationListener()
+                            {
                                 int lastPercent = 0;
 
                                 @Override
                                 public void onUploadProgress(int totalBytes,
                                                              int bytesRemaining,
-                                                             LiveOperation operation) {
+                                                             LiveOperation operation)
+                                {
                                     int newPercent = computePercentCompleted(totalBytes, bytesRemaining);
                                     /* This is done to limit the amount of updates to the notification
                                     * Restrictionles updating makes the system crash, so beware!
                                     */
-                                    if (newPercent > lastPercent + 5 && notificationIsAvailable) {
+                                    if (newPercent > lastPercent + 5 && notificationIsAvailable)
+                                    {
                                         lastPercent = newPercent;
                                         notificationProgress.contentView.setProgressBar(R.id.progressBar, 100,
                                                 lastPercent, false);
@@ -135,45 +140,56 @@ public class XLoader
 
                                 @Override
                                 public void onUploadFailed(LiveOperationException exception,
-                                                           LiveOperation operation) {
-                                    if (notificationIsAvailable) {
+                                                           LiveOperation operation)
+                                {
+                                    if (notificationIsAvailable)
+                                    {
                                         notificationManager.cancel(NOTIFICATION_PROGRESS_ID);
                                     }
-                                    if (context != null) {
+                                    if (context != null)
+                                    {
                                         Toast.makeText(context, context.getString(R.string.uploadError), Toast.LENGTH_SHORT).show();
                                     }
 
-                                    try {
+                                    try
+                                    {
                                         localFilePaths.remove(localFilePaths.size() - 1);
                                         localFilePaths.trimToSize();
                                         uploadFile(client, localFilePaths, currentFolderId);
-                                    } catch (IndexOutOfBoundsException e) {
+                                    } catch (IndexOutOfBoundsException e)
+                                    {
                                         return;
                                     }
                                 }
 
                                 @Override
-                                public void onUploadCompleted(LiveOperation operation) {
-                                    if (notificationIsAvailable) {
+                                public void onUploadCompleted(LiveOperation operation)
+                                {
+                                    if (notificationIsAvailable)
+                                    {
                                         notificationManager.cancel(NOTIFICATION_PROGRESS_ID);
                                     }
                                     JSONObject result = operation.getResult();
-                                    if (result.has(JsonKeys.ERROR)) {
+                                    if (result.has(JsonKeys.ERROR))
+                                    {
                                         JSONObject error = result.optJSONObject(JsonKeys.ERROR);
                                         String message = error.optString(JsonKeys.MESSAGE);
                                         String code = error.optString(JsonKeys.CODE);
-                                        if (context != null) {
+                                        if (context != null)
+                                        {
                                             Toast.makeText(context,
                                                     context.getString(R.string.uploadError), Toast.LENGTH_SHORT).show();
                                         }
                                         return;
                                     }
                                     showFileXloadedNotification(file, false);
-                                    try {
+                                    try
+                                    {
                                         localFilePaths.remove(localFilePaths.size() - 1);
                                         localFilePaths.trimToSize();
                                         uploadFile(client, localFilePaths, currentFolderId);
-                                    } catch (IndexOutOfBoundsException e) {
+                                    } catch (IndexOutOfBoundsException e)
+                                    {
                                         return;
                                     }
                                 }
@@ -227,7 +243,7 @@ public class XLoader
         }
 
         final File fileToCreateLocally = checkForFileDuplicateAndCreateCopy(skyDriveFile);
-        if(!fileToCreateLocally.getParentFile().exists())
+        if (!fileToCreateLocally.getParentFile().exists())
         {
             fileToCreateLocally.getParentFile().mkdirs();
         }
@@ -769,7 +785,8 @@ public class XLoader
         int copyNr = 1;
 
         File result;
-        if(context != null){
+        if (context != null)
+        {
             result = new File(skyDriveFile.getLocalDownloadLocation() +
                     fileName + " " + context.getString(R.string.savedFileCopy) + " " + copyNr + extension);
         } else

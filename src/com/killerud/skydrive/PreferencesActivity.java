@@ -99,7 +99,7 @@ public class PreferencesActivity extends SherlockPreferenceActivity
                             "xml",
                             getActivity().getApplicationContext().getPackageName()));
 
-            if(resourceArgument.equals("preferences_data"))
+            if (resourceArgument.equals("preferences_data"))
             {
                 ((PreferencesActivity) getActivity()).getAndUpdateSkyDriveQuota(this);
             }
@@ -109,7 +109,7 @@ public class PreferencesActivity extends SherlockPreferenceActivity
     private void getAndUpdateSkyDriveQuota(final PreferenceFragment context)
     {
         LiveConnectClient client = ((BrowserForSkyDriveApplication) getApplication()).getConnectClient();
-        if(client == null)
+        if (client == null)
         {
             errorOnSkyDriveFetch(context);
             return;
@@ -130,9 +130,10 @@ public class PreferencesActivity extends SherlockPreferenceActivity
                     totalAvailableSpace = "unknown";
                 }
 
-                try{
+                try
+                {
                     unusedSpace = operation.getResult().getString("available");
-                }catch (JSONException e)
+                } catch (JSONException e)
                 {
                     totalAvailableSpace = "unknown";
                 }
@@ -140,17 +141,18 @@ public class PreferencesActivity extends SherlockPreferenceActivity
                 String baseString = getString(R.string.skyDriveQuotaSummary);
 
                 Preference quotaPreference;
-                if(context == null)
+                if (context == null)
                 {
                     quotaPreference = findPreference("skydrive_storage_quota");
-                }else
+                } else
                 {
                     quotaPreference = context.findPreference("skydrive_storage_quota");
                 }
 
-                try{
+                try
+                {
                     quotaPreference.setSummary(createReadableSkyDriveQuotaString(baseString, unusedSpace, totalAvailableSpace));
-                }catch(NumberFormatException e)
+                } catch (NumberFormatException e)
                 {
                     errorOnSkyDriveFetch(context);
                 }
@@ -167,10 +169,10 @@ public class PreferencesActivity extends SherlockPreferenceActivity
     private void errorOnSkyDriveFetch(PreferenceFragment context)
     {
         Preference quotaPreference;
-        if(context == null)
+        if (context == null)
         {
             quotaPreference = findPreference("skydrive_storage_quota");
-        }else
+        } else
         {
             quotaPreference = context.findPreference("skydrive_storage_quota");
         }
@@ -181,7 +183,7 @@ public class PreferencesActivity extends SherlockPreferenceActivity
     {
         long unused = Long.parseLong(unusedSpace);
         long totalAvailable = Long.parseLong(totalAvailableSpace);
-        long occupied = totalAvailable-unused;
+        long occupied = totalAvailable - unused;
 
         String occupiedInGigabytes = Utility.convertBytesToGigabytes(occupied) + "GB";
         String totalAvailableInGigabytes = Utility.convertBytesToGigabytes(totalAvailable) + "GB";

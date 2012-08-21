@@ -58,7 +58,10 @@ public class NewFolderDialog extends SherlockActivity
             @Override
             public void onClick(View v)
             {
-                if(mClient == null) return;
+                if (mClient == null)
+                {
+                    return;
+                }
 
                 Map<String, String> folder = new HashMap<String, String>();
                 folder.put(JsonKeys.NAME, name.getText().toString());
@@ -83,8 +86,7 @@ public class NewFolderDialog extends SherlockActivity
                                 if (result.has(JsonKeys.ERROR))
                                 {
                                     Toast.makeText(getApplicationContext(), R.string.errorFolderCouldNotBeCreated, Toast.LENGTH_SHORT).show();
-                                }
-                                else
+                                } else
                                 {
                                     ((BrowserForSkyDriveApplication) getApplication()).getCurrentBrowser().reloadFolder();
                                     finish();

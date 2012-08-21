@@ -8,7 +8,8 @@
     <string name="mySkyDrive">Din SkyDrive</string>
     <string name="automaticSignInError">Kunne ikke logge på automatisk. Prøv å logge på manuelt.</string>
     <string name="manualSignInError">Kunne ikke logge på. Har du en nettforbindelse?</string>
-    <string name="noAccountQuestion">Ingen Microsoft-konto? Gå til live.com og registrer deg for 7GB gratis lagring!</string>
+    <string name="noAccountQuestion">Ingen Microsoft-konto? Gå til live.com og registrer deg for 7GB gratis lagring!
+    </string>
 
     <string name="icon">Ikon</string>
     <string name="noItemsInFolder">Her var det ingenting</string>
@@ -86,7 +87,9 @@
 
     <string name="appExitConfirmationHeader">Er du sikker på at du vil lukke?</string>
     <string name="confirmExitHeader">Bekreft lukking</string>
-    <string name="confirmExitSummary">Hindrer deg i å lukke appen ved et uhell ved å åpne en dialogboks for bekreftelse</string>
+    <string name="confirmExitSummary">Hindrer deg i å lukke appen ved et uhell ved å åpne en dialogboks for
+        bekreftelse
+    </string>
 
     <string name="sharedFiles">Delte filer</string>
     <string name="sharingLinks">Delingslenker</string>
@@ -123,7 +126,9 @@
     <string name="limitCameraToWifiSummary">Bruk dette om du har et abonnement uten inkludert datatrafikk</string>
     <string name="limitDataToWiFiHeader">Begrens all data til WiFi</string>
     <string name="limitDataToWiFiSummary">Bruk dette om du har et abonnement uten inkludert datatrafikk</string>
-    <string name="noInternetConnection">Ingen WiFi tilgjengelig. Finn et trådløst nett eller skru av begrensingen i instillinger.</string>
+    <string name="noInternetConnection">Ingen WiFi tilgjengelig. Finn et trådløst nett eller skru av begrensingen i
+        instillinger.
+    </string>
 
     <string name="preferencesFeatures">Egenskaper</string>
     <string name="preferencesData">Databruk</string>

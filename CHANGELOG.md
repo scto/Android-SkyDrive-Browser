@@ -1,6 +1,6 @@
 Changelog
 =========
-**2.7**
+**2.7.1**
 - All file types can now be uploaded, and images ar eno longer shrunk on upload
 - Fixed issue with download path on fresh install
 - Fixed NPE in ImageGalleryActivity

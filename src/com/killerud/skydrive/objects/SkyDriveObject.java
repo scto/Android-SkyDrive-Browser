@@ -79,24 +79,19 @@ public abstract class SkyDriveObject
         if (type.equals(SkyDriveFolder.TYPE))
         {
             return new SkyDriveFolder(skyDriveObject);
-        }
-        else if (type.equals(SkyDriveAlbum.TYPE))
+        } else if (type.equals(SkyDriveAlbum.TYPE))
         {
             return new SkyDriveAlbum(skyDriveObject);
-        }
-        else if (type.equals(SkyDrivePhoto.TYPE))
+        } else if (type.equals(SkyDrivePhoto.TYPE))
         {
             return new SkyDrivePhoto(skyDriveObject);
-        }
-        else if (type.equals(SkyDriveVideo.TYPE))
+        } else if (type.equals(SkyDriveVideo.TYPE))
         {
             return new SkyDriveVideo(skyDriveObject);
-        }
-        else if (type.equals(SkyDriveAudio.TYPE))
+        } else if (type.equals(SkyDriveAudio.TYPE))
         {
             return new SkyDriveAudio(skyDriveObject);
-        }
-        else
+        } else
         {
             return new SkyDriveFile(skyDriveObject);
         }
@@ -165,7 +160,7 @@ public abstract class SkyDriveObject
 
     public String getLocalDownloadLocation()
     {
-        if(localDownloadLocation == null)
+        if (localDownloadLocation == null)
         {
             return Environment.getExternalStorageDirectory() + "/SkyDrive/";
         }
@@ -174,9 +169,11 @@ public abstract class SkyDriveObject
 
     public void setLocalDownloadLocation(String localDownloadLocation)
     {
-        if(localDownloadLocation.endsWith("/")){
+        if (localDownloadLocation.endsWith("/"))
+        {
             this.localDownloadLocation = localDownloadLocation;
-        }else {
+        } else
+        {
             this.localDownloadLocation = localDownloadLocation + "/";
         }
     }
