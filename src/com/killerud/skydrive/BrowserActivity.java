@@ -125,6 +125,10 @@ public class BrowserActivity extends SherlockListActivity
 
     public void addBitmapToThumbCache(String key, Bitmap bitmap)
     {
+        if(key == null || bitmap == null)
+        {
+            return;
+        }
         if (getBitmapFromThumbCache(key) == null)
         {
             thumbCache.put(key, bitmap);
@@ -168,6 +172,9 @@ public class BrowserActivity extends SherlockListActivity
         createLocalSkyDriveFolderIfNotExists();
         setupListView(getListView());
 
+
+
+
         folderHierarchyView = (TextView) findViewById(R.id.folder_hierarchy);
         folderHierarchy = new Stack<String>();
         folderHierarchy.push(getString(R.string.rootFolderTitle));
@@ -182,6 +189,11 @@ public class BrowserActivity extends SherlockListActivity
         {
             restoreSavedInstanceState(savedInstanceState);
         }
+
+        //ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+        //      this, R.array.ContentViewStyles, android.R.layout.simple_spinner_item);
+        //actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+        //actionBar.setListNavigationCallbacks(adapter, new ActionBarNavigationListener());
 
 
         loadFolder(currentFolderId);
@@ -617,6 +629,7 @@ public class BrowserActivity extends SherlockListActivity
                         currentFolderId);
             }
         }
+        finish();
     }
 
     @Override
@@ -1142,7 +1155,8 @@ public class BrowserActivity extends SherlockListActivity
             final WeakReference viewReference = new WeakReference(view);
             final WeakReference objectReference = new WeakReference(skyDriveObject);
 
-            if (viewReference == null || objectReference == null)
+            if (viewReference == null || objectReference == null
+                    || objectReference.get() == null || viewReference.get() == null )
             {
                 return;
             }
@@ -1156,7 +1170,7 @@ public class BrowserActivity extends SherlockListActivity
             /* Take something relatively unique as a key if the reference has been lost, so no bitmap is found */
             final long time = System.currentTimeMillis();
             final String imageKey = String.valueOf(
-                    (objectReference != null ? skyDriveObject.getName() : "" + time));
+                    (objectReference != null && objectReference.get() != null? ((SkyDriveObject) objectReference.get()).getName() : "" + time));
 
 
             final Bitmap bitmap = getBitmapFromThumbCache(imageKey);
@@ -1164,7 +1178,8 @@ public class BrowserActivity extends SherlockListActivity
             {
                 ImageView imgView = (ImageView) view.findViewById(R.id.skyDriveItemIcon);
                 imgView.setImageBitmap(bitmap);
-            } else if (objectReference != null && viewReference != null)
+            } else if (objectReference != null && viewReference != null
+                    && objectReference.get() != null && viewReference.get() != null)
             {
                 File cacheFolder = new File(Environment.getExternalStorageDirectory()
                         + "/Android/data/com.killerud.skydrive/thumbs/");
@@ -1175,7 +1190,7 @@ public class BrowserActivity extends SherlockListActivity
                 }
 
                 File thumbCache = new File(cacheFolder,
-                        (objectReference != null ? skyDriveObject.getName() : "" + time));
+                        (objectReference != null && objectReference.get() != null ? ((SkyDriveObject) objectReference.get()).getName() : "" + time));
                 if (thumbCache.exists())
                 {
                     BitmapFactory.Options options = new BitmapFactory.Options();
@@ -1184,7 +1199,8 @@ public class BrowserActivity extends SherlockListActivity
                     addBitmapToThumbCache(skyDriveObject.getName(), BitmapFactory.decodeFile(thumbCache.getPath(), options));
                     loadThumbnail(view, skyDriveObject);
                     Log.i(Constants.LOGTAG, "Thumb loaded from cache for image " + skyDriveObject.getName());
-                }else if (objectReference != null && viewReference != null)
+                }else if (objectReference != null && viewReference != null
+                        && objectReference.get() != null && viewReference.get() != null)
                 {
                 try
                 {
@@ -1202,7 +1218,7 @@ public class BrowserActivity extends SherlockListActivity
                         public void onDownloadFailed(LiveOperationException exception,
                                                      LiveDownloadOperation operation)
                         {
-                            if (objectReference != null)
+                            if (objectReference != null && objectReference.get() != null)
                             {
                                 Log.i(Constants.LOGTAG, "Thumb download failed for " + ((SkyDriveObject) objectReference.get()).getName()
                                         + ". " + exception.getMessage());
@@ -1213,7 +1229,7 @@ public class BrowserActivity extends SherlockListActivity
                         @Override
                         public void onDownloadCompleted(LiveDownloadOperation operation)
                         {
-                            if (objectReference != null)
+                            if (objectReference != null && objectReference.get() != null)
                             {
                                 Log.i(Constants.LOGTAG, "Thumb loaded from web for image " + ((SkyDriveObject) objectReference.get()).getName());
                             }
@@ -1235,7 +1251,7 @@ public class BrowserActivity extends SherlockListActivity
                                                         ((LiveDownloadOperation) inputStreams[0]).getStream());
                                             } catch (Exception e)
                                             {
-                                                if (objectReference != null)
+                                                if (objectReference != null && objectReference.get() != null)
                                                 {
                                                     Log.i(Constants.LOGTAG, "Thumb download failed for " + ((SkyDriveObject) objectReference.get()).getName()
                                                             + ". " + e.getMessage());
@@ -1259,7 +1275,7 @@ public class BrowserActivity extends SherlockListActivity
                                                 work with the other folders absent...
                                                 */
                                             }
-                                            if (objectReference != null)
+                                            if (objectReference != null && objectReference.get() != null)
                                             {
                                                 File thumb = new File(cacheFolder,
                                                         ((SkyDriveObject) objectReference.get()).getName());
@@ -1279,7 +1295,7 @@ public class BrowserActivity extends SherlockListActivity
                                                    * doe to rare cases of crashes when activity
                                                    * loses focus during load.
                                                    * */
-                                                    if (objectReference != null)
+                                                    if (objectReference != null && objectReference.get() != null)
                                                     {
                                                         Log.e(Constants.LOGTAG, "Could not cache thumbnail for " +
                                                                 thumb.getName() + ". " + e.toString());
@@ -1287,7 +1303,8 @@ public class BrowserActivity extends SherlockListActivity
                                                 }
 
                                                 addBitmapToThumbCache(thumb.getName(), bm);
-                                                if (objectReference != null && viewReference != null)
+                                                if (objectReference != null && viewReference != null
+                                                        && objectReference.get() != null && viewReference.get() != null)
                                                 {
                                                     loadThumbnail((View) viewReference.get(),
                                                             (SkyDriveObject) objectReference.get());
@@ -1301,7 +1318,7 @@ public class BrowserActivity extends SherlockListActivity
                                 } catch (Exception e)
                                 {
                                     Log.i(Constants.LOGTAG, "OnDownloadCompleted failed for " +
-                                            (objectReference != null ? ((SkyDriveObject) objectReference.get()).getName() : " file")
+                                            (objectReference != null && objectReference.get() != null ? ((SkyDriveObject) objectReference.get()).getName() : " file")
                                             + ". " + e.getMessage());
                                     setIcon(R.drawable.image_x_generic);
                                 }
@@ -1323,7 +1340,7 @@ public class BrowserActivity extends SherlockListActivity
                                     */
                                 }
 
-                                if (objectReference != null)
+                                if (objectReference != null&& objectReference.get() != null)
                                 {
                                     File thumb = new File(cacheFolder,
                                             ((SkyDriveObject) objectReference.get()).getName());
@@ -1346,7 +1363,8 @@ public class BrowserActivity extends SherlockListActivity
                                     }
 
                                     addBitmapToThumbCache(thumb.getName(), bm);
-                                    if (viewReference != null && objectReference != null)
+                                    if (viewReference != null && objectReference != null
+                                            && objectReference.get() != null && viewReference.get() != null)
                                     {
                                         loadThumbnail((View) viewReference.get(), (SkyDriveObject) objectReference.get());
                                     }
@@ -1468,6 +1486,10 @@ public class BrowserActivity extends SherlockListActivity
 
                 private View inflateNewSkyDriveListItem()
                 {
+                    if(actionBar!= null && actionBar.getSelectedNavigationIndex() == 1)
+                    {
+                        return  inflater.inflate(R.layout.skydrive_grid_item, parent, false );
+                    }
                     return inflater.inflate(R.layout.skydrive_list_item, parent, false);
                 }
 
@@ -1740,6 +1762,29 @@ public class BrowserActivity extends SherlockListActivity
         }
     };
 
+    private class ActionBarNavigationListener implements ActionBar.OnNavigationListener
+    {
+        @Override
+        public boolean onNavigationItemSelected(int itemPosition, long itemId)
+        {
+            if(itemPosition ==1){
+                ListView listView =  getListView();
+                listView.setVisibility(View.INVISIBLE);
+                GridView gridView = (GridView) findViewById(R.id.grid);
+                gridView.setVisibility(View.VISIBLE);
+                gridView.setAdapter(getListAdapter());
+                gridView.invalidate();
+            }else if(itemPosition == 0)
+            {
+                ListView listView =  getListView();
+                listView.setVisibility(View.VISIBLE);
+                GridView gridView = (GridView) findViewById(R.id.grid);
+                gridView.setVisibility(View.INVISIBLE);
+            }
+
+            return true;
+        }
+    }
 }
 
 

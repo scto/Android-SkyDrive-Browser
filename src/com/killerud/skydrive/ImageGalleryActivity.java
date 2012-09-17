@@ -9,6 +9,7 @@ package com.killerud.skydrive;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.widget.ImageView;
@@ -25,6 +26,7 @@ import com.microsoft.live.LiveDownloadOperationListener;
 import com.microsoft.live.LiveOperationException;
 
 import java.io.File;
+import java.net.URI;
 
 /**
  * The photo dialog. Downloads and displays an image, but does not save the
@@ -33,6 +35,7 @@ import java.io.File;
 public class ImageGalleryActivity extends SherlockActivity
 {
     private boolean savePhoto;
+    private boolean sharePhoto;
     private File image;
     private XLoader xLoader;
 
@@ -44,6 +47,7 @@ public class ImageGalleryActivity extends SherlockActivity
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         savePhoto = false;
+        sharePhoto = false;
 
         Intent photoDetails = getIntent();
         String photoId = photoDetails.getStringExtra("killerud.skydrive.PHOTO_ID");
@@ -122,7 +126,7 @@ public class ImageGalleryActivity extends SherlockActivity
             dividend = bitmapHeight;
         }
 
-        int sampleSize = bitmapHeight / 800;
+        int sampleSize = bitmapHeight / dividend;
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inSampleSize = sampleSize;
         options.inPurgeable = true;
@@ -150,9 +154,9 @@ public class ImageGalleryActivity extends SherlockActivity
                 savePhoto = false;
                 finish();
                 return true;
-            case R.id.galleryCancel:
-                savePhoto = false;
-                finish();
+            case R.id.galleryShare:
+                sharePhoto = true;
+                sharePhoto();
                 return true;
             case R.id.gallerySave:
                 savePhoto = true;
@@ -161,6 +165,21 @@ public class ImageGalleryActivity extends SherlockActivity
             default:
                 return false;
         }
+    }
+
+    private void sharePhoto()
+    {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("image/*");
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        try{
+            intent.putExtra(Intent.EXTRA_STREAM, Uri.parse(image.getAbsolutePath()));
+            startActivity(Intent.createChooser(intent, getString(R.string.share)));
+        }catch (Exception e)
+        {
+            Toast.makeText(getApplicationContext(), R.string.errorFileNotFound, Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     /* Known "feature": pressing the Home-button (or rather, not pressing
@@ -173,10 +192,10 @@ public class ImageGalleryActivity extends SherlockActivity
     protected void onStop()
     {
         super.onStop();
-        if (savePhoto)
+        if (savePhoto && !sharePhoto)
         {
             xLoader.showFileXloadedNotification(image, true);
-        } else
+        } else if(!sharePhoto)
         {
             if (image != null)
             {

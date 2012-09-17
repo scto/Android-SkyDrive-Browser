@@ -8,9 +8,9 @@
             android:visible="true"
             />
     <item
-            android:id="@+id/galleryCancel"
+            android:id="@+id/galleryShare"
             android:showAsAction="never"
-            android:title="@string/cancel"
+            android:title="@string/share"
             android:visible="true"
             />
 

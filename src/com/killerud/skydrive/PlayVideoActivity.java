@@ -18,8 +18,8 @@ import com.killerud.skydrive.objects.SkyDriveVideo;
  */
 public class PlayVideoActivity extends SherlockActivity
 {
-    private SkyDriveVideo mVideo;
-    private VideoView mVideoHolder;
+    private SkyDriveVideo video;
+    private VideoView videoHolder;
 
 
     @Override
@@ -28,13 +28,18 @@ public class PlayVideoActivity extends SherlockActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.video_activity);
 
-        mVideo = ((BrowserForSkyDriveApplication) getApplication()).getCurrentVideo();
-        setTitle(mVideo.getName());
-
-        mVideoHolder = (VideoView) findViewById(R.id.videoView);
-        mVideoHolder.setMediaController(new MediaController(mVideoHolder.getContext()));
-        mVideoHolder.setVideoURI(Uri.parse(mVideo.getSource()));
-        mVideoHolder.start();
+        video = ((BrowserForSkyDriveApplication) getApplication()).getCurrentVideo();
+        if(video == null)
+        {
+            setTitle(R.string.errorFileNotFound);
+        }else
+        {
+            setTitle(video.getName());
+            videoHolder = (VideoView) findViewById(R.id.videoView);
+            videoHolder.setMediaController(new MediaController(videoHolder.getContext()));
+            videoHolder.setVideoURI(Uri.parse(video.getSource()));
+            videoHolder.start();
+        }
     }
 
 
