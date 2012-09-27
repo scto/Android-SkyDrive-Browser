@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.widget.MediaController;
 import android.widget.VideoView;
 import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.MenuItem;
 import com.killerud.skydrive.objects.SkyDriveVideo;
 
 /**
@@ -27,6 +28,7 @@ public class PlayVideoActivity extends SherlockActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.video_activity);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         video = ((BrowserForSkyDriveApplication) getApplication()).getCurrentVideo();
         if(video == null)
@@ -39,6 +41,18 @@ public class PlayVideoActivity extends SherlockActivity
             videoHolder.setMediaController(new MediaController(videoHolder.getContext()));
             videoHolder.setVideoURI(Uri.parse(video.getSource()));
             videoHolder.start();
+        }
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        switch (item.getItemId())
+        {
+            case android.R.id.home:
+                finish();
+                return true;
+            default:
+                return false;
         }
     }
 

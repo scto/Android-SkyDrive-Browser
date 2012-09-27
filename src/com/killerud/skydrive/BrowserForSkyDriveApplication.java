@@ -5,10 +5,14 @@ import android.os.FileObserver;
 import android.util.SparseBooleanArray;
 import com.killerud.skydrive.constants.Constants;
 import com.killerud.skydrive.objects.SkyDriveAudio;
+import com.killerud.skydrive.objects.SkyDriveObject;
 import com.killerud.skydrive.objects.SkyDriveVideo;
 import com.microsoft.live.LiveAuthClient;
 import com.microsoft.live.LiveConnectClient;
 import com.microsoft.live.LiveConnectSession;
+
+import java.util.ArrayList;
+import java.util.Stack;
 
 /**
  * User: William
@@ -26,6 +30,7 @@ public class BrowserForSkyDriveApplication extends Application
     private BrowserActivity browserActivity;
     private SparseBooleanArray checkedPositions;
     private FileObserver cameraFileObserver;
+    private Stack<ArrayList<SkyDriveObject>> navigationHistory;
 
 
     public void setCurrentBrowser(BrowserActivity browser)
@@ -131,4 +136,11 @@ public class BrowserForSkyDriveApplication extends Application
         return this.cameraFileObserver;
     }
 
+    public Stack<ArrayList<SkyDriveObject>> getNavigationHistory() {
+        return navigationHistory;
+    }
+
+    public void setNavigationHistory(Stack<ArrayList<SkyDriveObject>> navigationHistory) {
+        this.navigationHistory = navigationHistory;
+    }
 }

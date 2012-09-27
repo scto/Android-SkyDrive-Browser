@@ -2,6 +2,7 @@ package com.killerud.skydrive;
 
 import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.app.Application;
 import android.content.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -63,7 +64,7 @@ public class BrowserActivity extends SherlockListActivity
     private Stack<String> folderHierarchy;
     private TextView folderHierarchyView;
     private ActionBar actionBar;
-    private Stack<ArrayList<SkyDriveObject>> navigationCache;
+    private Stack<ArrayList<SkyDriveObject>> navigationHistory;
 
 
     /* File manipulation */
@@ -179,7 +180,7 @@ public class BrowserActivity extends SherlockListActivity
         folderHierarchy = new Stack<String>();
         folderHierarchy.push(getString(R.string.rootFolderTitle));
 
-        navigationCache = new Stack<ArrayList<SkyDriveObject>>();
+        navigationHistory = new Stack<ArrayList<SkyDriveObject>>();
 
         updateFolderHierarchy(null);
         app.setCurrentBrowser(this);
@@ -236,6 +237,12 @@ public class BrowserActivity extends SherlockListActivity
             {
                 previousFolderIds.push(folderIds[i]);
             }
+        }
+
+        BrowserForSkyDriveApplication app = (BrowserForSkyDriveApplication) getApplication();
+        if(app.getNavigationHistory() != null)
+        {
+            navigationHistory = app.getNavigationHistory();
         }
 
         if (savedInstanceState.containsKey(Constants.STATE_ACTION_MODE_CURRENTLY_ON))
@@ -432,7 +439,7 @@ public class BrowserActivity extends SherlockListActivity
 
     private void navigateBack()
     {
-        if(navigationCache.peek() != null)
+        if(!navigationHistory.isEmpty() && navigationHistory.peek() != null)
         {
 
             if (actionBar != null && !previousFolderIds.empty())
@@ -454,10 +461,9 @@ public class BrowserActivity extends SherlockListActivity
             ArrayList<SkyDriveObject> adapterContent = ((SkyDriveListAdapter) getListAdapter()).getSkyDriveObjects();
             adapterContent.clear();
 
-            adapterContent.addAll(navigationCache.pop());
+            adapterContent.addAll(navigationHistory.pop());
             ((SkyDriveListAdapter) getListAdapter()).notifyDataSetChanged();
         }
-       // loadFolder(previousFolderIds.pop());
 
         if (!folderHierarchy.isEmpty())
         {
@@ -719,6 +725,8 @@ public class BrowserActivity extends SherlockListActivity
         savedInstanceState.putStringArray(Constants.STATE_CURRENT_HIERARCHY, hierarcy);
         savedInstanceState.putStringArray(Constants.STATE_PREVIOUS_FOLDERS, previous);
 
+        ((BrowserForSkyDriveApplication) getApplication()).setNavigationHistory(navigationHistory);
+
         if (actionMode != null)
         {
             savedInstanceState.putBoolean(Constants.STATE_ACTION_MODE_CURRENTLY_ON, true);
@@ -828,9 +836,9 @@ public class BrowserActivity extends SherlockListActivity
             actionBar.setDisplayHomeAsUpEnabled(false);
         }
 
-        if(!previousFolderIds.empty())
+        if(!previousFolderIds.empty() && !currentFolderId.equals(folderId))
         {
-            navigationCache.push((ArrayList<SkyDriveObject>)
+            navigationHistory.push((ArrayList<SkyDriveObject>)
                     ((SkyDriveListAdapter) getListAdapter()).getSkyDriveObjects().clone());
         }
 
@@ -986,8 +994,7 @@ public class BrowserActivity extends SherlockListActivity
                 supportInvalidateOptionsMenu();
                 return true;
             case R.id.reload:
-                loadFolder(currentFolderId);
-                supportInvalidateOptionsMenu();
+                reloadFolder();
                 return true;
             case R.id.paste:
                 setSupportProgressBarIndeterminateVisibility(true);
@@ -1185,7 +1192,7 @@ public class BrowserActivity extends SherlockListActivity
                         + "/Android/data/com.killerud.skydrive/thumbs/");
                 if (!cacheFolder.exists())
                 {
-                    cacheFolder.mkdir();
+                    cacheFolder.mkdirs();
                     return;
                 }
 
@@ -1404,7 +1411,6 @@ public class BrowserActivity extends SherlockListActivity
                     setIcon(R.drawable.video_x_generic);
                     setName(video);
                     setSelected(isChecked(SkyDriveListAdapter.this.position));
-
                     View view = SkyDriveListAdapter.this.view;
                     loadThumbnail(view, video);
                 }
