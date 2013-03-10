@@ -10,7 +10,6 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -36,9 +35,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Stack;
+import java.util.*;
 
 public class FileBrowserActivity extends SherlockListActivity
 {
@@ -310,95 +307,95 @@ public class FileBrowserActivity extends SherlockListActivity
 
     private class FileBrowserListAdapter extends BaseAdapter
     {
-        private final LayoutInflater mInflater;
-        private final ArrayList<File> mFiles;
-        private View mView;
-        private SparseBooleanArray mCheckedPositions;
-        private int mChecked;
+        private final LayoutInflater inflater;
+        private final ArrayList<File> files;
+        private View view;
+        private SparseBooleanArray checkedPositions;
+        private int checked;
 
         public FileBrowserListAdapter(Context context)
         {
-            mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            mFiles = new ArrayList<File>();
-            mCheckedPositions = new SparseBooleanArray();
-            mChecked = 0;
+            inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            files = new ArrayList<File>();
+            checkedPositions = new SparseBooleanArray();
+            checked = 0;
         }
 
 
         public boolean isChecked(int pos)
         {
-            return mCheckedPositions.get(pos, false);
+            return checkedPositions.get(pos, false);
         }
 
         public int getCheckedCount()
         {
-            return this.mChecked;
+            return this.checked;
         }
 
         public void setCheckedPositions(SparseBooleanArray checkedPositions)
         {
-            mChecked = checkedPositions.size();
-            this.mCheckedPositions = checkedPositions;
+            checked = checkedPositions.size();
+            this.checkedPositions = checkedPositions;
             notifyDataSetChanged();
         }
 
         public SparseBooleanArray getCheckedPositions()
         {
-            return this.mCheckedPositions;
+            return this.checkedPositions;
         }
 
         public void setChecked(int pos, boolean checked)
         {
             if (checked && !isChecked(pos))
             {
-                mChecked++;
+                this.checked++;
             } else if (isChecked(pos) && !checked)
             {
-                mChecked--;
+                this.checked--;
             }
 
-            mCheckedPositions.put(pos, checked);
+            checkedPositions.put(pos, checked);
             notifyDataSetChanged();
         }
 
         public void clearChecked()
         {
-            mChecked = 0;
-            mCheckedPositions = new SparseBooleanArray();
+            checked = 0;
+            checkedPositions = new SparseBooleanArray();
             currentlySelectedFiles.clear();
             notifyDataSetChanged();
         }
 
         public void checkAll()
         {
-            for (int i = 0; i < mFiles.size(); i++)
+            for (int i = 0; i < files.size(); i++)
             {
                 if (!isChecked(i))
                 {
-                    mChecked++;
+                    checked++;
                 }
 
-                mCheckedPositions.put(i, true);
-                currentlySelectedFiles.add(mFiles.get(i).getPath());
+                checkedPositions.put(i, true);
+                currentlySelectedFiles.add(files.get(i).getPath());
             }
             notifyDataSetChanged();
         }
 
         public ArrayList<File> getFiles()
         {
-            return mFiles;
+            return files;
         }
 
         @Override
         public int getCount()
         {
-            return mFiles.size();
+            return files.size();
         }
 
         @Override
         public File getItem(int position)
         {
-            return mFiles.get(position);
+            return files.get(position);
         }
 
         @Override
@@ -410,16 +407,32 @@ public class FileBrowserActivity extends SherlockListActivity
         @Override
         public View getView(int position, View convertView, ViewGroup parent)
         {
-            mView = convertView != null ? convertView :
-                    mInflater.inflate(R.layout.skydrive_list_item,
+            view = convertView != null ? convertView :
+                    inflater.inflate(R.layout.skydrive_list_item,
                             parent, false);
-            TextView name = (TextView) mView.findViewById(R.id.nameTextView);
-            ImageView type = (ImageView) mView.findViewById(R.id.skyDriveItemIcon);
+            TextView name = (TextView) view.findViewById(R.id.nameTextView);
+            ImageView type = (ImageView) view.findViewById(R.id.skyDriveItemIcon);
+            TextView details = (TextView) view.findViewById(R.id.detailsTextView);
 
             final WeakReference viewReference = new WeakReference(convertView);
 
             File file = getItem(position);
+            GregorianCalendar calendar = new GregorianCalendar();
+            if(file.isDirectory())
+            {
+                details.setText(file.listFiles().length + " items - " +
+                        calendar.get(Calendar.YEAR)+"."+calendar.get(Calendar.MONTH)+"."+calendar.get(Calendar.DAY_OF_MONTH) + " " +
+                        calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE)
+                );
+            }else
+            {
+                details.setText(IOUtil.getFittingByteAndSizeDescriptor(file.length()) + " - " +
+                        calendar.get(Calendar.YEAR)+"."+calendar.get(Calendar.MONTH)+"."+calendar.get(Calendar.DAY_OF_MONTH) + " " +
+                        calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE)
+                );
+            }
             name.setText(file.getName());
+
 
             int fileDrawable = determineFileDrawable(file);
             type.setImageResource(fileDrawable);
@@ -496,7 +509,7 @@ public class FileBrowserActivity extends SherlockListActivity
                 }
             }
             setChecked(isChecked(position));
-            return mView;
+            return view;
         }
 
         private File cacheOfThumbExists(File file)
@@ -548,10 +561,10 @@ public class FileBrowserActivity extends SherlockListActivity
         {
             if (checked)
             {
-                mView.setBackgroundResource(R.color.HightlightBlue);
+                view.setBackgroundResource(R.color.HightlightBlue);
             } else
             {
-                mView.setBackgroundResource(android.R.color.white);
+                view.setBackgroundResource(android.R.color.white);
             }
         }
     }

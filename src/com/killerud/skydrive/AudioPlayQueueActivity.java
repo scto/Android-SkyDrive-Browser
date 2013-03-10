@@ -243,7 +243,7 @@ public class AudioPlayQueueActivity extends SherlockActivity
             if (row == null)
             {
                 LayoutInflater inflater = getLayoutInflater();
-                row = inflater.inflate(R.layout.row, parent, false);
+                row = inflater.inflate(R.layout.music_playlist_row, parent, false);
             }
 
             TextView label = (TextView) row.findViewById(R.id.label);
