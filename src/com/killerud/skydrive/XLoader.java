@@ -1,12 +1,10 @@
 package com.killerud.skydrive;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.Service;
+import android.app.*;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
@@ -39,17 +37,27 @@ public class XLoader
     private Notification notificationProgress;
     public static int NOTIFICATION_PROGRESS_ID = 2;
     public static int NOTIFICATION_XLOADED_ID = 1;
-    private BrowserActivity context;
+    private Context context;
+    private boolean contextIsBrowserActivity;
     private boolean notificationIsAvailable;
 
     private IOUtil ioUtil;
 
-    public XLoader(BrowserActivity browserActivity)
+    public XLoader(Context context)
     {
-        context = browserActivity;
+        if(context.getClass().equals(BrowserActivity.class))
+        {
+            contextIsBrowserActivity = true;
+        }
+        else
+        {
+            contextIsBrowserActivity = false;
+        }
+
+        this.context = context;
         try
         {
-            notificationManager = (NotificationManager) context.getSystemService(Service.NOTIFICATION_SERVICE);
+            notificationManager = (NotificationManager) this.context.getSystemService(Service.NOTIFICATION_SERVICE);
             notificationIsAvailable = true;
         } catch (IllegalStateException e)
         {
@@ -60,6 +68,8 @@ public class XLoader
         }
         ioUtil = new IOUtil();
     }
+
+
 
     /**
      * Handles the uploading of a file. Manages a notification with a progressbar.
@@ -73,10 +83,10 @@ public class XLoader
     {
         if (localFilePaths.size() <= 0)
         {
-            if (context != null)
+            if (context != null && contextIsBrowserActivity)
             {
-                context.setDefaultBrowserBehaviour();
-                context.reloadFolder();
+                ((BrowserActivity)context).setDefaultBrowserBehaviour();
+                ((BrowserActivity)context).reloadFolder();
             }
             return;
         }
@@ -211,9 +221,9 @@ public class XLoader
     {
         if (fileIds.size() <= 0)
         {
-            if (context != null)
+            if (context != null && contextIsBrowserActivity)
             {
-                context.reloadFolder();
+                ((BrowserActivity)context).reloadFolder();
             }
             return;
         }
@@ -390,9 +400,9 @@ public class XLoader
     {
         if (fileIds.size() <= 0)
         {
-            if (context != null)
+            if (context != null && contextIsBrowserActivity)
             {
-                context.reloadFolder();
+                ((BrowserActivity)context).reloadFolder();
                 Toast.makeText(context,
                         context.getString(R.string.deletedFiles), Toast.LENGTH_SHORT).show();
             }
@@ -463,13 +473,13 @@ public class XLoader
 
         if (fileIds.size() <= 0)
         {
-            if (context != null)
+            if (context != null && contextIsBrowserActivity)
             {
 
                 Toast.makeText(context,
                         (cutNotCopy ? context.getString(R.string.movedFiles) : context.getString(R.string.copiedFiles)),
                         Toast.LENGTH_SHORT).show();
-                context.reloadFolder();
+                ((BrowserActivity)context).reloadFolder();
             }
             return;
         }
@@ -567,13 +577,13 @@ public class XLoader
                             pasteFiles(client, fileIds, currentFolder, cutNotCopy);
                         } catch (IndexOutOfBoundsException e)
                         {
-                            if (context != null)
+                            if (context != null && contextIsBrowserActivity)
                             {
 
                                 Toast.makeText(context,
                                         (cutNotCopy ? context.getString(R.string.errorMovingFile) : context.getString(R.string.errorCopyingFile)),
                                         Toast.LENGTH_SHORT).show();
-                                context.reloadFolder();
+                                ((BrowserActivity)context).reloadFolder();
                             }
                             return;
                         }
@@ -603,11 +613,11 @@ public class XLoader
     {
         if (fileIds.size() <= 0)
         {
-            if (context != null)
+            if (context != null && contextIsBrowserActivity)
             {
-                context.setSupportProgressBarIndeterminateVisibility(false);
+                ((BrowserActivity)context).setSupportProgressBarIndeterminateVisibility(false);
                 Toast.makeText(context, context.getString(R.string.renamedFiles), Toast.LENGTH_SHORT).show();
-                context.reloadFolder();
+                ((BrowserActivity)context).reloadFolder();
             }
             return;
         }
@@ -901,12 +911,12 @@ public class XLoader
 
     private void handleIllegalConnectionState()
     {
-        if (context == null)
+        if (context == null || !contextIsBrowserActivity)
         {
             return;
         }
 
-        ((BrowserForSkyDriveApplication) context.getApplication())
+        ((BrowserForSkyDriveApplication) ((BrowserActivity)context).getApplication())
                 .getAuthClient()
                 .initialize(Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener()
                 {
@@ -915,7 +925,7 @@ public class XLoader
                     {
                         if (status == LiveStatus.CONNECTED)
                         {
-                            context.reloadFolder();
+                            ((BrowserActivity)context).reloadFolder();
                         } else
                         {
                             informUserOfConnectionProblemAndDismiss();
@@ -933,14 +943,14 @@ public class XLoader
 
     private void informUserOfConnectionProblemAndDismiss()
     {
-        if (context != null)
+        if (context != null || !contextIsBrowserActivity)
         {
             return;
         }
 
         Toast.makeText(context, R.string.errorLoggedOut, Toast.LENGTH_LONG).show();
         context.startActivity(new Intent(context, SignInActivity.class));
-        context.finish();
+        ((BrowserActivity)context).finish();
     }
 
 }

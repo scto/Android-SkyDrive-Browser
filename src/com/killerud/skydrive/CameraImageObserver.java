@@ -31,7 +31,7 @@ public class CameraImageObserver extends ContentObserver
     {
         super(handler);
         this.context = context;
-        loader = new XLoader(null);
+        loader = new XLoader(context);
         connectivityManager = (ConnectivityManager) context.getSystemService(context.CONNECTIVITY_SERVICE);
     }
 
