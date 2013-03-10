@@ -184,4 +184,44 @@ public class IOUtil
         extension = fileName.substring(positionOfLastDot + 1, fileName.length());
         return extension;
     }
+
+    public static long convertBytesToGigabytes(long bytes)
+    {
+        return bytes / 1024 / 1024 / 1024;
+    }
+
+    public static long convertBytesToMegabytes(long bytes)
+    {
+        return bytes / 1024 / 1024;
+    }
+
+    public static long convertBytesToKilobytes(long bytes)
+    {
+        return bytes / 1024;
+    }
+
+    public static long convertBytesToTerabytes(long bytes)
+    {
+        return bytes / 1024 / 1024 / 1024 / 1024;
+    }
+
+    public static String getFittingByteAndSizeDescriptor(long bytes)
+    {
+        if(convertBytesToTerabytes(bytes)>0)
+        {
+            return convertBytesToTerabytes(bytes) + " TB";
+        }else if(convertBytesToGigabytes(bytes)>0)
+        {
+            return convertBytesToGigabytes(bytes) + " GB";
+        }else if(convertBytesToMegabytes(bytes)>0)
+        {
+            return convertBytesToMegabytes(bytes) + " MB";
+        }else if(convertBytesToKilobytes(bytes)>0)
+        {
+            return convertBytesToKilobytes(bytes) + " KB";
+        }else
+        {
+            return bytes + " bytes";
+        }
+    }
 }

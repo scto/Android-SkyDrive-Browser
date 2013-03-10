@@ -2,7 +2,6 @@ package com.killerud.skydrive;
 
 import android.app.ActivityManager;
 import android.app.AlertDialog;
-import android.app.Application;
 import android.content.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -1410,6 +1409,15 @@ public class BrowserActivity extends SherlockListActivity
 
                     setIcon(R.drawable.video_x_generic);
                     setName(video);
+
+                    TextView detailsTextView = (TextView) view.findViewById(R.id.detailsTextView);
+                    detailsTextView.setText(
+                        IOUtil.getFittingByteAndSizeDescriptor(video.getSize())
+                            + " - " + parseTimeString(video.getUpdatedTime()));
+
+                    TextView sharedTextView = (TextView) view.findViewById(R.id.sharedTextView);
+                    sharedTextView.setText((video.getSharedWith().getAccess().equalsIgnoreCase("Just me")?"":video.getSharedWith().getAccess()));
+
                     setSelected(isChecked(SkyDriveListAdapter.this.position));
                     View view = SkyDriveListAdapter.this.view;
                     loadThumbnail(view, video);
@@ -1426,6 +1434,15 @@ public class BrowserActivity extends SherlockListActivity
 
                     setIcon(determineFileIcon(file));
                     setName(file);
+
+                    TextView detailsTextView = (TextView) view.findViewById(R.id.detailsTextView);
+                    detailsTextView.setText(
+                            IOUtil.getFittingByteAndSizeDescriptor(file.getSize())
+                                    + " - " + parseTimeString(file.getUpdatedTime()));
+
+                    TextView sharedTextView = (TextView) view.findViewById(R.id.sharedTextView);
+                    sharedTextView.setText((file.getSharedWith().getAccess().equalsIgnoreCase("Just me")?"":file.getSharedWith().getAccess()));
+
                     setSelected(isChecked(SkyDriveListAdapter.this.position));
                 }
 
@@ -1439,6 +1456,16 @@ public class BrowserActivity extends SherlockListActivity
 
                     setIcon(R.drawable.folder);
                     setName(folder);
+
+                    TextView detailsTextView = (TextView) view.findViewById(R.id.detailsTextView);
+                    detailsTextView.setText(
+                            folder.getCount() + " items"
+                                    + " - " + parseTimeString(folder.getUpdatedTime()));
+
+                    TextView sharedTextView = (TextView) view.findViewById(R.id.sharedTextView);
+                    sharedTextView.setText((folder.getSharedWith().getAccess().equalsIgnoreCase("Just me")?"":folder.getSharedWith().getAccess()));
+
+
                     setSelected(isChecked(SkyDriveListAdapter.this.position));
                 }
 
@@ -1451,6 +1478,16 @@ public class BrowserActivity extends SherlockListActivity
                     }
                     setIcon(R.drawable.folder_image);
                     setName(album);
+
+                    TextView detailsTextView = (TextView) view.findViewById(R.id.detailsTextView);
+                    detailsTextView.setText(
+                            album.getCount() + " items"
+                                    + " - " + parseTimeString(album.getUpdatedTime()));
+
+                    TextView sharedTextView = (TextView) view.findViewById(R.id.sharedTextView);
+                    sharedTextView.setText((album.getSharedWith().getAccess().equalsIgnoreCase("Just me")?"":album.getSharedWith().getAccess()));
+
+
                     setSelected(isChecked(SkyDriveListAdapter.this.position));
                 }
 
@@ -1467,6 +1504,16 @@ public class BrowserActivity extends SherlockListActivity
                             audioPlaybackServiceConnection, Context.BIND_ABOVE_CLIENT);
                     setIcon(R.drawable.audio_x_generic);
                     setName(audio);
+
+                    TextView detailsTextView = (TextView) view.findViewById(R.id.detailsTextView);
+                    detailsTextView.setText(
+                            IOUtil.getFittingByteAndSizeDescriptor(audio.getSize())
+                                    + " - " + parseTimeString(audio.getUpdatedTime()));
+
+                    TextView sharedTextView = (TextView) view.findViewById(R.id.sharedTextView);
+                    sharedTextView.setText((audio.getSharedWith().getAccess().equalsIgnoreCase("Just me")?"":audio.getSharedWith().getAccess()));
+
+
                     setSelected(isChecked(SkyDriveListAdapter.this.position));
                 }
 
@@ -1484,6 +1531,14 @@ public class BrowserActivity extends SherlockListActivity
                     setIcon(R.drawable.image_x_generic);
                     setName(photo);
                     setSelected(isChecked(SkyDriveListAdapter.this.position));
+
+                    TextView detailsTextView = (TextView) view.findViewById(R.id.detailsTextView);
+                    detailsTextView.setText(
+                            IOUtil.getFittingByteAndSizeDescriptor(photo.getSize())
+                                    + " - " + parseTimeString(photo.getUpdatedTime()));
+
+                    TextView sharedTextView = (TextView) view.findViewById(R.id.sharedTextView);
+                    sharedTextView.setText((photo.getSharedWith().getAccess().equalsIgnoreCase("Just me")?"":photo.getSharedWith().getAccess()));
 
 
                     loadThumbnail(view, photo);
@@ -1510,12 +1565,17 @@ public class BrowserActivity extends SherlockListActivity
             tv.setText(skyDriveObj.getName());
         }
 
-
-
         private void setIcon(int iconResId)
         {
             ImageView img = (ImageView) view.findViewById(R.id.skyDriveItemIcon);
             img.setImageResource(iconResId);
+        }
+
+        private String parseTimeString(String time)
+        {
+            String[] dateTimeSplit = time.split("T");
+            String[] timeSplit = dateTimeSplit[1].split("\\+");
+            return dateTimeSplit[0].replace("-",".") + " " + timeSplit[0].substring(0,5);
         }
 
         private void setSelected(boolean checked)

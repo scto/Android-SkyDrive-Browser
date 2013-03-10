@@ -5,7 +5,7 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.actionbarsherlock.view.MenuItem;
-import com.killerud.skydrive.util.Utility;
+import com.killerud.skydrive.util.IOUtil;
 import com.microsoft.live.LiveConnectClient;
 import com.microsoft.live.LiveOperation;
 import com.microsoft.live.LiveOperationException;
@@ -185,8 +185,8 @@ public class PreferencesActivity extends SherlockPreferenceActivity
         long totalAvailable = Long.parseLong(totalAvailableSpace);
         long occupied = totalAvailable - unused;
 
-        String occupiedInGigabytes = Utility.convertBytesToGigabytes(occupied) + "GB";
-        String totalAvailableInGigabytes = Utility.convertBytesToGigabytes(totalAvailable) + "GB";
+        String occupiedInGigabytes = IOUtil.convertBytesToGigabytes(occupied) + "GB";
+        String totalAvailableInGigabytes = IOUtil.convertBytesToGigabytes(totalAvailable) + "GB";
 
         return String.format(baseString, occupiedInGigabytes, totalAvailableInGigabytes);
     }

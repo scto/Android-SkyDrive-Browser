@@ -20,13 +20,44 @@
             android:layout_height="wrap_content">
         <TextView
                 android:id="@+id/nameTextView"
-                android:layout_width="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_height="fill_parent"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
                 android:textColor="@android:color/black"
-                android:padding="10dp"
-                android:layout_centerVertical="true"
-                android:textSize="16sp"/>
+                android:padding="0dp"
+                android:textSize="16sp"
+                android:text="Name"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginLeft="10dp"
+                android:focusableInTouchMode="true"
+                android:lines="1"
+                android:linksClickable="false"/>
+
+        <TextView
+                android:id="@+id/detailsTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/darker_gray"
+                android:padding="0dp"
+                android:textSize="12sp"
+                android:text="Size and Last Changed"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="10dp"
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="20dp"/>
+
+        <TextView
+                android:id="@+id/sharedTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/darker_gray"
+                android:padding="0dp"
+                android:textSize="10sp"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="10dp"
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="33dp"
+                android:layout_gravity="center_horizontal|top"/>
     </RelativeLayout>
 
 </LinearLayout>
