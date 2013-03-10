@@ -13,7 +13,7 @@ SkyDrive sharing functionality is also supported. Files shared with the user can
 
 Dependencies
 ============
-- [ActionBarSherlock][1]
+- [ActionBarSherlock][1] NB: export the android-support-v4.jar library, as AEfS depends on that lib as well
 - [LiveSDK for Android][2] NB: to enable full resolution uploads UploadRequest.java needs some work [5]
 - [CWAC TouchListView][3]
 
