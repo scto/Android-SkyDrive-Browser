@@ -190,12 +190,6 @@ public class BrowserActivity extends SherlockListActivity
             restoreSavedInstanceState(savedInstanceState);
         }
 
-        //ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
-        //      this, R.array.ContentViewStyles, android.R.layout.simple_spinner_item);
-        //actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-        //actionBar.setListNavigationCallbacks(adapter, new ActionBarNavigationListener());
-
-
         loadFolder(currentFolderId);
     }
 
@@ -1459,7 +1453,7 @@ public class BrowserActivity extends SherlockListActivity
 
                     TextView detailsTextView = (TextView) view.findViewById(R.id.detailsTextView);
                     detailsTextView.setText(
-                            folder.getCount() + " items"
+                            folder.getCount() + " " + getString(R.string.items)
                                     + " - " + parseTimeString(folder.getUpdatedTime()));
 
                     TextView sharedTextView = (TextView) view.findViewById(R.id.sharedTextView);
@@ -1481,7 +1475,7 @@ public class BrowserActivity extends SherlockListActivity
 
                     TextView detailsTextView = (TextView) view.findViewById(R.id.detailsTextView);
                     detailsTextView.setText(
-                            album.getCount() + " items"
+                            album.getCount() + " " + getString(R.string.items)
                                     + " - " + parseTimeString(album.getUpdatedTime()));
 
                     TextView sharedTextView = (TextView) view.findViewById(R.id.sharedTextView);

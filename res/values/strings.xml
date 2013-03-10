@@ -176,6 +176,7 @@
     <string name="audioControls">Music controls</string>
 
     <string name="audioQueueClear">Clear</string>
+    <string name="items">items</string>
 
 
 </resources>

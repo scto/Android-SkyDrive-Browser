@@ -129,6 +129,8 @@
     <string name="noInternetConnection">Ingen WiFi tilgjengelig. Finn et trådløst nett eller skru av begrensingen i
         instillinger.
     </string>
+    <string name="downloadLocation">Nedlastingsmappe</string>
+    <string name="downloadLocationSummary">Hvor du vil at filene dine skal lastes ned</string>
 
     <string name="preferencesFeatures">Egenskaper</string>
     <string name="preferencesData">Databruk</string>
@@ -167,5 +169,7 @@
     <string name="audioQueueInstructions">Dra og slipp for å endre rekkefølgen. Dra til venstre for å fjerne.</string>
     <string name="audioControls">Musikkontroller</string>
     <string name="audioQueueClear">Fjern alle</string>
+
+    <string name="items">filer</string>
 
 </resources>
