@@ -26,6 +26,7 @@ public class CameraImageObserver extends ContentObserver
     private boolean isWiFiOnly;
     private boolean isCameraWiFiOnly;
     private ConnectivityManager connectivityManager;
+    private boolean serviceIsWanted;
 
     public CameraImageObserver(Handler handler, CameraObserverService context)
     {
@@ -54,7 +55,6 @@ public class CameraImageObserver extends ContentObserver
         path.add(imagePath);
         if (!connectionIsUnavailable())
         {
-
             final LiveConnectClient client = ((BrowserForSkyDriveApplication) context.getApplication()).getConnectClient();
             if (client == null)
             {
@@ -94,7 +94,6 @@ public class CameraImageObserver extends ContentObserver
         }
     }
 
-
     private boolean connectionIsUnavailable()
     {
         getPreferences();
@@ -106,7 +105,8 @@ public class CameraImageObserver extends ContentObserver
                             != ConnectivityManager.TYPE_WIFI))
                     || (isCameraWiFiOnly
                     && (connectivityManager.getActiveNetworkInfo().getType()
-                    != ConnectivityManager.TYPE_WIFI));
+                    != ConnectivityManager.TYPE_WIFI)
+                    || !serviceIsWanted);
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
             if (!preferences.getBoolean("automatic_camera_upload", false))
             {
@@ -124,6 +124,8 @@ public class CameraImageObserver extends ContentObserver
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context.getApplication());
         isWiFiOnly = preferences.getBoolean("limit_all_to_wifi", false);
         isCameraWiFiOnly = preferences.getBoolean("camera_upload_wifi_only", false);
+        serviceIsWanted = preferences.getBoolean("automatic_camera_upload",false);
+
     }
 
     private int getIdOfLatestImageAddedToMediaStore()
@@ -150,21 +152,40 @@ public class CameraImageObserver extends ContentObserver
             return -1;
         }
 
-        if (!isCameraImage(cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATE_TAKEN))))
+        if (!isNewCameraImage(cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATE_TAKEN))))
         {
             latestMediaId = topMediaIdFromDatabase;
             cursor.close();
             return -1;
         }
 
+
+
         latestMediaId = topMediaIdFromDatabase;
         cursor.close();
         return topMediaIdFromDatabase;
     }
 
-    private boolean isCameraImage(String imageOrientation)
+    private boolean isNewCameraImage(String dateTaken)
     {
-        return (imageOrientation != null);
+        try{
+            long dateTakenUnixTime = Long.parseLong(dateTaken);
+            //if the image is less than five minutes old we consider the image "new"
+            if(dateTakenUnixTime+300000>System.currentTimeMillis())
+            {
+                return (dateTaken != null);
+            }
+            else
+            {
+                return false;
+            }
+        }catch (NumberFormatException e)
+        {
+
+        }finally
+        {
+            return false;
+        }
     }
 
     private boolean changeOrDeletionInMediaStoreSinceLastInvocation(int topMediaIdFromDatabase)

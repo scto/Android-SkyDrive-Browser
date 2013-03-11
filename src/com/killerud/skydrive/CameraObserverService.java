@@ -5,8 +5,10 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.text.format.DateUtils;
 import android.text.format.Time;
@@ -21,10 +23,14 @@ public class CameraObserverService extends Service
     public void onCreate()
     {
         super.onCreate();
-        cameraImageObserver = new CameraImageObserver(new Handler(), this);
-        getApplicationContext().getContentResolver().registerContentObserver(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                true, cameraImageObserver);
-        scheduleNextRun();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
+        if(preferences.getBoolean("automatic_camera_upload",false))
+        {
+            cameraImageObserver = new CameraImageObserver(new Handler(), this);
+            getApplicationContext().getContentResolver().registerContentObserver(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    true, cameraImageObserver);
+            scheduleNextRun();
+        }
     }
 
 
