@@ -152,28 +152,28 @@ public class CameraImageObserver extends ContentObserver
             return -1;
         }
 
-        if (!isNewCameraImage(cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATE_TAKEN))))
+        if (isNewCameraImage(cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATE_TAKEN))))
+        {
+            latestMediaId = topMediaIdFromDatabase;
+            cursor.close();
+            return topMediaIdFromDatabase;
+        } else
         {
             latestMediaId = topMediaIdFromDatabase;
             cursor.close();
             return -1;
         }
-
-
-
-        latestMediaId = topMediaIdFromDatabase;
-        cursor.close();
-        return topMediaIdFromDatabase;
     }
 
     private boolean isNewCameraImage(String dateTaken)
     {
         try{
             long dateTakenUnixTime = Long.parseLong(dateTaken);
-            //if the image is less than five minutes old we consider the image "new"
-            if(dateTakenUnixTime+300000>System.currentTimeMillis())
+            //if the image is less than thirty seconds old we consider the image "new"
+            long currentTime = System.currentTimeMillis();
+            if(dateTakenUnixTime+30000>currentTime)
             {
-                return (dateTaken != null);
+                return true;
             }
             else
             {
@@ -181,11 +181,9 @@ public class CameraImageObserver extends ContentObserver
             }
         }catch (NumberFormatException e)
         {
-
-        }finally
-        {
-            return false;
+            Log.e("AEfS", e.getMessage());
         }
+        return false;
     }
 
     private boolean changeOrDeletionInMediaStoreSinceLastInvocation(int topMediaIdFromDatabase)
