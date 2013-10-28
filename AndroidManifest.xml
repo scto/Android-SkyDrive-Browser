@@ -96,6 +96,14 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".ConnectionStateBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
+
         <activity android:name=".BrowserActivity"
                   android:label="@string/mySkyDrive">
         </activity>

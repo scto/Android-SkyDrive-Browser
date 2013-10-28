@@ -1,39 +1,26 @@
 package com.killerud.skydrive;
 
 import android.content.ContentUris;
-import android.content.SharedPreferences;
 import android.database.ContentObserver;
 import android.database.Cursor;
-import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
-import com.killerud.skydrive.constants.Constants;
-import com.killerud.skydrive.util.Stopwatch;
-import com.microsoft.live.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import com.killerud.skydrive.util.Stopwatch;
 
 
 public class CameraImageObserver extends ContentObserver
 {
-    private final CameraObserverService context;
+    private final CameraObserverService observerService;
     private int latestMediaId;
-    XLoader loader;
-    private boolean isWiFiOnly;
-    private boolean isCameraWiFiOnly;
-    private ConnectivityManager connectivityManager;
-    private boolean serviceIsWanted;
 
-    public CameraImageObserver(Handler handler, CameraObserverService context)
+
+    public CameraImageObserver(Handler handler, CameraObserverService observerService)
     {
         super(handler);
-        this.context = context;
-        loader = new XLoader(context);
-        connectivityManager = (ConnectivityManager) context.getSystemService(context.CONNECTIVITY_SERVICE);
+        this.observerService = observerService;
     }
 
     @Override
@@ -51,87 +38,13 @@ public class CameraImageObserver extends ContentObserver
             return;
         }
 
-        final ArrayList<String> path = new ArrayList<String>();
-        path.add(imagePath);
-        if (!connectionIsUnavailable())
-        {
-            final LiveConnectClient client = ((BrowserForSkyDriveApplication) context.getApplication()).getConnectClient();
-            if (client == null)
-            {
-                final LiveAuthClient authClient = new LiveAuthClient(context, Constants.APP_CLIENT_ID);
-                ((BrowserForSkyDriveApplication) context.getApplication()).setAuthClient(authClient);
-                authClient.initialize(Arrays.asList(Constants.APP_SCOPES), new LiveAuthListener()
-                {
-                    @Override
-                    public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState)
-                    {
-                        if (status == LiveStatus.CONNECTED)
-                        {
-                            ((BrowserForSkyDriveApplication) context.getApplication()).setAuthClient(authClient);
-                            ((BrowserForSkyDriveApplication) context.getApplication()).setSession(session);
-                            ((BrowserForSkyDriveApplication) context.getApplication())
-                                    .setConnectClient(new LiveConnectClient(session));
-
-                            loader.uploadFile(((BrowserForSkyDriveApplication) context.getApplication()).getConnectClient()
-                                    , path, "me/skydrive/camera_roll");
-                        } else
-                        {
-                            Log.e(Constants.LOGTAG, "Initialize did not connect. Status is " + status + ".");
-                        }
-                    }
-
-                    @Override
-                    public void onAuthError(LiveAuthException exception, Object userState)
-                    {
-                        Log.e(Constants.LOGTAG, "Error: " + exception.getMessage());
-                    }
-                });
-            } else
-            {
-                loader.uploadFile(client, path, "me/skydrive/camera_roll");
-            }
-
-        }
-    }
-
-    private boolean connectionIsUnavailable()
-    {
-        getPreferences();
-        boolean unavailable;
-        try
-        {
-            unavailable = (isWiFiOnly &&
-                    (connectivityManager.getActiveNetworkInfo().getType()
-                            != ConnectivityManager.TYPE_WIFI))
-                    || (isCameraWiFiOnly
-                    && (connectivityManager.getActiveNetworkInfo().getType()
-                    != ConnectivityManager.TYPE_WIFI)
-                    || !serviceIsWanted);
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-            if (!preferences.getBoolean("automatic_camera_upload", false))
-            {
-                unavailable = true;
-            }
-        } catch (NullPointerException e)
-        {
-            unavailable = true;
-        }
-        return unavailable;
-    }
-
-    private void getPreferences()
-    {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context.getApplication());
-        isWiFiOnly = preferences.getBoolean("limit_all_to_wifi", false);
-        isCameraWiFiOnly = preferences.getBoolean("camera_upload_wifi_only", false);
-        serviceIsWanted = preferences.getBoolean("automatic_camera_upload",false);
-
+        observerService.uploadImage(imagePath);
     }
 
     private int getIdOfLatestImageAddedToMediaStore()
     {
         String[] columns = new String[]{MediaStore.Images.Media._ID, MediaStore.Images.Media.DATE_TAKEN};
-        Cursor cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null,
+        Cursor cursor = observerService.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null,
                 MediaStore.Images.Media._ID + " DESC");
 
         if (cursor == null)
@@ -198,10 +111,10 @@ public class CameraImageObserver extends ContentObserver
 
 
         Uri image = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, latestMediaId);
-        Cursor cursor = context.getContentResolver().query(image, columns, null, null, null);
+        Cursor cursor = observerService.getContentResolver().query(image, columns, null, null, null);
         if (cursor == null)
         {
-            cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null,
+            cursor = observerService.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null,
                     MediaStore.Images.Media._ID + " DESC");
         }
         if (cursor != null && cursor.moveToFirst())
