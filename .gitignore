@@ -41,6 +41,6 @@ Thumbs.db
 
 # Folders #
 ###########
-
+gen/
 out/
 .idea/
