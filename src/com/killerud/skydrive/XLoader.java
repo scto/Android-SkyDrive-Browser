@@ -4,7 +4,6 @@ import android.app.*;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
@@ -949,7 +948,7 @@ public class XLoader
         }
 
         Toast.makeText(context, R.string.errorLoggedOut, Toast.LENGTH_LONG).show();
-        context.startActivity(new Intent(context, SignInActivity.class));
+        context.startActivity(new Intent(context, SignInAndShareHandlerActivity.class));
         ((BrowserActivity)context).finish();
     }
 

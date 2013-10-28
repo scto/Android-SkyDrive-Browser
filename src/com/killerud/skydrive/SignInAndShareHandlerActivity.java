@@ -25,13 +25,10 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class SignInActivity extends SherlockActivity
+public class SignInAndShareHandlerActivity extends SherlockActivity
 {
     BrowserForSkyDriveApplication application;
-    TextView resultTextView;
     LiveAuthClient liveAuthClient;
-    Button signInButton;
-    TextView introText;
 
     /**
      * Called when the activity is first created.
@@ -49,11 +46,8 @@ public class SignInActivity extends SherlockActivity
         liveAuthClient = new LiveAuthClient(this, Constants.APP_CLIENT_ID);
         application.setAuthClient(liveAuthClient);
 
-        signInButton = (Button) findViewById(R.id.signInButton);
-        introText = (TextView) findViewById(R.id.introTextView);
-        resultTextView = (TextView) findViewById(R.id.introTextView);
+        Button signInButton = (Button) findViewById(R.id.signInButton);
         createTouchableHyperlinkToRegisterForAccountIfNeeded();
-
         signInButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -82,7 +76,6 @@ public class SignInActivity extends SherlockActivity
                         onLiveConnect(session);
                     } else
                     {
-                        Toast.makeText(getApplicationContext(), R.string.manualSignInError, Toast.LENGTH_SHORT);
                         Log.e(Constants.LOGTAG, "Login did not connect. Status is " + status + ".");
                     }
                 }
@@ -132,7 +125,6 @@ public class SignInActivity extends SherlockActivity
                         onLiveConnect(session);
                     } else
                     {
-                        Toast.makeText(getApplicationContext(), R.string.automaticSignInError, Toast.LENGTH_SHORT);
                         Log.e(Constants.LOGTAG, "Initialize did not connect. Status is " + status + ".");
                     }
                 }
@@ -155,121 +147,24 @@ public class SignInActivity extends SherlockActivity
 
     private void pruneCacheFolders()
     {
-        pruneFileCache();
-        pruneThumbCache();
+        LocalPersistentStorageManager cacheManager = new LocalPersistentStorageManager();
+        pruneFileCache(cacheManager);
+        pruneThumbCache(cacheManager);
     }
 
-    private void pruneFileCache()
+    private void pruneFileCache(LocalPersistentStorageManager cacheManager)
     {
         final File fileCacheFolder = new File(Environment.getExternalStorageDirectory()
                 + "/Android/data/com.killerud.skydrive/cache/");
-
-        /* No cache for us to prune */
-        if (!fileCacheFolder.exists())
-        {
-            return;
-        }
-
-        /* This block could potentially be a while, so run it in a new thread */
-        new Thread(new Runnable()
-        {
-            public void run()
-            {
-                File[] cacheContents = fileCacheFolder.listFiles();
-                long cacheSize = 0l;
-
-                for (int i = 0; i < cacheContents.length; i++)
-                {
-                    cacheSize += cacheContents[i].length();
-                }
-
-                if (cacheSize > Constants.CACHE_MAX_SIZE)
-                {
-
-                    boolean cachePruned = false;
-                    int fileIndex = 0;
-
-                    while (!cachePruned)
-                    {
-                        try
-                        {
-                            cacheSize -= cacheContents[fileIndex].length();
-                            cacheContents[fileIndex].delete();
-                            Log.i(Constants.LOGTAG, "File cache pruned");
-                        } catch (IndexOutOfBoundsException e)
-                        {
-                            cachePruned = true;
-                            Log.e(Constants.LOGTAG, "Error on file cache prune. " + e.getMessage());
-                        } finally
-                        {
-                            if (cacheSize < Constants.CACHE_MAX_SIZE - 50)
-                            {
-                                cachePruned = true;
-                            }
-
-                            fileIndex++;
-                        }
-                    }
-                }
-            }
-        }).start();
+        cacheManager.pruneCache(fileCacheFolder, LocalPersistentStorageManager.FILES_MAX_SIZE);
     }
 
 
-    private void pruneThumbCache()
+    private void pruneThumbCache(LocalPersistentStorageManager cacheManager)
     {
         final File thumbCacheFolder = new File(Environment.getExternalStorageDirectory()
                 + "/Android/data/com.killerud.skydrive/thumbs/");
-
-        /* No cache for us to prune */
-        if (!thumbCacheFolder.exists())
-        {
-            return;
-        }
-
-        /* This block could potentially be a while, so run it in a new thread */
-        new Thread(new Runnable()
-        {
-            public void run()
-            {
-                File[] cacheContents = thumbCacheFolder.listFiles();
-                long cacheSize = 0l;
-
-                for (int i = 0; i < cacheContents.length; i++)
-                {
-                    cacheSize += cacheContents[i].length();
-                }
-
-                if (cacheSize > Constants.THUMBS_MAX_SIZE)
-                {
-
-                    boolean cachePruned = false;
-                    int fileIndex = 0;
-
-                    while (!cachePruned)
-                    {
-                        try
-                        {
-                            cacheSize -= cacheContents[fileIndex].length();
-                            cacheContents[fileIndex].delete();
-                            Log.i(Constants.LOGTAG, "Thumb cache pruned");
-                        } catch (IndexOutOfBoundsException e)
-                        {
-                            cachePruned = true;
-                            Log.e(Constants.LOGTAG, "Error on thumb cache prune. " + e.getMessage());
-                        } finally
-                        {
-                            if (cacheSize < Constants.THUMBS_MAX_SIZE - 50)
-                            {
-                                cachePruned = true;
-                            }
-
-                            fileIndex++;
-                        }
-                    }
-                }
-            }
-        }).start();
+        cacheManager.pruneCache(thumbCacheFolder, LocalPersistentStorageManager.THUMBS_MAX_SIZE);
     }
 
 
@@ -278,33 +173,7 @@ public class SignInActivity extends SherlockActivity
     {
         if (keyCode == KeyEvent.KEYCODE_BACK)
         {
-            if (liveAuthClient != null)
-            {
-                try
-                {
-                    liveAuthClient.logout(new LiveAuthListener()
-                    {
-                        @Override
-                        public void onAuthComplete(LiveStatus status, LiveConnectSession session, Object userState)
-                        {
-
-                        }
-
-                        @Override
-                        public void onAuthError(LiveAuthException exception, Object userState)
-                        {
-
-                        }
-                    });
-                } catch (IllegalStateException e)
-                {
-                    Toast.makeText(getApplicationContext(), getString(R.string.errorDuringLogin), Toast.LENGTH_SHORT).show();
-                    finish();
-                }
-            }
-
             setSupportProgressBarIndeterminateVisibility(false);
-
             return super.onKeyDown(keyCode, event);
         } else
         {
@@ -424,7 +293,7 @@ public class SignInActivity extends SherlockActivity
     private Intent handleSentDocument(Intent shareIntent)
     {
         Intent startIntent = new Intent();
-        Uri uri = (Uri) shareIntent.getParcelableExtra(Intent.EXTRA_STREAM);
+        Uri uri = shareIntent.getParcelableExtra(Intent.EXTRA_STREAM);
 
         ArrayList<String> filePath = new ArrayList<String>();
         try

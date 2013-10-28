@@ -22,7 +22,7 @@
             android:uiOptions="splitActionBarWhenNarrow"
             android:icon="@drawable/icon">
 
-        <activity android:name=".SignInActivity"
+        <activity android:name=".SignInAndShareHandlerActivity"
                   android:label="@string/appName">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

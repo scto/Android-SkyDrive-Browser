@@ -43,11 +43,6 @@ import java.util.Arrays;
 import java.util.Stack;
 
 
-/**
- * User: William
- * Date: 25.04.12
- * Time: 15:07
- */
 public class BrowserActivity extends SherlockListActivity
 {
     /* Live Client and download/upload class */
@@ -152,7 +147,6 @@ public class BrowserActivity extends SherlockListActivity
         final int memClass = ((ActivityManager) getSystemService(
                 Context.ACTIVITY_SERVICE)).getMemoryClass();
         final int cacheSize = 1024 * 1024 * memClass / 10;
-
         thumbCache = new LruCache(cacheSize);
 
         xLoader = new XLoader(this);
@@ -169,11 +163,10 @@ public class BrowserActivity extends SherlockListActivity
         currentFolderId = HOME_FOLDER;
 
         determineBrowserStateAndLayout(getIntent());
-        createLocalSkyDriveFolderIfNotExists();
         setupListView(getListView());
 
-
-
+        LocalPersistentStorageManager localPersistentStorageManager = new LocalPersistentStorageManager();
+        localPersistentStorageManager.createLocalSkyDriveFolderIfNotExists();
 
         folderHierarchyView = (TextView) findViewById(R.id.folder_hierarchy);
         folderHierarchy = new Stack<String>();
@@ -193,14 +186,7 @@ public class BrowserActivity extends SherlockListActivity
         loadFolder(currentFolderId);
     }
 
-    private void createLocalSkyDriveFolderIfNotExists()
-    {
-        File sdcard = new File(Environment.getExternalStorageDirectory() + "/SkyDrive/");
-        if (!sdcard.exists())
-        {
-            sdcard.mkdir();
-        }
-    }
+
 
     private void restoreSavedInstanceState(Bundle savedInstanceState)
     {
@@ -260,7 +246,6 @@ public class BrowserActivity extends SherlockListActivity
 
     private void setupListView(ListView lv)
     {
-        lv.setTextFilterEnabled(true);
         lv.setOnItemClickListener(new OnItemClickListener()
         {
             @Override
@@ -496,7 +481,7 @@ public class BrowserActivity extends SherlockListActivity
             @Override
             public void visit(SkyDrivePhoto photo)
             {
-                if (isUploadDialog)
+                if (isUploadDialog || connectionIsUnavailable())
                 {
                     return;
                 }
@@ -541,7 +526,7 @@ public class BrowserActivity extends SherlockListActivity
             @Override
             public void visit(SkyDriveVideo video)
             {
-                if (isUploadDialog)
+                if (isUploadDialog || connectionIsUnavailable())
                 {
                     return;
                 }
@@ -556,11 +541,7 @@ public class BrowserActivity extends SherlockListActivity
             @Override
             public void visit(SkyDriveAudio audio)
             {
-                if (isUploadDialog)
-                {
-                    return;
-                }
-                if (connectionIsUnavailable())
+                if (isUploadDialog || connectionIsUnavailable())
                 {
                     return;
                 }
@@ -691,7 +672,7 @@ public class BrowserActivity extends SherlockListActivity
     private void informUserOfConnectionProblemAndDismiss()
     {
         Toast.makeText(this, R.string.errorLoggedOut, Toast.LENGTH_LONG).show();
-        startActivity(new Intent(this, SignInActivity.class));
+        startActivity(new Intent(this, SignInAndShareHandlerActivity.class));
         finish();
     }
 
@@ -1017,7 +998,7 @@ public class BrowserActivity extends SherlockListActivity
                     {
                         setSupportProgressBarIndeterminateVisibility(false);
                         Toast.makeText(getApplicationContext(), R.string.loggedOut, Toast.LENGTH_SHORT);
-                        startActivity(new Intent(getApplicationContext(), SignInActivity.class));
+                        startActivity(new Intent(getApplicationContext(), SignInAndShareHandlerActivity.class));
                         finish();
                         Log.e(Constants.LOGTAG, "Logged out. Status is " + status + ".");
                     }
@@ -1026,7 +1007,7 @@ public class BrowserActivity extends SherlockListActivity
                     public void onAuthError(LiveAuthException exception, Object userState)
                     {
                         setSupportProgressBarIndeterminateVisibility(false);
-                        startActivity(new Intent(getApplicationContext(), SignInActivity.class));
+                        startActivity(new Intent(getApplicationContext(), SignInAndShareHandlerActivity.class));
                         finish();
                         Log.e(Constants.LOGTAG, "Error: " + exception.getMessage());
                     }
@@ -1822,29 +1803,6 @@ public class BrowserActivity extends SherlockListActivity
         }
     };
 
-    private class ActionBarNavigationListener implements ActionBar.OnNavigationListener
-    {
-        @Override
-        public boolean onNavigationItemSelected(int itemPosition, long itemId)
-        {
-            if(itemPosition ==1){
-                ListView listView =  getListView();
-                listView.setVisibility(View.INVISIBLE);
-                GridView gridView = (GridView) findViewById(R.id.grid);
-                gridView.setVisibility(View.VISIBLE);
-                gridView.setAdapter(getListAdapter());
-                gridView.invalidate();
-            }else if(itemPosition == 0)
-            {
-                ListView listView =  getListView();
-                listView.setVisibility(View.VISIBLE);
-                GridView gridView = (GridView) findViewById(R.id.grid);
-                gridView.setVisibility(View.INVISIBLE);
-            }
-
-            return true;
-        }
-    }
 }
 
 

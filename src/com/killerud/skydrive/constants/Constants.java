@@ -38,8 +38,7 @@ final public class Constants
     public static final String STATE_ACTION_MODE_CURRENTLY_ON = "actionModeOn";
 
     /* Bytes */
-    public static final long THUMBS_MAX_SIZE = 10485760; //10MB
-    public static final long CACHE_MAX_SIZE = 104857600; //100MB
+
 
     /* Settings */
     public static final String CONFIRM_EXIT = "confirm_exit";
