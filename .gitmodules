@@ -1,6 +1,0 @@
-[submodule "LiveSDK"]
-	path = LiveSDK
-	url = git://github.com/liveservices/LiveSDK-for-Android.git
-[submodule "TouchList"]
-	path = TouchList
-	url = git://github.com/commonsguy/cwac-touchlist.git
