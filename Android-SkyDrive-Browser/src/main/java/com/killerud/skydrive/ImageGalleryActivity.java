@@ -12,14 +12,13 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v7.app.ActionBarActivity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import com.microsoft.live.LiveConnectClient;
 import com.microsoft.live.LiveDownloadOperation;
 import com.microsoft.live.LiveDownloadOperationListener;
@@ -32,7 +31,7 @@ import java.net.URI;
  * The photo dialog. Downloads and displays an image, but does not save the
  * image unless the user presses the save button (i.e. acts as a cache)
  */
-public class ImageGalleryActivity extends SherlockActivity
+public class ImageGalleryActivity extends ActionBarActivity
 {
     private boolean savePhoto;
     private boolean sharePhoto;
@@ -140,9 +139,7 @@ public class ImageGalleryActivity extends SherlockActivity
     public boolean onCreateOptionsMenu(Menu menu)
     {
         super.onCreateOptionsMenu(menu);
-
-        MenuInflater inflater = getSupportMenuInflater();
-        inflater.inflate(R.menu.image_gallery_menu, menu);
+        getMenuInflater().inflate(R.menu.image_gallery_menu, menu);
         return true;
     }
 

@@ -2,9 +2,10 @@ package com.killerud.skydrive;
 
 import android.os.Bundle;
 import android.preference.Preference;
+import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
-import com.actionbarsherlock.app.SherlockPreferenceActivity;
-import com.actionbarsherlock.view.MenuItem;
+import android.view.MenuItem;
+
 import com.killerud.skydrive.util.IOUtil;
 import com.microsoft.live.LiveConnectClient;
 import com.microsoft.live.LiveOperation;
@@ -19,7 +20,7 @@ import java.util.List;
 /*
     Based on http://www.blackmoonit.com/2012/07/all_api_prefsactivity/
  */
-public class PreferencesActivity extends SherlockPreferenceActivity
+public class PreferencesActivity extends PreferenceActivity
 {
     protected Method loadHeaders = null;
     protected Method hasHeaders = null;
@@ -50,8 +51,7 @@ public class PreferencesActivity extends SherlockPreferenceActivity
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+        getActionBar().setDisplayHomeAsUpEnabled(true);
         try
         {
             loadHeaders = getClass().getMethod("loadHeadersFromResource", int.class, List.class);

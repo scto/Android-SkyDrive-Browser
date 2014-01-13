@@ -8,16 +8,16 @@ package com.killerud.skydrive;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
+import android.view.MenuItem;
 import android.widget.MediaController;
 import android.widget.VideoView;
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.MenuItem;
 import com.killerud.skydrive.objects.SkyDriveVideo;
 
 /**
  * The Video dialog. Automatically starts buffering and playing a video using VideoView
  */
-public class PlayVideoActivity extends SherlockActivity
+public class PlayVideoActivity extends ActionBarActivity
 {
     private SkyDriveVideo video;
     private VideoView videoHolder;

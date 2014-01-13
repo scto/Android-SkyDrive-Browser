@@ -7,15 +7,15 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
+import android.support.v7.app.ActionBarActivity;
 import android.text.util.Linkify;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Window;
 import com.killerud.skydrive.constants.Constants;
 import com.microsoft.live.*;
 
@@ -25,7 +25,7 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class SignInAndShareHandlerActivity extends SherlockActivity
+public class SignInAndShareHandlerActivity extends ActionBarActivity
 {
     BrowserForSkyDriveApplication application;
     LiveAuthClient liveAuthClient;

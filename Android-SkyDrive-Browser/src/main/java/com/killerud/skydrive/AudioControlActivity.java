@@ -12,20 +12,18 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
+import android.support.v7.app.ActionBarActivity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import com.killerud.skydrive.constants.Constants;
 import com.killerud.skydrive.objects.SkyDriveAudio;
 import com.microsoft.live.LiveDownloadOperation;
 import com.microsoft.live.LiveDownloadOperationListener;
 import com.microsoft.live.LiveOperationException;
-
 import java.io.File;
 
 /**
@@ -33,7 +31,7 @@ import java.io.File;
  * and allows the user to pause, play, stop, and save the song, or
  * dismiss the dialog
  */
-public class AudioControlActivity extends SherlockActivity implements View.OnClickListener
+public class AudioControlActivity extends ActionBarActivity implements View.OnClickListener
 {
     private AudioPlaybackService audioPlaybackService;
     private TextView audioTitleText;
@@ -62,9 +60,7 @@ public class AudioControlActivity extends SherlockActivity implements View.OnCli
     public boolean onCreateOptionsMenu(Menu menu)
     {
         super.onCreateOptionsMenu(menu);
-
-        MenuInflater inflater = getSupportMenuInflater();
-        inflater.inflate(R.menu.audio_controls_menu, menu);
+        getMenuInflater().inflate(R.menu.audio_controls_menu, menu);
         return true;
     }
 
@@ -96,6 +92,7 @@ public class AudioControlActivity extends SherlockActivity implements View.OnCli
 
     public boolean onOptionsItemSelected(MenuItem item)
     {
+
         switch (item.getItemId())
         {
             case android.R.id.home:

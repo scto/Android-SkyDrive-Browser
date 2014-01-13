@@ -1,0 +1,1 @@
+include ':Android-SkyDrive-Browser:src:main', ':Android-SkyDrive-Browser:src:libraries:cwac-touchlist', ':Android-SkyDrive-Browser:src:libraries:LiveSDK-for-Android:src'

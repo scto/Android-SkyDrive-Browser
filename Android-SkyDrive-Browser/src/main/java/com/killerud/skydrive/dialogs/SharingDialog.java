@@ -2,13 +2,13 @@ package com.killerud.skydrive.dialogs;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Toast;
-import com.actionbarsherlock.app.SherlockActivity;
 import com.killerud.skydrive.BrowserForSkyDriveApplication;
 import com.killerud.skydrive.R;
 import com.killerud.skydrive.constants.Constants;
@@ -21,7 +21,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 
-public class SharingDialog extends SherlockActivity
+public class SharingDialog extends ActionBarActivity
 {
 
     public static final String EXTRAS_FILE_IDS = "fileIds";

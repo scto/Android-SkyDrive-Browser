@@ -9,17 +9,19 @@ import android.net.ConnectivityManager;
 import android.os.*;
 import android.preference.PreferenceManager;
 import android.support.v4.util.LruCache;
+import android.support.v7.app.ActionBar;
+import android.support.v7.view.ActionMode;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.*;
 import android.widget.AdapterView.OnItemClickListener;
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockListActivity;
-import com.actionbarsherlock.view.*;
 import com.killerud.skydrive.constants.Constants;
 import com.killerud.skydrive.constants.SortCriteria;
 import com.killerud.skydrive.dialogs.DownloadDialog;
@@ -27,6 +29,7 @@ import com.killerud.skydrive.dialogs.NewFolderDialog;
 import com.killerud.skydrive.dialogs.RenameDialog;
 import com.killerud.skydrive.dialogs.SharingDialog;
 import com.killerud.skydrive.objects.*;
+import com.killerud.skydrive.util.ActionBarListActivity;
 import com.killerud.skydrive.util.IOUtil;
 import com.killerud.skydrive.util.JsonKeys;
 import com.microsoft.live.*;
@@ -43,7 +46,7 @@ import java.util.Arrays;
 import java.util.Stack;
 
 
-public class BrowserActivity extends SherlockListActivity
+public class BrowserActivity extends ActionBarListActivity
 {
     /* Live Client and download/upload class */
     private LiveConnectClient liveConnectClient;
@@ -228,7 +231,7 @@ public class BrowserActivity extends SherlockListActivity
         {
             if (savedInstanceState.getBoolean(Constants.STATE_ACTION_MODE_CURRENTLY_ON))
             {
-                actionMode = startActionMode(new SkyDriveActionMode());
+                actionMode = startSupportActionMode(new SkyDriveActionMode());
             }
         }
 
@@ -291,7 +294,7 @@ public class BrowserActivity extends SherlockListActivity
             {
                 if (actionMode == null)
                 {
-                    actionMode = startActionMode(new SkyDriveActionMode());
+                    actionMode = startSupportActionMode(new SkyDriveActionMode());
                     skyDriveListAdapter.setChecked(position, true);
                     SkyDriveObject fileToAdd = ((SkyDriveListAdapter) getListAdapter()).getItem(position);
                     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
@@ -932,8 +935,8 @@ public class BrowserActivity extends SherlockListActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        MenuInflater inflater = getSupportMenuInflater();
-        inflater.inflate(R.menu.browser_menu, menu);
+        super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.browser_menu, menu);
         return true;
     }
 
@@ -1581,10 +1584,10 @@ public class BrowserActivity extends SherlockListActivity
         }
     }
 
-    private class SkyDriveActionMode implements com.actionbarsherlock.view.ActionMode.Callback
+    private class SkyDriveActionMode implements ActionMode.Callback
     {
         @Override
-        public boolean onCreateActionMode(com.actionbarsherlock.view.ActionMode mode, Menu menu)
+        public boolean onCreateActionMode(ActionMode mode, Menu menu)
         {
 
             menu.add(getString(R.string.download))
@@ -1611,13 +1614,13 @@ public class BrowserActivity extends SherlockListActivity
         }
 
         @Override
-        public boolean onPrepareActionMode(com.actionbarsherlock.view.ActionMode mode, Menu menu)
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu)
         {
             return false;
         }
 
         @Override
-        public boolean onActionItemClicked(final com.actionbarsherlock.view.ActionMode mode, MenuItem item)
+        public boolean onActionItemClicked(final ActionMode mode, MenuItem item)
         {
             String title = item.getTitle().toString();
             if (title.equalsIgnoreCase(getString(R.string.download)))
@@ -1672,7 +1675,7 @@ public class BrowserActivity extends SherlockListActivity
 
 
         @Override
-        public void onDestroyActionMode(com.actionbarsherlock.view.ActionMode mode)
+        public void onDestroyActionMode(ActionMode mode)
         {
             resetSelection();
             actionMode = null;

@@ -12,20 +12,20 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v4.util.LruCache;
+import android.support.v7.view.ActionMode;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.*;
 import android.widget.AdapterView.OnItemClickListener;
-import com.actionbarsherlock.app.SherlockListActivity;
-import com.actionbarsherlock.view.ActionMode;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.Window;
 import com.killerud.skydrive.constants.Constants;
+import com.killerud.skydrive.util.ActionBarListActivity;
 import com.killerud.skydrive.util.IOUtil;
 
 import java.io.BufferedOutputStream;
@@ -37,7 +37,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Stack;
 
-public class UploadFileActivity extends SherlockListActivity
+public class UploadFileActivity extends ActionBarListActivity
 {
     private ArrayList<String> mCurrentlySelectedFiles;
 
@@ -143,7 +143,7 @@ public class UploadFileActivity extends SherlockListActivity
             {
                 if (mActionMode == null)
                 {
-                    mActionMode = startActionMode(new UploadFileActionMode());
+                    mActionMode = startSupportActionMode(new UploadFileActionMode());
                     mFileBrowserAdapter.setChecked(position, true);
                     mCurrentlySelectedFiles.add(
                             ((UploadFileListAdapter) getListAdapter()).getItem(position).getPath());
@@ -211,7 +211,7 @@ public class UploadFileActivity extends SherlockListActivity
         {
             if (savedInstanceState.getBoolean(Constants.STATE_ACTION_MODE_CURRENTLY_ON))
             {
-                mActionMode = startActionMode(new UploadFileActionMode());
+                mActionMode = startSupportActionMode(new UploadFileActionMode());
             }
         }
 
@@ -563,11 +563,11 @@ public class UploadFileActivity extends SherlockListActivity
     }
 
 
-    private class UploadFileActionMode implements com.actionbarsherlock.view.ActionMode.Callback
+    private class UploadFileActionMode implements ActionMode.Callback
     {
 
         @Override
-        public boolean onCreateActionMode(com.actionbarsherlock.view.ActionMode mode, Menu menu)
+        public boolean onCreateActionMode(ActionMode mode, Menu menu)
         {
             menu.add(getString(R.string.selectAll))
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
@@ -577,13 +577,13 @@ public class UploadFileActivity extends SherlockListActivity
         }
 
         @Override
-        public boolean onPrepareActionMode(com.actionbarsherlock.view.ActionMode mode, Menu menu)
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu)
         {
             return false;
         }
 
         @Override
-        public boolean onActionItemClicked(final com.actionbarsherlock.view.ActionMode mode, MenuItem item)
+        public boolean onActionItemClicked(final ActionMode mode, MenuItem item)
         {
             String title = item.getTitle().toString();
             if (title.equalsIgnoreCase(getString(R.string.uploadSelected)))
@@ -619,7 +619,7 @@ public class UploadFileActivity extends SherlockListActivity
 
 
         @Override
-        public void onDestroyActionMode(com.actionbarsherlock.view.ActionMode mode)
+        public void onDestroyActionMode(ActionMode mode)
         {
             mActionMode = null;
             ((UploadFileListAdapter) getListAdapter()).clearChecked();

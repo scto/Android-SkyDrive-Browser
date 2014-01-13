@@ -4,24 +4,23 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.Window;
 import com.killerud.skydrive.util.WebViewFixed;
 
 /**
  * In large part taken from the Reddit is fun/Diode open source project available here:
  * https://github.com/zagaberoo/diode/
  */
-public class WebActivity extends SherlockActivity
+public class WebActivity extends ActionBarActivity
 {
     public static final String EXTRA_FILE_LINK = "extra_file_link";
 
@@ -45,7 +44,6 @@ public class WebActivity extends SherlockActivity
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.getSettings().setRenderPriority(WebSettings.RenderPriority.HIGH);
         mWebView.getSettings().setBuiltInZoomControls(true);
-        mWebView.getSettings().setPluginsEnabled(true);
         mWebView.getSettings().setUseWideViewPort(true);
 
         mWebView.setBackgroundColor(0);
@@ -110,9 +108,7 @@ public class WebActivity extends SherlockActivity
     public boolean onCreateOptionsMenu(Menu menu)
     {
         super.onCreateOptionsMenu(menu);
-
-        MenuInflater inflater = getSupportMenuInflater();
-        inflater.inflate(R.menu.web_menu, menu);
+        getMenuInflater().inflate(R.menu.web_menu, menu);
         return true;
     }
 

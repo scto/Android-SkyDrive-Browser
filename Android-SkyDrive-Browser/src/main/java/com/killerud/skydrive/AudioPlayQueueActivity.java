@@ -3,16 +3,15 @@ package com.killerud.skydrive;
 import android.content.*;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import com.commonsware.cwac.tlv.TouchListView;
 import com.killerud.skydrive.constants.Constants;
 import com.killerud.skydrive.objects.SkyDriveAudio;
@@ -21,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class AudioPlayQueueActivity extends SherlockActivity
+public class AudioPlayQueueActivity extends ActionBarActivity
 {
     private TouchListView listView;
 
@@ -61,9 +60,7 @@ public class AudioPlayQueueActivity extends SherlockActivity
     public boolean onCreateOptionsMenu(Menu menu)
     {
         super.onCreateOptionsMenu(menu);
-
-        MenuInflater inflater = getSupportMenuInflater();
-        inflater.inflate(R.menu.audio_queue_menu, menu);
+        getMenuInflater().inflate(R.menu.audio_queue_menu, menu);
         return true;
     }
 

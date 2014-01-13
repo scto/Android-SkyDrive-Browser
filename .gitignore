@@ -5,6 +5,10 @@
 .idea/
 *.iml
 build/
+gradlew
+gradlew.bat
+gradle/
+Android-SkyDrive-Browser/src/libraries/
 
 # Compiled source #
 ###################

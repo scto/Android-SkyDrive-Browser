@@ -9,11 +9,11 @@ package com.killerud.skydrive.dialogs;
  */
 
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
-import com.actionbarsherlock.app.SherlockActivity;
 import com.killerud.skydrive.BrowserForSkyDriveApplication;
 import com.killerud.skydrive.R;
 import com.killerud.skydrive.constants.Constants;
@@ -30,7 +30,7 @@ import java.util.Map;
 /**
  * The Create a new folder dialog. Always creates in the current directory.
  */
-public class NewFolderDialog extends SherlockActivity
+public class NewFolderDialog extends ActionBarActivity
 {
     private LiveConnectClient mClient;
     private String mCurrentFolderId;
