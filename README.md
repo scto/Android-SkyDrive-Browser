@@ -1,19 +1,18 @@
-Android Explorer for SkyDrive
+Android Explorer for OneDrive
 =============================
 
-A cleaner, simpler Microsoft SkyDrive experience!
+A cleaner, simpler Microsoft OneDrive experience!
 
-Using the Android Live SDK and ActionBarSherlock, Android Explorer for SkyDrive is a clean, free and ad-free client for SkyDrive.
+Android Explorer for OneDrive is a clean, free and ad-free client for OneDrive.
 
 Supports batch uploading and downloading, renaming, deleting, copying and moving.
 
 Play audio, video and view images in-app and download everything else to open in a supported installed app with a click of the notification.
 
-SkyDrive sharing functionality is also supported. Files shared with the user can be reached via a menu option, and sharing links for both read and read+write can be generated and shard through any supported app.
+OneDrive sharing functionality is also supported. Files shared with the user can be reached via a menu option, and sharing links for both read and read+write can be generated and shard through any supported app.
 
 Dependencies
 ============
-- [ActionBarSherlock][1] NB: export the android-support-v4.jar library, as AEfS depends on that lib as well
 - [LiveSDK for Android][2] NB: to enable full resolution uploads UploadRequest.java needs some work [5]
 - [CWAC TouchListView][3]
 
@@ -37,7 +36,6 @@ License
     See the License for the specific language governing permissions and
     limitations under the License.
 
-[1]: https://github.com/JakeWharton/ActionBarSherlock
 [2]: https://github.com/liveservices/LiveSDK-for-Android
 [3]: https://github.com/commonsguy/cwac-touchlist
 [4]: http://openiconlibrary.sourceforge.net/
