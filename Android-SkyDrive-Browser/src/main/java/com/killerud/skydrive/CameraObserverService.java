@@ -227,6 +227,7 @@ public class CameraObserverService extends Service
                 line = reader.readLine();
             }
             inputStream.close();
+            deleteFile(QUEUE_FILE_NAME);
             return filesInQueue;
         } catch (FileNotFoundException e) {
             return new ArrayList<String>();
