@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="appName">Explorer for SkyDrive</string>
+    <string name="appName">Explorer for OneDrive</string>
     <string name="initializingMessage">Connecting to your Microsoft account…</string>
     <string name="firstWelcomeMessage">Sign in with your Microsoft account to get
         started!
     </string>
     <string name="signInToWindowsLive">Sign in</string>
-    <string name="mySkyDrive">Your SkyDrive</string>
+    <string name="mySkyDrive">Your OneDrive</string>
     <string name="automaticSignInError">Couldn\'t connect automatically. Try manually.</string>
     <string name="manualSignInError">Couldn\'t connect. Do you have an internet connection?</string>
     <string name="noAccountQuestion">No Microsoft account? Go to live.com and register for 7GB of free storage!</string>
@@ -16,7 +16,7 @@
     <string name="noItemsInFolder">No files here</string>
     <string name="newFolderTitle">Create a new folder here</string>
     <string name="newFolder">New folder</string>
-    <string name="talkingToSkyDriveWait">Talking to SkyDrive…</string>
+    <string name="talkingToSkyDriveWait">Talking to OneDrive…</string>
     <string name="imageDisplayError">Couldn\'t show the image</string>
     <string name="copyCutSelectedFiles">Ready to paste</string>
     <string name="imageLoading">Loading image...</string>
@@ -27,14 +27,14 @@
     <string name="movedFiles">Moved file(s)</string>
     <string name="copiedFiles">Copied file(s)</string>
     <string name="renamedFiles">Renamed file(s)</string>
-    <string name="serviceLabel">Camera AutoUploader for SkyDrive</string>
+    <string name="serviceLabel">Camera AutoUploader for OneDrive</string>
 
 
     <string name="fileWillBeDownloaded">The file will be downloaded to your phone</string>
     <string name="ok">OK</string>
     <string name="downloading">Downloading</string>
     <string name="uploading">Uploading</string>
-    <string name="downloadingFromSkyDrive">Downloading from SkyDrive…</string>
+    <string name="downloadingFromSkyDrive">Downloading from OneDrive…</string>
     <string name="fileSaved">File saved</string>
     <string name="downloadError">Something went wrong while downloading. The file was not saved on your phone.</string>
 
@@ -42,7 +42,7 @@
     <string name="savedLowerCase">saved</string>
     <string name="from">from</string>
     <string name="to">to</string>
-    <string name="skyDrive">SkyDrive</string>
+    <string name="skyDrive">OneDrive</string>
 
     <string name="downloadNoPreview">No preview available</string>
     <string name="downloadFileCannotBeViewed">Can\'t open file for preview. Download instead?</string>
@@ -54,10 +54,10 @@
     <string name="description">Description (Optional)</string>
     <string name="renameTitle">Rename files and folders</string>
 
-    <string name="uploadToSkyDrive">Upload to SkyDrive</string>
+    <string name="uploadToSkyDrive">Upload to OneDrive</string>
     <string name="uploadTo">Upload to</string>
-    <string name="uploadingToSkyDrive">Uploading to your SkyDrive…</string>
-    <string name="uploadError">Something happened while uploading. The file was not saved in your SkyDrive.</string>
+    <string name="uploadingToSkyDrive">Uploading to your OneDrive…</string>
+    <string name="uploadError">Something happened while uploading. The file was not saved in your OneDrive.</string>
     <string name="uploadToThisFolder">Upload here</string>
     <string name="uploadSelected">Upload selected</string>
     <string name="noFilesInFolder">No files in this folder</string>
@@ -145,13 +145,13 @@
     </string>
     <string name="donate">Donate</string>
     <string name="donateSummary">Click to donate a small amount to help out the developer.</string>
-    <string name="skyDriveQuota">Space on SkyDrive</string>
-    <string name="skyDriveQuotaLoading">Getting numbers from SkyDrive…</string>
+    <string name="skyDriveQuota">Space on OneDrive</string>
+    <string name="skyDriveQuotaLoading">Getting numbers from OneDrive…</string>
     <string name="skyDriveQuotaSummary">You\'re using %1$s of %2$s available</string>
 
-    <string name="audioServiceName">Explorer for SkyDrive Music</string>
+    <string name="audioServiceName">Explorer for OneDrive Music</string>
     <string name="audioBuffering">Buffering song</string>
-    <string name="audioBufferingSummary">Buffering the song from your SkyDrive</string>
+    <string name="audioBufferingSummary">Buffering the song from your OneDrive</string>
     <string name="audioNotPlaying">Not playing</string>
     <string name="audioNotPlayingSummary">No songs in playlist. Tap some songs in the app to play them.</string>
     <string name="audioPlaying">Playing</string>
