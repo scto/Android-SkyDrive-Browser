@@ -1,5 +1,7 @@
 package com.killerud.skydrive.util;
 
+import android.provider.ContactsContract;
+
 import com.killerud.skydrive.R;
 import eu.medsea.mimeutil.MimeType;
 import eu.medsea.mimeutil.MimeUtil;
@@ -7,7 +9,10 @@ import eu.medsea.mimeutil.MimeUtil;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 
 /**
@@ -223,5 +228,19 @@ public class IOUtil
         {
             return bytes + " bytes";
         }
+    }
+
+    public static String getFittingDateFromUnixTime(long lastModifiedUnixTime)
+    {
+        Date date = new Date(lastModifiedUnixTime);
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(date);
+
+        String dateString = calendar.get(GregorianCalendar.YEAR) + "."
+                                + (calendar.get(GregorianCalendar.MONTH)+1) + "."
+                                + calendar.get(GregorianCalendar.DAY_OF_MONTH) + " "
+                                + calendar.get(GregorianCalendar.HOUR_OF_DAY) + ":"
+                                + calendar.get(GregorianCalendar.MINUTE);
+        return dateString;
     }
 }

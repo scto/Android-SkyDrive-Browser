@@ -32,6 +32,8 @@ import com.killerud.skydrive.constants.Constants;
 import com.killerud.skydrive.util.ActionBarListActivity;
 import com.killerud.skydrive.util.IOUtil;
 
+import org.w3c.dom.Text;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -362,12 +364,16 @@ public class BaseFileActivity extends ActionBarListActivity
                     mInflater.inflate(R.layout.skydrive_list_item,
                             parent, false);
             TextView name = (TextView) mView.findViewById(R.id.nameTextView);
+            TextView sizeAndLastChanged = (TextView) mView.findViewById(R.id.detailsTextView);
             ImageView type = (ImageView) mView.findViewById(R.id.skyDriveItemIcon);
 
             final WeakReference viewReference = new WeakReference(convertView);
 
             File file = getItem(position);
             name.setText(file.getName());
+            sizeAndLastChanged.setText(IOUtil.getFittingByteAndSizeDescriptor(file.length())
+                    + " - " + IOUtil.getFittingDateFromUnixTime(file.lastModified()));
+
 
             int fileDrawable = determineFileDrawable(file);
             type.setImageResource(fileDrawable);
