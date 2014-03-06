@@ -5,17 +5,9 @@
               android:orientation="vertical">
 
     <ListView
-            android:id="@id/android:list"
+            android:id="@+id/list"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_weight="2"
             android:drawSelectorOnTop="true">
     </ListView>
-
-    <TextView
-            android:id="@id/android:empty"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/noItemsInFolder"/>
-
 </LinearLayout>

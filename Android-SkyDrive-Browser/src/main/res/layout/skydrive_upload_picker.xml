@@ -13,7 +13,7 @@
     </LinearLayout>
 
     <ListView
-            android:id="@id/android:list"
+            android:id="@+id/list"
             android:layout_width="fill_parent"
             android:layout_height="0dip"
             android:layout_weight="2"
@@ -26,13 +26,4 @@
             android:layout_width="fill_parent"
             android:layout_weight="0">
     </Button>
-
-    <TextView
-            android:id="@id/android:empty"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:text="@string/noItemsInFolder"
-            android:visible="false"/>
-
-
 </LinearLayout>

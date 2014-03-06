@@ -24,10 +24,6 @@ import android.widget.*;
 import android.widget.AdapterView.OnItemClickListener;
 import com.killerud.skydrive.constants.Constants;
 import com.killerud.skydrive.constants.SortCriteria;
-import com.killerud.skydrive.dialogs.DownloadDialog;
-import com.killerud.skydrive.dialogs.NewFolderDialog;
-import com.killerud.skydrive.dialogs.RenameDialog;
-import com.killerud.skydrive.dialogs.SharingDialog;
 import com.killerud.skydrive.objects.*;
 import com.killerud.skydrive.util.ActionBarListActivity;
 import com.killerud.skydrive.util.IOUtil;
@@ -51,7 +47,6 @@ public class BrowserActivity extends ActionBarListActivity
     /* Live Client and download/upload class */
     private LiveConnectClient liveConnectClient;
     private XLoader xLoader;
-    private CameraImageObserver cameraImageObserver;
 
     /* Directory navigation */
     private SkyDriveListAdapter skyDriveListAdapter;
@@ -102,22 +97,6 @@ public class BrowserActivity extends ActionBarListActivity
                         data.getStringArrayListExtra(UploadFileActivity.EXTRA_FILES_LIST),
                         currentFolderId);
             }
-        } else if (requestCode == DownloadDialog.DOWNLOAD_REQUEST)
-        {
-            if (resultCode == RESULT_OK)
-            {
-                XLoader loader = new XLoader(this);
-                ArrayList<SkyDriveObject> file = new ArrayList<SkyDriveObject>();
-
-                SkyDriveObject fileToAdd = ((SkyDriveListAdapter) getListAdapter())
-                        .getItem(data.getIntExtra(DownloadDialog.EXTRA_FILE_POSITION, 0));
-                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
-                fileToAdd.setLocalDownloadLocation(preferences.getString("download_location",
-                        Environment.getExternalStorageDirectory() + "/SkyDrive/"));
-
-                file.add(fileToAdd);
-                loader.downloadFiles(((BrowserForSkyDriveApplication) getApplication()).getConnectClient(), file);
-            }
         }
     }
 
@@ -143,6 +122,8 @@ public class BrowserActivity extends ActionBarListActivity
     {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+
+
         connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 
         // Get memory class of this device, exceeding this amount will throw an
@@ -152,9 +133,10 @@ public class BrowserActivity extends ActionBarListActivity
         final int cacheSize = 1024 * 1024 * memClass / 10;
         thumbCache = new LruCache(cacheSize);
 
+
+
         xLoader = new XLoader(this);
-        skyDriveListAdapter = new SkyDriveListAdapter(this);
-        setListAdapter(skyDriveListAdapter);
+
 
         BrowserForSkyDriveApplication app = (BrowserForSkyDriveApplication) getApplication();
 
@@ -166,6 +148,8 @@ public class BrowserActivity extends ActionBarListActivity
         currentFolderId = HOME_FOLDER;
 
         determineBrowserStateAndLayout(getIntent());
+        skyDriveListAdapter = new SkyDriveListAdapter(this);
+        setListAdapter(skyDriveListAdapter);
         setupListView(getListView());
 
         LocalPersistentStorageManager localPersistentStorageManager = new LocalPersistentStorageManager();
@@ -215,9 +199,9 @@ public class BrowserActivity extends ActionBarListActivity
         {
             previousFolderIds = new Stack<String>();
             String[] folderIds = savedInstanceState.getStringArray(Constants.STATE_PREVIOUS_FOLDERS);
-            for (int i = 0; i < folderIds.length; i++)
+            for (String folderId : folderIds)
             {
-                previousFolderIds.push(folderIds[i]);
+                previousFolderIds.push(folderId);
             }
         }
 
@@ -488,12 +472,12 @@ public class BrowserActivity extends ActionBarListActivity
                 {
                     return;
                 }
-                Intent startPhotoDialog = new Intent(getApplicationContext(), ImageGalleryActivity.class);
-                startPhotoDialog.putExtra("killerud.skydrive.PHOTO_ID", photo.getId());
-                startPhotoDialog.putExtra("killerud.skydrive.PHOTO_NAME", photo.getName());
+                Intent startPhotoActivity = new Intent(getApplicationContext(), ImageGalleryActivity.class);
+                startPhotoActivity.putExtra("killerud.skydrive.PHOTO_ID", photo.getId());
+                startPhotoActivity.putExtra("killerud.skydrive.PHOTO_NAME", photo.getName());
                 if (!connectionIsUnavailable())
                 {
-                    startActivity(startPhotoDialog);
+                    startActivity(startPhotoActivity);
                 }
             }
 
@@ -506,7 +490,7 @@ public class BrowserActivity extends ActionBarListActivity
             }
 
             @Override
-            public void visit(SkyDriveFile file)
+            public void visit(final SkyDriveFile file)
             {
                 if (isUploadDialog || connectionIsUnavailable())
                 {
@@ -521,9 +505,37 @@ public class BrowserActivity extends ActionBarListActivity
                     return;
                 }
 
-                Intent confirmDownload = new Intent(getApplicationContext(), DownloadDialog.class);
-                confirmDownload.putExtra(DownloadDialog.EXTRA_FILE_POSITION, position);
-                startActivityForResult(confirmDownload, DownloadDialog.DOWNLOAD_REQUEST);
+
+                final AlertDialog dialog = new AlertDialog.Builder(getSupportActionBar().getThemedContext()).create();
+                dialog.setTitle(getString(R.string.download));
+                dialog.setMessage(getString(R.string.downloadFileCannotBeViewed));
+                dialog.setButton(getString(R.string.yes), new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i)
+                    {
+                        setSupportProgressBarIndeterminateVisibility(true);
+                        if (!connectionIsUnavailable())
+                        {
+                            ArrayList<SkyDriveObject> download = new ArrayList<SkyDriveObject>();
+                            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
+                            file.setLocalDownloadLocation(preferences.getString("download_location",
+                                    Environment.getExternalStorageDirectory() + "/SkyDrive/"));
+                            download.add(file);
+                            xLoader.downloadFiles(liveConnectClient, download);
+                        }
+                        setSupportProgressBarIndeterminateVisibility(false);
+                    }
+                });
+                dialog.setButton2(getString(R.string.no), new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i)
+                    {
+                        dialog.dismiss();
+                    }
+                });
+                dialog.show();
             }
 
             @Override
@@ -774,14 +786,10 @@ public class BrowserActivity extends ActionBarListActivity
 
     public void setDefaultBrowserBehaviour()
     {
-        setContentView(R.layout.skydrive);
         isUploadDialog = false;
-        setupListView(getListView());
-
         folderHierarchyView = (TextView) findViewById(R.id.folder_hierarchy);
         folderHierarchy = new Stack<String>();
         folderHierarchy.push(getString(R.string.rootFolderTitle));
-
         updateFolderHierarchy(null);
     }
 
@@ -935,7 +943,6 @@ public class BrowserActivity extends ActionBarListActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.browser_menu, menu);
         return true;
     }
@@ -953,7 +960,7 @@ public class BrowserActivity extends ActionBarListActivity
                 return true;
 
             case R.id.newFolder:
-                Intent startNewFolderDialog = new Intent(getApplicationContext(), NewFolderDialog.class);
+                Intent startNewFolderDialog = new Intent(getApplicationContext(), NewFolderActivity.class);
                 startNewFolderDialog.putExtra("killerud.skydrive.CURRENT_FOLDER", currentFolderId);
                 if (!connectionIsUnavailable())
                 {
@@ -1591,25 +1598,18 @@ public class BrowserActivity extends ActionBarListActivity
         {
 
             menu.add(getString(R.string.download))
-                    .setIcon(R.drawable.ic_menu_save)
-                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+                    .setIcon(R.drawable.ic_menu_save);
             menu.add(getString(R.string.copy))
-                    .setIcon(R.drawable.ic_menu_copy_holo_light)
-                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+                    .setIcon(R.drawable.ic_menu_copy_holo_light);
             menu.add(getString(R.string.cut))
-                    .setIcon(R.drawable.ic_menu_cut_holo_light)
-                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+                    .setIcon(R.drawable.ic_menu_cut_holo_light);
             menu.add(getString(R.string.rename))
-                    .setIcon(R.drawable.ic_menu_edit)
-                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+                    .setIcon(R.drawable.ic_menu_edit);
             menu.add(getString(R.string.delete))
-                    .setIcon(R.drawable.ic_menu_delete)
-                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+                    .setIcon(R.drawable.ic_menu_delete);
             menu.add((getString(R.string.share)))
-                    .setIcon(R.drawable.ic_menu_share)
-                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-            menu.add(getString(R.string.selectAll))
-                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+                    .setIcon(R.drawable.ic_menu_share);
+            menu.add(getString(R.string.selectAll));
             return true;
         }
 
@@ -1646,15 +1646,15 @@ public class BrowserActivity extends ActionBarListActivity
                 return true;
             } else if (title.equalsIgnoreCase(getString(R.string.delete)))
             {
-                createDeleteDialog(mode);
+                createDeleteConfirmationDialog(mode);
                 return true;
             } else if (title.equalsIgnoreCase(getString(R.string.rename)))
             {
-                createRenameDialog();
+                startRenameActivity();
                 return true;
             } else if (title.equalsIgnoreCase(getString((R.string.share))))
             {
-                createSharingDialog();
+                startSharingActivity();
                 return true;
             } else if (title.equalsIgnoreCase(getString(R.string.selectAll)))
             {
@@ -1707,7 +1707,7 @@ public class BrowserActivity extends ActionBarListActivity
         mode.finish();
     }
 
-    private void createDeleteDialog(final ActionMode mode)
+    private void createDeleteConfirmationDialog(final ActionMode mode)
     {
         final AlertDialog dialog = new AlertDialog.Builder(getSupportActionBar().getThemedContext()).create();
         dialog.setTitle(getString(R.string.deleteConfirmationTitle));
@@ -1748,9 +1748,9 @@ public class BrowserActivity extends ActionBarListActivity
         dialog.show();
     }
 
-    private void createRenameDialog()
+    private void startRenameActivity()
     {
-        Intent startRenameDialog = new Intent(getSupportActionBar().getThemedContext(), RenameDialog.class);
+        Intent renameActivityIntent = new Intent(getSupportActionBar().getThemedContext(), RenameActivity.class);
         ArrayList<String> fileIds = new ArrayList<String>();
         ArrayList<String> fileNames = new ArrayList<String>();
         for (int i = 0; i < currentlySelectedFiles.size(); i++)
@@ -1758,29 +1758,33 @@ public class BrowserActivity extends ActionBarListActivity
             fileIds.add(currentlySelectedFiles.get(i).getId());
             fileNames.add(currentlySelectedFiles.get(i).getName());
         }
-        startRenameDialog.putExtra(RenameDialog.EXTRAS_FILE_IDS, fileIds);
-        startRenameDialog.putExtra(RenameDialog.EXTRAS_FILE_NAMES, fileNames);
+        renameActivityIntent.putExtra(RenameActivity.EXTRAS_FILE_IDS, fileIds);
+        renameActivityIntent.putExtra(RenameActivity.EXTRAS_FILE_NAMES, fileNames);
         resetSelection();
 
         if (!connectionIsUnavailable())
         {
-            startActivity(startRenameDialog);
+            startActivity(renameActivityIntent);
         }
+        if(this.actionMode != null)
+            this.actionMode.finish();
     }
 
-    private void createSharingDialog()
+    private void startSharingActivity()
     {
-        Intent startSharingDialog = new Intent(getSupportActionBar().getThemedContext(), SharingDialog.class);
+        Intent sharingActivityIntent = new Intent(getSupportActionBar().getThemedContext(), SharingActivity.class);
         ArrayList<String> fileIds = new ArrayList<String>();
         for (int i = 0; i < currentlySelectedFiles.size(); i++)
         {
             fileIds.add(currentlySelectedFiles.get(i).getId());
         }
-        startSharingDialog.putExtra(RenameDialog.EXTRAS_FILE_IDS, fileIds);
+        sharingActivityIntent.putExtra(RenameActivity.EXTRAS_FILE_IDS, fileIds);
         if (!connectionIsUnavailable())
         {
-            startActivity(startSharingDialog);
+            startActivity(sharingActivityIntent);
         }
+        if(this.actionMode != null)
+            this.actionMode.finish();
     }
 
     private void resetSelection()

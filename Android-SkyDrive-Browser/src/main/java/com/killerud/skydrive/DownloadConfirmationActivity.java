@@ -1,4 +1,4 @@
-package com.killerud.skydrive.dialogs;
+package com.killerud.skydrive;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -15,7 +15,7 @@ import com.killerud.skydrive.R;
  * Time: 21:12
  * To change this template use File | Settings | File Templates.
  */
-public class DownloadDialog extends ActionBarActivity
+public class DownloadConfirmationActivity extends ActionBarActivity
 {
 
     public static final String EXTRA_FILE_POSITION = "file_position";

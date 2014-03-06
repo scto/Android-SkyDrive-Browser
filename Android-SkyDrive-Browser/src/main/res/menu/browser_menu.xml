@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:aefs="http://schemas.android.com/apk/res-auto">
     <item
             android:id="@+id/newFolder"
             android:showAsAction="ifRoom"
+            aefs:showAsAction="ifRoom"
             android:title="@string/newFolder"
             android:visible="true"
             android:icon="@drawable/ic_menu_add_folder"
@@ -11,6 +13,7 @@
     <item
             android:id="@+id/uploadFile"
             android:showAsAction="ifRoom"
+            aefs:showAsAction="ifRoom"
             android:icon="@drawable/ic_menu_upload"
             android:title="@string/uploadToSkyDrive"
             android:visible="true"
@@ -18,12 +21,14 @@
     <item
             android:id="@+id/reload"
             android:showAsAction="ifRoom"
+            aefs:showAsAction="ifRoom"
             android:icon="@drawable/ic_menu_refresh"
             android:title="@string/reload"
             android:visible="true"
             />
     <item android:id="@+id/paste"
           android:showAsAction="ifRoom"
+          aefs:showAsAction="ifRoom"
           android:title="@string/paste"
           android:icon="@drawable/ic_menu_set_as"
           android:visible="false"
@@ -31,22 +36,27 @@
 
     <item android:id="@+id/sharedFiles"
           android:showAsAction="withText|never"
+          aefs:showAsAction="withText|never"
           android:title="@string/sharedFiles"/>
 
     <item android:id="@+id/savedFiles"
           android:showAsAction="withText|never"
+          aefs:showAsAction="withText|never"
           android:title="@string/savedFiles"/>
 
     <item android:title="@string/audioControls"
           android:showAsAction="withText|never"
+          aefs:showAsAction="withText|never"
           android:id="@+id/audioControls"/>
 
     <item android:title="@string/settings"
           android:showAsAction="withText|never"
+          aefs:showAsAction="withText|never"
           android:id="@+id/settings"/>
 
     <item android:id="@+id/signOut"
           android:showAsAction="withText|never"
+          aefs:showAsAction="withText|never"
           android:title="@string/signOut"/>
 
 

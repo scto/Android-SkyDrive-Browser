@@ -5,6 +5,8 @@ import android.widget.HeaderViewListAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
+import com.killerud.skydrive.R;
+
 /**
  * http://stackoverflow.com/a/19283600/1200902
  * @author Patrick McGrail
@@ -15,7 +17,7 @@ public abstract class ActionBarListActivity extends ActionBarActivity {
 
     protected ListView getListView() {
         if (mListView == null) {
-            mListView = (ListView) findViewById(android.R.id.list);
+            mListView = (ListView) findViewById(R.id.list);
         }
         return mListView;
     }

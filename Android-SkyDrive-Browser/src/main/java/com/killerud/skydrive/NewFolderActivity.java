@@ -1,4 +1,4 @@
-package com.killerud.skydrive.dialogs;
+package com.killerud.skydrive;
 
 /**
  * Created with IntelliJ IDEA.
@@ -30,7 +30,7 @@ import java.util.Map;
 /**
  * The Create a new folder dialog. Always creates in the current directory.
  */
-public class NewFolderDialog extends ActionBarActivity
+public class NewFolderActivity extends ActionBarActivity
 {
     private LiveConnectClient mClient;
     private String mCurrentFolderId;

@@ -1,4 +1,4 @@
-package com.killerud.skydrive.dialogs;
+package com.killerud.skydrive;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
  * Date: 10.05.12
  * Time: 23:22
  */
-public class RenameDialog extends ActionBarActivity
+public class RenameActivity extends ActionBarActivity
 {
     public static final String EXTRAS_FILE_IDS = "fileIds";
     public static final String EXTRAS_FILE_NAMES = "fileNames";

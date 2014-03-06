@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.6.+'
+        classpath 'com.android.tools.build:gradle:0.9.+'
     }
 }
 apply plugin: 'android'
@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:19.0.0'
+    compile 'com.android.support:appcompat-v7:19.0.1'
     compile 'commons-io:commons-io:2.4'
     compile 'eu.medsea.mimeutil:mime-util:2.1.3'
     compile project(':Android-SkyDrive-Browser:src:libraries:cwac-touchlist')
@@ -22,12 +22,12 @@ dependencies {
 
 
 android {
-    compileSdkVersion 18
-    buildToolsVersion "17.0.0"
+    compileSdkVersion 19
+    buildToolsVersion "19.0.2"
 
     defaultConfig {
         minSdkVersion 8
-        targetSdkVersion 18
+        targetSdkVersion 19
     }
 
     sourceSets {

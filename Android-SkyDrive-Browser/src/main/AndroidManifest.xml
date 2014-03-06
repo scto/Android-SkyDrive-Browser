@@ -133,20 +133,19 @@
                   android:theme="@style/LightTheme"/>
 
 
-        <activity android:name=".dialogs.NewFolderDialog"
+        <activity android:name=".NewFolderActivity"
                   android:label="@string/createFolder"
-                  android:theme="@style/LightThemeDialog"
-                />
+                  android:theme="@style/LightTheme"/>
 
-        <activity android:name=".dialogs.RenameDialog"
-                  android:theme="@style/LightThemeDialog"/>
+        <activity android:name=".RenameActivity"
+                  android:theme="@style/LightTheme"/>
 
-        <activity android:name=".dialogs.SharingDialog"
-                  android:theme="@style/LightThemeDialog"/>
+        <activity android:name=".SharingActivity"
+                  android:theme="@style/LightTheme"/>
 
-        <activity android:name=".dialogs.DownloadDialog"
+        <activity android:name=".DownloadConfirmationActivity"
                   android:label="@string/downloadFileCannotBeViewed"
-                  android:theme="@style/LightThemeDialog"/>
+                  android:theme="@style/LightTheme"/>
 
         <activity android:name=".PreferencesActivity"
                   android:theme="@style/LightTheme">

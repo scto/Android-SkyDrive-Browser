@@ -1,4 +1,4 @@
-package com.killerud.skydrive.dialogs;
+package com.killerud.skydrive;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -21,7 +21,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 
-public class SharingDialog extends ActionBarActivity
+public class SharingActivity extends ActionBarActivity
 {
 
     public static final String EXTRAS_FILE_IDS = "fileIds";
