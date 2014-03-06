@@ -1,5 +1,6 @@
 package com.killerud.skydrive;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -48,10 +49,11 @@ public class PreferencesActivity extends PreferenceActivity
         return hasHeaders != null && loadHeaders != null;
     }
 
+    @SuppressLint("NewApi")
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+
         try
         {
             loadHeaders = getClass().getMethod("loadHeadersFromResource", int.class, List.class);
@@ -67,6 +69,8 @@ public class PreferencesActivity extends PreferenceActivity
             addPreferencesFromResource(R.xml.preferences_data);
             addPreferencesFromResource(R.xml.preferences_about);
             getAndUpdateSkyDriveQuota(null);
+        }else{
+            getActionBar().setDisplayHomeAsUpEnabled(true);
         }
     }
 
@@ -85,6 +89,7 @@ public class PreferencesActivity extends PreferenceActivity
         }
     }
 
+    @SuppressLint("NewApi")
     static public class CompatibilityPreferenceFragment extends PreferenceFragment
     {
         @Override
@@ -106,6 +111,7 @@ public class PreferencesActivity extends PreferenceActivity
         }
     }
 
+    @SuppressLint("NewApi")
     private void getAndUpdateSkyDriveQuota(final PreferenceFragment context)
     {
         LiveConnectClient client = ((BrowserForSkyDriveApplication) getApplication()).getConnectClient();
@@ -146,6 +152,7 @@ public class PreferencesActivity extends PreferenceActivity
                     quotaPreference = findPreference("skydrive_storage_quota");
                 } else
                 {
+
                     quotaPreference = context.findPreference("skydrive_storage_quota");
                 }
 
@@ -166,6 +173,7 @@ public class PreferencesActivity extends PreferenceActivity
         });
     }
 
+    @SuppressLint("NewApi")
     private void errorOnSkyDriveFetch(PreferenceFragment context)
     {
         Preference quotaPreference;
